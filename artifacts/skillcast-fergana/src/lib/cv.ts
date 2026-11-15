@@ -29,11 +29,13 @@ export function scrubCV(input: string): ScrubReport {
   const items: Array<{ kind: string; preview: string }> = [];
   let text = input;
 
-  // Malaysian NRIC (12 digits, optional dashes) — the headline case
-  text = text.replace(/\b\d{6}[-\s]?\d{2}[-\s]?\d{4}\b/g, (m) => maskLine(m, 'NRIC (MyKad)', items));
+  // Generic national identifiers, including 12- and 14-digit formats.
+  text = text.replace(/\b\d{6}[-\s]?\d{2}[-\s]?\d{4}\b/g, (m) => maskLine(m, 'National ID', items));
+  text = text.replace(/\b\d{14}\b/g, (m) => maskLine(m, 'National ID', items));
+  text = text.replace(/\b(?:national\s+id|passport|jshshir|pinfl)\s*[:#-]?\s*[A-Z0-9-]{6,20}\b/gi, (m) => maskLine(m, 'National ID', items));
 
-  // Phone numbers (MY formats: +60 12-345 6789, 012-345 6789, 0123456789)
-  text = text.replace(/(\+?6?0?[\s-]?\d{2,3}[-\s]?\d{3,4}[-\s]?\d{4})\b/g, (m) => maskLine(m, 'Phone number', items));
+  // International phone numbers, including Uzbekistan's +998 country code.
+  text = text.replace(/(?:\+\d{1,3}[\s-]?)?(?:\d[\s().-]?){8,12}\d\b/g, (m) => maskLine(m, 'Phone number', items));
 
   // Email
   text = text.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, (m) => maskLine(m, 'Email', items));
@@ -41,9 +43,8 @@ export function scrubCV(input: string): ScrubReport {
   // LinkedIn / social URLs
   text = text.replace(/(https?:\/\/)?(www\.)?(linkedin|facebook|instagram|twitter|x)\.com\/\S+/gi, (m) => maskLine(m, 'Social profile URL', items));
 
-  // Malaysian addresses (Jalan/Lorong/Taman/No. + postcode patterns)
-  text = text.replace(/\b\d{5}\s+(?:Jalan|Lorong|Lebuh|Persiaran)\b[^\n,;]*/gi, (m) => maskLine(m, 'Address', items));
-  text = text.replace(/\b(Jalan|Lorong|Taman|Kampung|Batu)\s+[\w\s]+\d*[^\n]{0,40}/g, (m) => maskLine(m, 'Address', items));
+  // Explicitly labelled addresses, including Uzbek/Russian labels.
+  text = text.replace(/^\s*(?:address|manzil|адрес)\s*[:#-]\s*[^\n]+/gim, (m) => maskLine(m, 'Address', items));
 
   // Date of birth / age / gender / race / religion / marital status
   text = text.replace(/\b(0?[1-9]|[12]\d|3[01])[\/\-.](0?[1-9]|1[0-2])[\/\-.](19|20)\d{2}\b/g, (m) => maskLine(m, 'Date of birth', items));
@@ -53,7 +54,7 @@ export function scrubCV(input: string): ScrubReport {
   text = text.replace(/\breligion\s*[:\-]\s*\w+/gi, (m) => maskLine(m, 'Religion', items));
   text = text.replace(/\b(islam|christianity|buddhism|hinduism)\b/gi, (m) => maskLine(m, 'Religion', items));
   text = text.replace(/\brace\s*[:\-]\s*\w+/gi, (m) => maskLine(m, 'Race/ethnicity', items));
-  text = text.replace(/\b(race\s*[:\-]\s*\w+|malay|chinese|indian|iban|kadazan)\b/gi, (m) => maskLine(m, 'Race/ethnicity', items));
+  text = text.replace(/\b(race|ethnicity)\s*[:\-]\s*[\w\s-]+/gi, (m) => maskLine(m, 'Race/ethnicity', items));
 
   // Candidate name: heuristic — "Name:" label or the first non-empty line
   text = text.replace(/^\s*name\s*[:\-]\s*[^\n]+/im, (m) => maskLine(m, 'Full name', items));

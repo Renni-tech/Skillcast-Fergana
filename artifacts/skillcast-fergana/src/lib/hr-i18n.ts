@@ -1,13 +1,15 @@
 import type { CourseDef, Lang } from './types';
+import hrUz from './hr-i18n-uz';
 
 // Interface-owned HR copy, not official third-party course/provider titles.
 // Keys reference immutable registry identities; only presentation changes.
-// Columns: English, Malay, Simplified Chinese, Russian.
+// Legacy copy arrays remain in source for migration history; active dictionaries
+// expose English, Uzbek, and Russian only.
 const COPY: Record<string, [string, string, string, string]> = {
   'hr.study.hours': ['{n} h', '{n} jam', '{n} 小时', '{n} ч'],
   'hr.course.count': ['Courses: {n}', 'Kursus: {n}', '课程数：{n}', 'Курсы: {n}'],
   'hr.budget.preference.unset': ['No budget preference selected. The hours below describe catalogue resources, not spending.', 'Tiada pilihan bajet dipilih. Jam di bawah merujuk sumber dalam katalog, bukan perbelanjaan.', '尚未选择预算偏好。以下为目录资源课时，并非支出。', 'Предпочтение по бюджету не выбрано. Ниже указаны часы ресурсов каталога, а не расходы.'],
-  'hr.abbreviations': ['AI = artificial intelligence; SQL = structured query language; SDG = United Nations Sustainable Development Goal. HRD Corp is explained in the training-hours section.', 'AI = kecerdasan buatan; SQL = bahasa pertanyaan berstruktur; SDG = Matlamat Pembangunan Mampan Pertubuhan Bangsa-Bangsa Bersatu. HRD Corp diterangkan dalam bahagian jam latihan.', 'AI指人工智能，SQL指结构化查询语言，SDG指联合国可持续发展目标。HRD Corp的含义见培训课时部分。', 'AI — искусственный интеллект (ИИ); SQL — язык структурированных запросов; SDG — Цель устойчивого развития ООН. HRD Corp поясняется в разделе учебных часов.'],
+  'hr.abbreviations': ['AI = artificial intelligence; SQL = structured query language; SDG = United Nations Sustainable Development Goal.', 'AI = kecerdasan buatan; SQL = bahasa pertanyaan berstruktur; SDG = Matlamat Pembangunan Mampan Pertubuhan Bangsa-Bangsa Bersatu.', 'AI指人工智能，SQL指结构化查询语言，SDG指联合国可持续发展目标。', 'AI — искусственный интеллект (ИИ); SQL — язык структурированных запросов; SDG — Цель устойчивого развития ООН.'],
   'hr.footer.statement': ['Aiversecity — Future-Ready Workforce · Human-in-command: AI supports career decisions, people make them.', 'Aiversecity — Tenaga Kerja Sedia Masa Hadapan · Manusia memegang kawalan: AI menyokong keputusan kerjaya, manusia membuatnya.', 'Aiversecity — 面向未来的劳动力 · 由人掌控：AI辅助职业决策，决定由人作出。', 'Aiversecity — Кадры будущего · Решает человек: ИИ помогает в карьерных решениях, но принимает их человек.'],
   'hr.loading': ['Loading', 'Sedang dimuatkan', '正在加载', 'Загрузка'],
   'hr.signals.error': ['Could not load signals', 'Isyarat tidak dapat dimuatkan', '无法加载市场信号', 'Не удалось загрузить рыночные сигналы'],
@@ -38,12 +40,10 @@ const COPY: Record<string, [string, string, string, string]> = {
   'hr.course.fao-climate-smart-ag.title': ['Climate-Smart Agriculture modules', 'Modul Climate-Smart Agriculture', 'Climate-Smart Agriculture模块', 'Модули Climate-Smart Agriculture'],
   'hr.course.openwho-digital-health.title': ['Digital Health courses', 'Kursus kesihatan digital', '数字健康课程', 'Курсы по цифровому здравоохранению'],
   'hr.course.alison-training-strategy.title': ['Training of Trainers foundations', 'Asas Training of Trainers', 'Training of Trainers基础', 'Основы Training of Trainers'],
-  'hr.course.hrcorp-claimable-directory.title': ['HRD Corp claimable programmes (registered providers)', 'Program tuntutan HRD Corp (penyedia berdaftar)', 'HRD Corp可申领项目（注册培训机构）', 'Программы с возмещением HRD Corp (зарегистрированные провайдеры)'],
   'hr.provider.Coursera (audit free)': ['Coursera (audit free)', 'Coursera (belajar tanpa sijil secara percuma)', 'Coursera（可免费旁听）', 'Coursera (бесплатно без сертификата)'],
   'hr.provider.TU Delft (audit free)': ['TU Delft (audit free)', 'TU Delft (belajar tanpa sijil secara percuma)', 'TU Delft（可免费旁听）', 'TU Delft (бесплатно без сертификата)'],
   'hr.provider.DeepLearning.AI / Coursera (audit free)': ['DeepLearning.AI / Coursera (audit free)', 'DeepLearning.AI / Coursera (belajar tanpa sijil secara percuma)', 'DeepLearning.AI / Coursera（可免费旁听）', 'DeepLearning.AI / Coursera (бесплатно без сертификата)'],
   'hr.provider.Alison (free)': ['Alison (free)', 'Alison (percuma)', 'Alison（免费）', 'Alison (бесплатно)'],
-  'hr.provider.HRD Corp course directory': ['HRD Corp course directory', 'Direktori kursus HRD Corp', 'HRD Corp课程目录', 'Каталог курсов HRD Corp'],
   'hr.month.range': ['M{start}–M{end}', 'B{start}–B{end}', '第{start}–{end}月', 'М{start}–М{end}'],
   'hr.automation.exposure': ['{role}: illustrative automation exposure', '{role}: pendedahan automasi ilustrasi', '{role}：自动化影响示例', '{role}: иллюстративная подверженность автоматизации'],
   'hr.skill.level': ['{skill}: level {n}/5', '{skill}: tahap {n}/5', '{skill}：等级{n}/5', '{skill}: уровень {n}/5'],
@@ -94,7 +94,7 @@ const COPY: Record<string, [string, string, string, string]> = {
 
   'hr.role.ai-ops-specialist.signals': ['Outlook blends live posting momentum for workflow automation / RPA aliases with WEF FOJ 2025 growth direction for AI-augmented roles.', 'Prospek menggabungkan momentum iklan kerja langsung bagi automasi aliran kerja dan RPA dengan arah pertumbuhan peranan berbantu AI dalam WEF FOJ 2025.', '展望结合工作流自动化与RPA相关职位的实时动量，以及WEF FOJ 2025中AI辅助岗位的增长方向。', 'Перспективы сочетают импульс вакансий по автоматизации процессов и RPA с направлением роста ролей с ИИ из WEF FOJ 2025.'],
   'hr.role.ai-marketing-strategist.signals': ['Tracks live momentum of digital-marketing vs AI-content aliases; the gap between them drives the "manage the tools vs. be replaced by them" narrative.', 'Menjejaki momentum langsung pemasaran digital berbanding kandungan AI; jurangnya membezakan mengurus alat daripada digantikan olehnya.', '比较数字营销与AI内容相关职位的实时动量，其差距体现管理工具与被工具替代的区别。', 'Сравнивается импульс вакансий в цифровом маркетинге и ИИ-контенте: разница отражает выбор между управлением инструментами и замещением ими.'],
-  'hr.role.ai-hr-partner.signals': ['Reskilling demand is itself a signal: MOSTI expects 600,000+ Malaysian workers to need reskilling within 3-5 years (see curated sources).', 'Permintaan latihan semula ialah isyarat: MOSTI menjangka lebih 600,000 pekerja Malaysia memerlukan latihan semula dalam 3–5 tahun (lihat sumber pilihan).', '再培训需求本身就是信号：MOSTI预计未来3至5年超过60万名马来西亚员工需要再培训（见精选来源）。', 'Спрос на переобучение сам по себе является сигналом: MOSTI ожидает такую потребность у более 600 000 работников Малайзии за 3–5 лет (см. источники).'],
+  'hr.role.ai-hr-partner.signals': ['Reskilling demand is a workforce signal; this outlook uses cited international research and is not a local forecast.', 'Permintaan latihan semula ialah isyarat tenaga kerja; prospek ini menggunakan penyelidikan antarabangsa yang dirujuk, bukan ramalan tempatan.', '再培训需求是劳动力市场信号；此展望参考了国际研究，并非本地预测。', 'Спрос на переобучение — важный сигнал; этот прогноз основан на цитируемых международных исследованиях и не является локальной оценкой.'],
   'hr.role.ai-business-analyst.signals': ['WEF FOJ 2025 lists analytical thinking and AI & big data among the fastest-growing skills; this role sits exactly at their intersection.', 'WEF FOJ 2025 menyenaraikan pemikiran analitikal serta AI dan data raya antara kemahiran paling pesat berkembang; peranan ini menggabungkannya.', 'WEF FOJ 2025将分析思维、AI和大数据列为增长最快的技能，这一岗位处于其交汇点。', 'WEF FOJ 2025 относит аналитическое мышление, ИИ и большие данные к быстрорастущим навыкам; эта роль объединяет их.'],
   'hr.role.ai-cx-lead.signals': ['Customer-service aliases still show high posting volume but flat trend; the accelerated scenario discounts routine service work further.', 'Iklan kerja perkhidmatan pelanggan masih banyak tetapi trendnya mendatar; senario dipercepat mengurangkan lagi indeks kerja perkhidmatan rutin.', '客户服务相关职位发布量仍高，但趋势持平；加速情景进一步下调常规服务工作指数。', 'Вакансий в обслуживании клиентов много, но тренд остаётся ровным; ускоренный сценарий сильнее снижает оценку рутинного обслуживания.'],
   'hr.role.solar-technician.signals': ['Renewable-energy aliases show steady posting growth; WEF FOJ 2025 ranks green-transition roles among the largest absolute job creators to 2030.', 'Iklan kerja tenaga boleh baharu berkembang stabil; WEF FOJ 2025 meletakkan peranan peralihan hijau antara penyumbang terbesar pekerjaan baharu hingga 2030.', '可再生能源相关职位稳定增长；WEF FOJ 2025将绿色转型岗位列为截至2030年就业净增量最大的类别之一。', 'Вакансии в возобновляемой энергетике стабильно растут; WEF FOJ 2025 относит зелёные профессии к крупнейшим источникам новых рабочих мест до 2030 года.'],
@@ -103,10 +103,10 @@ const COPY: Record<string, [string, string, string, string]> = {
   'hr.role.cyber-analyst.signals': ['Cybersecurity aliases rank among the highest-frequency skills in our live posting corpus, with positive trend in both scenarios.', 'Keselamatan siber antara kemahiran paling kerap disebut dalam korpus iklan kerja langsung kami, dengan trend positif dalam kedua-dua senario.', '网络安全是实时职位语料中出现频率最高的技能之一，在两种情景中均呈正向趋势。', 'Кибербезопасность входит в число самых частых навыков в корпусе вакансий; в обоих сценариях тренд положительный.'],
   'hr.role.data-analyst.signals': ['Highest-frequency skill cluster in our live corpus; note the nuance — routine dashboarding is automating while interpretation demand rises.', 'Kelompok kemahiran paling kerap dalam korpus langsung kami; pembinaan papan pemuka rutin diautomasi sementara permintaan tafsiran meningkat.', '这是实时语料中最常见的技能群；常规仪表板制作正被自动化，但数据解读需求在增长。', 'Самая частая группа навыков в корпусе; типовые панели автоматизируются, а спрос на интерпретацию данных растёт.'],
   'hr.role.smart-ag-technologist.signals': ['Lower current posting volume (niche corpus) but strong policy tailwinds — flagged as an emerging signal with lower confidence.', 'Jumlah iklan semasa lebih rendah dalam korpus khusus, tetapi sokongan dasar kukuh — ditandai sebagai isyarat baharu dengan keyakinan lebih rendah.', '当前职位发布量较低（小众语料），但政策支持强劲，因此标为置信度较低的新兴信号。', 'Вакансий пока мало в узкой выборке, но поддержка политики сильна; это развивающийся сигнал с пониженной уверенностью.'],
-  'hr.role.digital-skills-trainer.signals': ['In the accelerated scenario, reskilling demand compounds — Malaysia alone expects 600,000+ workers needing reskilling within 3-5 years (MOSTI, see curated sources).', 'Dalam senario dipercepat, permintaan latihan semula bertambah — Malaysia sahaja menjangka lebih 600,000 pekerja memerlukannya dalam 3–5 tahun (MOSTI, lihat sumber pilihan).', '加速情景中，再培训需求持续累积：仅马来西亚就预计有超过60万名员工在3至5年内需要再培训（MOSTI，见精选来源）。', 'В ускоренном сценарии спрос на переобучение нарастает: только в Малайзии оно потребуется более 600 000 работников за 3–5 лет (MOSTI, см. источники).'],
+  'hr.role.digital-skills-trainer.signals': ['The accelerated scenario assumes stronger reskilling demand; it is a planning scenario, not a local workforce forecast.', 'Senario dipercepat mengandaikan permintaan latihan semula yang lebih tinggi; ini senario perancangan, bukan ramalan tenaga kerja tempatan.', '加速情景假设再培训需求更强；这是规划情景，并非本地劳动力预测。', 'Ускоренный сценарий предполагает более высокий спрос на переобучение; это плановое допущение, а не локальный прогноз занятости.'],
   'hr.role.prompt-workflow-designer.signals': ['Prompt/generative-AI aliases moved from near-zero to mainstream in live postings within two years — the clearest "emerging skill" signal in the corpus.', 'Istilah arahan dan AI generatif beralih daripada hampir sifar kepada arus perdana dalam iklan kerja dalam dua tahun — isyarat kemahiran baharu paling jelas.', '提示词与生成式AI相关职位在两年内从几乎没有变为主流，是语料中最明显的新兴技能信号。', 'Запросы к генеративному ИИ за два года стали массовой темой вакансий почти с нуля — это наиболее явный сигнал нового навыка.'],
   'hr.role.agent-ops-engineer.signals': ['Agentic aliases are still low-frequency in postings but carry the highest research-horizon score in our taxonomy — a leading indicator by design.', 'Istilah ejen AI masih jarang dalam iklan kerja tetapi mendapat skor horizon penyelidikan tertinggi dalam taksonomi kami — direka sebagai petunjuk awal.', '智能体相关职位仍少，但在分类体系中的研究前沿评分最高，因此被设计为先行指标。', 'ИИ-агенты пока редко встречаются в вакансиях, но имеют наивысшую оценку исследовательского потенциала в нашей классификации — это намеренно опережающий индикатор.'],
-  'hr.role.responsible-ai-associate.signals': ['Demand scales with regulation (EU AI Act, Malaysia’s AI code of practice) rather than postings — modelled via research-horizon weighting.', 'Permintaan berkembang mengikut peraturan (EU AI Act dan kod amalan AI Malaysia), bukan jumlah iklan — dimodelkan melalui pemberat horizon penyelidikan.', '需求随法规发展（欧盟AI法案、马来西亚AI实践准则），而非职位发布量增长，因此使用研究前沿权重建模。', 'Спрос определяется регулированием (EU AI Act и кодекс практики ИИ Малайзии), а не числом вакансий; модель учитывает исследовательский потенциал.'],
+  'hr.role.responsible-ai-associate.signals': ['Demand can scale with regulation and organisational policy, not only job postings; the model uses cited research horizons.', 'Permintaan boleh meningkat mengikut peraturan dan dasar organisasi, bukan iklan kerja sahaja; model ini menggunakan horizon penyelidikan yang dirujuk.', '需求可能随法规和组织政策而变化，并非只由职位发布决定；模型参考了相关研究前景。', 'Спрос может зависеть от регулирования и политики организаций, а не только от вакансий; модель учитывает цитируемые исследования.'],
   'hr.role.ml-engineer.signals': ['Consistently among the top-frequency, top-trend aliases in live postings; entry barrier keeps supply constrained.', 'Konsisten antara istilah paling kerap dan trend tertinggi dalam iklan kerja; syarat kemasukan mengehadkan bekalan tenaga kerja.', '该技能在实时职位中持续保持高频与强趋势，入行门槛限制了人才供给。', 'Стабильно среди наиболее частых и быстрорастущих навыков в вакансиях; высокий порог входа ограничивает предложение специалистов.'],
 
   'hr.skill.prompt-engineering': ['Prompt & GenAI Orchestration', 'Arahan dan Penyelarasan AI Generatif', '提示词与生成式AI编排', 'Запросы и оркестрация генеративного ИИ'],
@@ -336,10 +336,14 @@ const COPY: Record<string, [string, string, string, string]> = {
   'hr.person.Employee 12 (batch, synthetic)': ['Employee 12', 'Pekerja 12', '员工12', 'Сотрудник 12'],
 };
 
-export const HR_DICTIONARIES: Record<Lang, Record<string, string>> = { en: {}, ms: {}, zh: {}, ru: {} };
-const languages: Lang[] = ['en', 'ms', 'zh', 'ru'];
+export const HR_DICTIONARIES: Record<Lang, Record<string, string>> = {
+  en: {},
+  uz: { ...hrUz },
+  ru: {},
+};
 for (const [key, translations] of Object.entries(COPY)) {
-  languages.forEach((lang, index) => { HR_DICTIONARIES[lang][key] = translations[index]; });
+  HR_DICTIONARIES.en[key] = translations[0];
+  HR_DICTIONARIES.ru[key] = translations[3];
 }
 
 // Explicitly classified interface-owned descriptors. Unlisted official titles
@@ -347,11 +351,10 @@ for (const [key, translations] of Object.entries(COPY)) {
 const COURSE_TITLE_KEYS: Record<string, string> = Object.fromEntries([
   'ms-ai-fundamentals', 'salesforce-ai-fundamentals', 'aws-ai-ready',
   'fao-climate-smart-ag', 'openwho-digital-health', 'alison-training-strategy',
-  'hrcorp-claimable-directory',
 ].map((slug) => [slug, `hr.course.${slug}.title`]));
 const PROVIDER_KEYS: Record<string, string> = Object.fromEntries([
   'Coursera (audit free)', 'TU Delft (audit free)', 'DeepLearning.AI / Coursera (audit free)',
-  'Alison (free)', 'HRD Corp course directory',
+  'Alison (free)',
 ].map((name) => [name, `hr.provider.${name}`]));
 
 export function localizeHrCourse(course: Pick<CourseDef, 'slug' | 'title' | 'provider'>, t: (key: string) => string) {

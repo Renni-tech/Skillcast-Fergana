@@ -17,7 +17,7 @@ import { SKILL_MAP } from '@/data/skills';
 import { matchAll } from '@/lib/matching';
 import { useSkillCast } from '@/lib/store';
 import type { Profile, StudyField } from '@/lib/types';
-import { LevelDots, SdgBadge, SourceChip, useSignals, useT } from './shared';
+import { LevelDots, SdgBadge, skillName, SourceChip, useSignals, useT } from './shared';
 
 // ─── TVET & University Career Centres (Student Advisory View) ──────────────
 // Advises a cohort against entry-level roles emerging from live market
@@ -97,14 +97,14 @@ export function InstitutionView() {
     return [...req.entries()]
       .map(([slug, info]) => ({
         slug,
-        name: SKILL_MAP[slug]?.name ?? slug,
+        name: skillName(t, slug),
         momentum: info.momentum,
         required: info.minLevel,
         roles: info.roles,
         taught: taught.get(slug) ?? 0,
       }))
       .sort((a, b) => b.momentum - a.momentum);
-  }, [relevantRoles, momentumMap, field]);
+  }, [relevantRoles, momentumMap, field, t]);
 
   const gapSkills = syllabusRows.filter((r) => r.taught < 2 && r.momentum >= 55);
 
@@ -339,9 +339,8 @@ export function InstitutionView() {
       </Card>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        <SourceChip href="https://esco.ec.europa.eu/en/about-esco/portal-classification">ESCO skills taxonomy</SourceChip>{' '}
-        <SourceChip href="https://www.myfuturejobs.gov.my/">MyFutureJobs</SourceChip>{' '}
-        <SourceChip href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/">WEF Future of Jobs 2025</SourceChip>
+        <SourceChip href="https://esco.ec.europa.eu/en/about-esco/portal-classification">{t('ESCO skills taxonomy')}</SourceChip>{' '}
+        <SourceChip href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/">{t('WEF Future of Jobs 2025')}</SourceChip>
       </p>
     </div>
   );

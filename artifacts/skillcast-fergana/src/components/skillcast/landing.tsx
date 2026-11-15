@@ -40,9 +40,9 @@ export function Landing() {
         <div className="skillcast-hero-glow" aria-hidden="true" />
         <div className="skillcast-bubble skillcast-bubble--one" aria-hidden="true" />
         <div className="skillcast-bubble skillcast-bubble--two" aria-hidden="true" />
-        <div className="skillcast-bubble skillcast-bubble--three" aria-hidden="true"><span>Future-ready</span></div>
+        <div className="skillcast-bubble skillcast-bubble--three" aria-hidden="true"><span>{t('Future-ready')}</span></div>
         <div className="skillcast-bubble skillcast-bubble--four" aria-hidden="true" />
-        <div className="skillcast-bubble skillcast-bubble--five" aria-hidden="true"><span>+18%<small>Illustrative demo</small></span></div>
+        <div className="skillcast-bubble skillcast-bubble--five" aria-hidden="true"><span>+18%<small>{t('Illustrative demo')}</small></span></div>
         <div className="skillcast-bubble skillcast-bubble--six" aria-hidden="true" />
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <Badge variant="outline" className="mb-6 gap-1.5 border-indigo-200/25 bg-white/[0.06] px-3 py-1 text-indigo-100 shadow-[0_0_32px_rgba(112,118,255,.15)] backdrop-blur-md">
@@ -63,7 +63,7 @@ export function Landing() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </div>
-          <p className="mt-6 text-xs tracking-wide text-blue-100/45">Discover your strengths · Adapt to change · Achieve your next step</p>
+          <p className="mt-6 text-xs tracking-wide text-blue-100/45">{t('Discover your strengths · Adapt to change · Achieve your next step')}</p>
         </div>
       </section>
 
@@ -110,7 +110,7 @@ export function Landing() {
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               {SDG_TITLES[4]} · {SDG_TITLES[5]} · {SDG_TITLES[8]} · {SDG_TITLES[9]} · {SDG_TITLES[10]} —
-              Aiversecity Future-Ready Workforce domain
+              {t('— Aiversecity Future-Ready Workforce domain')}
             </p>
           </CardContent>
         </Card>
@@ -126,9 +126,9 @@ export function Landing() {
             <Badge variant="outline" className="gap-1 border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
               <Scale className="h-3 w-3" aria-hidden /> {t('common.estimates')}
             </Badge>
-            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">2 scenarios</Badge>
-            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">4 languages: EN · BM · 中文 · RU</Badge>
-            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">SDG ledger on every role</Badge>
+            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('2 scenarios')}</Badge>
+            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">English · Uzbek · Русский</Badge>
+            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('SDG ledger on every role')}</Badge>
           </CardContent>
         </Card>
       </section>

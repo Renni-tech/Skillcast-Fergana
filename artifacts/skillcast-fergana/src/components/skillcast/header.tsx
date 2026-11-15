@@ -56,7 +56,7 @@ export function Header() {
         <button
           onClick={() => setView('landing')}
           className="flex items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
-          aria-label="SkillCast home"
+          aria-label={t('SkillCast home')}
         >
           <CloudSun className={`h-5 w-5 ${landing ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'}`} aria-hidden />
           <span className="text-lg">
@@ -67,7 +67,7 @@ export function Header() {
           </span>
         </button>
 
-        <nav aria-label="Primary" className="order-3 flex flex-1 flex-wrap items-center gap-1 sm:order-2 sm:justify-center">
+        <nav aria-label={t('Primary')} className="order-3 flex flex-1 flex-wrap items-center gap-1 sm:order-2 sm:justify-center">
           {views.map((v) => (
             <Button
               key={v.id}
@@ -126,7 +126,7 @@ export function Header() {
                   </SelectContent>
                 </Select>
               </TooltipTrigger>
-              <TooltipContent className="text-xs">{t('nav.lang')}: EN · BM · 中文 · RU</TooltipContent>
+              <TooltipContent className="text-xs">{t('English · Uzbek · Русский')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 

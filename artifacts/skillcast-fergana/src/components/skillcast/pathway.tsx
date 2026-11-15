@@ -11,7 +11,7 @@ import { COURSES, COURSE_MAP } from '@/data/courses';
 import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { SdgBadge, SourceChip, useSignals, useT } from './shared';
+import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, SourceChip, useSignals, useT } from './shared';
 
 // ─── Pathway tab: Duolingo-style tracked roadmap from the curated registry ──
 // Courses are picked deterministically: gap priority (weight × momentum),
@@ -115,7 +115,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         <div>
           <h2 className="text-lg font-semibold">{t('pw.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            {role.title} · {t('pw.subtitle')}
+            {roleTitle(t, role.slug)} · {t('pw.subtitle')}
           </p>
         </div>
         <Badge variant="outline" className="gap-1.5">
@@ -193,23 +193,18 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                         {t('pw.week', { n: n.startWeek })} · {t('pw.hours', { n: course.totalHours })}
                       </span>
                     </div>
-                    <CardTitle className="mt-1 text-base">{course.title}</CardTitle>
+                    <CardTitle className="mt-1 text-base">{courseTitle(t, course.slug)}</CardTitle>
                     <CardDescription className="flex flex-wrap items-center gap-1.5">
-                      <span>{course.provider}</span>
+                      <span>{courseProvider(t, course.slug)}</span>
                       {course.free && <Badge variant="secondary" className="text-[10px]">{t('pw.free')}</Badge>}
-                      {course.hrdClaimable && (
-                        <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700 dark:text-amber-300">
-                          {t('pw.hrd')}
-                        </Badge>
-                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <p className="text-sm text-muted-foreground">{t('pw.youll', { outcome: course.outcome })}</p>
+                    <p className="text-sm text-muted-foreground">{t('pw.youll', { outcome: courseOutcome(t, course.slug) })}</p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {course.skills.map((s) => (
                         <span key={s} className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                          {s.replace(/-/g, ' ')}
+                          {skillName(t, s)}
                         </span>
                       ))}
                     </div>
@@ -226,7 +221,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:underline dark:text-teal-400"
                         >
-                          {course.provider} <ExternalLink className="h-3 w-3" aria-hidden />
+                          {courseProvider(t, course.slug)} <ExternalLink className="h-3 w-3" aria-hidden />
                         </a>
                         {!locked && (
                           <Button
@@ -258,7 +253,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {role.title} — {role.signalsNote}
+                    {roleTitle(t, role.slug)} — {roleSignals(t, role.slug)}
                   </p>
                 </CardContent>
               </Card>
@@ -269,10 +264,9 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
 
       <div className="flex flex-wrap gap-2">
         <SourceChip href="https://www.freecodecamp.org/">freeCodeCamp</SourceChip>
-        <SourceChip href="https://www.coursera.org/">Coursera (audit)</SourceChip>
+        <SourceChip href="https://www.coursera.org/">{t('Coursera (audit)')}</SourceChip>
         <SourceChip href="https://learn.deeplearning.ai/">DeepLearning.AI</SourceChip>
         <SourceChip href="https://elearning.fao.org/">FAO eLearning</SourceChip>
-        <SourceChip href="https://hrdcorp.gov.my/">HRD Corp directory</SourceChip>
       </div>
     </div>
   );

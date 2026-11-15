@@ -1,6 +1,6 @@
 // ─── SkillCast shared types ────────────────────────────────────────────────
 
-export type Lang = 'en' | 'ms' | 'zh' | 'ru';
+export type Lang = 'en' | 'uz' | 'ru';
 export type ScenarioId = 'moderate' | 'accelerated';
 export type Persona = 'working-adult' | 'fresh-grad' | 'switcher' | 'tvet-student';
 export type PathType = 'work-with-ai' | 'pivot' | 'emerging';
@@ -32,7 +32,7 @@ export type EmployerIndustry =
   | 'technology' | 'manufacturing' | 'banking' | 'logistics'
   | 'public' | 'retail' | 'healthcare' | 'education';
 export type EmployerObjective = 'risk' | 'transition' | 'budget';
-export type EmployerBudget = 'free' | 'hrd';
+export type EmployerBudget = 'free' | 'paid';
 
 export interface EmployerProfile {
   company: string;
@@ -101,7 +101,6 @@ export interface CourseDef {
   level: 'beginner' | 'intermediate' | 'advanced';
   skills: string[];
   free: boolean;
-  hrdClaimable: boolean; // claimable via registered HRD Corp training providers
   formats: Array<'video' | 'text' | 'interactive' | 'project' | 'audio'>;
   accessibility: string[];
   certificate: boolean;

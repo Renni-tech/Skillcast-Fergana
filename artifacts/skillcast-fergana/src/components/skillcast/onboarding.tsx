@@ -25,9 +25,10 @@ import { ROLES, ROLE_MAP } from '@/data/roles';
 import { DEPT_TEMPLATES, INDUSTRIES } from '@/data/team';
 import { FIELDS_OF_STUDY } from '@/data/institution';
 import { INTERESTS, PERSONAS, useSkillCast } from '@/lib/store';
+import { LANGS } from '@/lib/i18n';
 import { matchAll } from '@/lib/matching';
 import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualProfileDetails } from '@/lib/types';
-import { SdgBadge, useSignals, useT } from './shared';
+import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
 
 // ─── Onboarding router: three tracks ────────────────────────────────────────
@@ -87,10 +88,11 @@ function StepUserType() {
 }
 
 function StepProgress({ step, total }: { step: number; total: number }) {
+  const t = useT();
   return (
-    <div aria-label={`Step ${step} of ${total}`}>
+    <div aria-label={`${t('onb.step')} ${step} ${t('onb.of')} ${total}`}>
       <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-medium text-slate-600">Your onboarding progress</span>
+        <span className="font-medium text-slate-600">{t('Your onboarding progress')}</span>
         <span className="font-semibold text-blue-700">{step} / {total}</span>
       </div>
       <div className="flex items-center gap-2" aria-hidden="true">
@@ -122,8 +124,8 @@ function OnboardingShell({
         {light ? (
           <>
             <aside className="mb-4 hidden rounded-2xl border border-blue-100 dark:border-slate-700 bg-white/90 p-4 shadow-sm lg:sticky lg:top-24 lg:col-start-1 lg:row-start-1 lg:block">
-              <p className="px-2 pb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Your progress</p>
-              <ol aria-label={`Step ${step} of ${total}`} className="space-y-1">
+              <p className="px-2 pb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{t('Your progress')}</p>
+              <ol aria-label={`${t('onb.step')} ${step} ${t('onb.of')} ${total}`} className="space-y-1">
                 {individualStepTitles.map((label, index) => {
                   const number = index + 1;
                   const complete = number < step;
@@ -131,7 +133,7 @@ function OnboardingShell({
                   return (
                     <li key={label} aria-current={active ? 'step' : undefined} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm ${active ? 'bg-blue-50 font-semibold text-blue-800 ring-1 ring-blue-100 dark:ring-blue-900' : complete ? 'text-slate-700' : 'text-slate-400'}`}>
                       <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${complete ? 'bg-blue-600 text-white' : active ? 'bg-blue-100 dark:bg-slate-700 text-blue-700' : 'bg-slate-100 text-slate-400'}`}>
-                        {complete ? <Check className="h-4 w-4" aria-label="Completed" /> : number}
+                        {complete ? <Check className="h-4 w-4" aria-label={t('Completed')} /> : number}
                       </span>
                       <span>{label}{[2, 3, 5].includes(index) ? ' (optional)' : ''}</span>
                     </li>
@@ -166,7 +168,7 @@ function OnboardingShell({
         <div className={`mt-4 flex items-center justify-between ${light ? 'lg:col-start-2' : ''}`}>
           {onSkip && (
             <Button variant="ghost" onClick={onSkip} className="text-slate-600 hover:text-blue-800">
-              Skip for now
+              {t('Skip for now')}
             </Button>
           )}
           <Button variant="ghost" onClick={onBack} className={light ? 'text-slate-600 hover:bg-blue-50 hover:text-blue-800' : ''}>
@@ -209,14 +211,14 @@ const COUNTRY_CITIES: Record<string, string[]> = {
   Australia: ['Adelaide', 'Brisbane', 'Canberra', 'Melbourne', 'Perth', 'Sydney'],
   India: ['Bengaluru', 'Chennai', 'Delhi', 'Hyderabad', 'Mumbai', 'Pune'],
   Indonesia: ['Bandung', 'Jakarta', 'Surabaya', 'Yogyakarta'],
-  Malaysia: ['George Town', 'Johor Bahru', 'Kota Kinabalu', 'Kuala Lumpur', 'Kuching', 'Shah Alam'],
+  Uzbekistan: ['Andijan', 'Bukhara', 'Fergana', 'Namangan', 'Samarkand', 'Tashkent'],
   Philippines: ['Cebu City', 'Davao City', 'Manila', 'Quezon City'],
   Singapore: ['Singapore'],
   Thailand: ['Bangkok', 'Chiang Mai', 'Phuket'],
   'United Kingdom': ['Birmingham', 'Glasgow', 'Leeds', 'London', 'Manchester'],
   'United States': ['Austin', 'Boston', 'Chicago', 'Los Angeles', 'New York', 'Seattle'],
 };
-const LANGUAGE_OPTIONS = ['Bahasa Melayu', 'English', 'Mandarin', 'Tamil', 'Arabic', 'Japanese', 'Other'];
+const LANGUAGE_OPTIONS = ['Uzbek', 'Russian', 'English', 'Tajik', 'Karakalpak', 'Kazakh', 'Arabic', 'Japanese', 'Other'];
 const PROFICIENCY_OPTIONS = ['basic', 'intermediate', 'advanced', 'native'] as const;
 const EDUCATION_OPTIONS = ['Secondary school', 'Certificate', 'Diploma', 'Bachelor\'s degree', 'Master\'s degree', 'Doctorate', 'Professional qualification'];
 const STATUS_OPTIONS: Array<{ value: EmploymentStatus; label: string }> = [
@@ -323,80 +325,81 @@ function ProfileStep({
   };
 
   const removeLanguage = (language: string) => patchDetails({ languages: languages.filter((item) => item.language !== language) });
+  const t = useT();
 
   return (
     <div className="space-y-7">
       <section className="space-y-4">
         <div>
-          <h3 className="mb-3 font-semibold text-slate-900">Your Profile</h3>
-          <Label htmlFor="employment-status" className="text-slate-800">Employment status <span className="text-rose-600">*</span></Label>
+          <h3 className="mb-3 font-semibold text-slate-900">{t('Your Profile')}</h3>
+          <Label htmlFor="employment-status" className="text-slate-800">{t('Employment status')} <span className="text-rose-600">*</span></Label>
           <Select value={details.employmentStatus || '__unset__'} onValueChange={(value) => { if (value !== '__unset__') setStatus(value as EmploymentStatus); }}>
-            <SelectTrigger id="employment-status" className={LIGHT_SELECT}><SelectValue placeholder="Choose your current status" /></SelectTrigger>
-            <SelectContent><SelectItem value="__unset__" disabled>Choose your current status</SelectItem>{STATUS_OPTIONS.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent>
+            <SelectTrigger id="employment-status" className={LIGHT_SELECT}><SelectValue placeholder={t('Choose your current status')} /></SelectTrigger>
+            <SelectContent><SelectItem value="__unset__" disabled>{t('Choose your current status')}</SelectItem>{STATUS_OPTIONS.map((item) => <SelectItem key={item.value} value={item.value}>{t(item.label)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="field-work" className="text-slate-800">Field of work</Label>
-            <Input id="field-work" value={details.fieldOfWork ?? ''} onChange={(e) => patchDetails({ fieldOfWork: e.target.value })} placeholder="e.g. Healthcare, finance, technology" className={LIGHT_INPUT} />
+            <Label htmlFor="field-work" className="text-slate-800">{t('Field of work')}</Label>
+            <Input id="field-work" value={details.fieldOfWork ?? ''} onChange={(e) => patchDetails({ fieldOfWork: e.target.value })} placeholder={t('e.g. Healthcare, finance, technology')} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="profession" className="text-slate-800">Profession <span className="text-rose-600">*</span></Label>
-            <Input id="profession" value={details.profession ?? ''} onChange={(e) => patchDetails({ profession: e.target.value })} placeholder="e.g. Operations analyst" className={LIGHT_INPUT} />
+            <Label htmlFor="profession" className="text-slate-800">{t('Profession')} <span className="text-rose-600">*</span></Label>
+            <Input id="profession" value={details.profession ?? ''} onChange={(e) => patchDetails({ profession: e.target.value })} placeholder={t('e.g. Operations analyst')} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="specialization" className="text-slate-800">Specialization <span className="text-rose-600">*</span></Label>
-            <Input id="specialization" value={details.specialization ?? ''} onChange={(e) => patchDetails({ specialization: e.target.value })} placeholder="e.g. Supply chain planning" className={LIGHT_INPUT} />
+            <Label htmlFor="specialization" className="text-slate-800">{t('Specialization')} <span className="text-rose-600">*</span></Label>
+            <Input id="specialization" value={details.specialization ?? ''} onChange={(e) => patchDetails({ specialization: e.target.value })} placeholder={t('e.g. Supply chain planning')} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="experience" className="text-slate-800">Years of experience <span className="text-rose-600">*</span></Label>
+            <Label htmlFor="experience" className="text-slate-800">{t('Years of experience')} <span className="text-rose-600">*</span></Label>
             <Input id="experience" type="number" min={0} max={60} step={1} value={profile.years} onChange={(e) => setProfile({ years: e.target.value === '' ? 0 : Number(e.target.value) })} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="education-level" className="text-slate-800">Education level <span className="text-rose-600">*</span></Label>
+            <Label htmlFor="education-level" className="text-slate-800">{t('Education level')} <span className="text-rose-600">*</span></Label>
             <Select value={details.educationLevel || '__unset__'} onValueChange={(value) => patchDetails({ educationLevel: value === '__unset__' ? '' : value })}>
-              <SelectTrigger id="education-level" className={LIGHT_SELECT}><SelectValue placeholder="Select highest level" /></SelectTrigger>
-              <SelectContent><SelectItem value="__unset__">Select highest level</SelectItem>{EDUCATION_OPTIONS.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+              <SelectTrigger id="education-level" className={LIGHT_SELECT}><SelectValue placeholder={t('Select highest level')} /></SelectTrigger>
+              <SelectContent><SelectItem value="__unset__">{t('Select highest level')}</SelectItem>{EDUCATION_OPTIONS.map((option) => <SelectItem key={option} value={option}>{t(option)}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
-        <p className="text-xs text-slate-500">Fields marked * are required. Experience must be a whole number from 0 to 60.</p>
+        <p className="text-xs text-slate-500">{t('Fields marked * are required. Experience must be a whole number from 0 to 60.')}</p>
       </section>
 
       <section className="space-y-4 border-t border-blue-100 dark:border-slate-700 pt-6">
         <div>
-          <h3 className="font-semibold text-slate-900">Upload Your CV</h3>
-          <p className="text-sm text-slate-500">Upload a CV for private, scrubbed extraction, or enter skills yourself below.</p>
+          <h3 className="font-semibold text-slate-900">{t('Upload Your CV')}</h3>
+          <p className="text-sm text-slate-500">{t('Upload a CV for private, scrubbed extraction, or enter skills yourself below.')}</p>
         </div>
         <CvStep onDone={() => {}} showContinue={false} preserveProfile />
       </section>
 
       <section className="space-y-4 border-t border-blue-100 dark:border-slate-700 pt-6">
         <div>
-          <h3 className="font-semibold text-slate-900">Skills Assessment</h3>
-          <p className="text-sm text-slate-600">Choose skills and rate your current level. Add at least one skill to continue.</p>
+          <h3 className="font-semibold text-slate-900">{t('Skills Assessment')}</h3>
+          <p className="text-sm text-slate-600">{t('Choose skills and rate your current level. Add at least one skill to continue.')}</p>
         </div>
         <StepSkills />
       </section>
 
       <section className="space-y-3 border-t border-blue-100 dark:border-slate-700 pt-6">
         <div>
-          <h3 className="font-semibold text-slate-900">Languages</h3>
-          <p className="text-sm text-slate-500">Add any languages you use and select your proficiency.</p>
+          <h3 className="font-semibold text-slate-900">{t('Languages')}</h3>
+          <p className="text-sm text-slate-500">{t('Add any languages you use and select your proficiency.')}</p>
         </div>
         <Select value={languageChoice || '__unset__'} onValueChange={(value) => { if (value !== '__unset__') addLanguage(value); setLanguageChoice(''); }}>
-          <SelectTrigger aria-label="Add a language" className={LIGHT_SELECT}><SelectValue placeholder="Add a language…" /></SelectTrigger>
-          <SelectContent><SelectItem value="__unset__">Add a language…</SelectItem>{LANGUAGE_OPTIONS.map((language) => <SelectItem key={language} value={language} disabled={languages.some((item) => item.language === language)}>{language}</SelectItem>)}</SelectContent>
+        <SelectTrigger aria-label={t('Add a language')} className={LIGHT_SELECT}><SelectValue placeholder={t('Add a language…')} /></SelectTrigger>
+          <SelectContent><SelectItem value="__unset__">{t('Add a language…')}</SelectItem>{LANGUAGE_OPTIONS.map((language) => <SelectItem key={language} value={language} disabled={languages.some((item) => item.language === language)}>{language === 'Other' ? t('Other') : language}</SelectItem>)}</SelectContent>
         </Select>
         <div className="space-y-2">
           {languages.map((item) => (
             <div key={item.language} className="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-3">
               <span className="min-w-28 flex-1 text-sm font-medium text-slate-800">{item.language}</span>
               <Select value={item.proficiency} onValueChange={(value) => updateProficiency(item.language, value as typeof PROFICIENCY_OPTIONS[number])}>
-                <SelectTrigger aria-label={`${item.language} proficiency`} className="h-11 w-40 rounded-xl border-blue-100 dark:border-slate-700 bg-white text-sm text-slate-900 shadow-sm hover:border-blue-200 focus:ring-2 focus:ring-blue-100"><SelectValue /></SelectTrigger>
-                <SelectContent>{PROFICIENCY_OPTIONS.map((level) => <SelectItem key={level} value={level}>{level[0].toUpperCase() + level.slice(1)}</SelectItem>)}</SelectContent>
+                <SelectTrigger aria-label={`${item.language} ${t('proficiency')}`} className="h-11 w-40 rounded-xl border-blue-100 dark:border-slate-700 bg-white text-sm text-slate-900 shadow-sm hover:border-blue-200 focus:ring-2 focus:ring-blue-100"><SelectValue /></SelectTrigger>
+                <SelectContent>{PROFICIENCY_OPTIONS.map((level) => <SelectItem key={level} value={level}>{t(level[0].toUpperCase() + level.slice(1))}</SelectItem>)}</SelectContent>
               </Select>
-              <Button type="button" variant="ghost" size="sm" onClick={() => removeLanguage(item.language)} className="text-slate-500">Remove</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => removeLanguage(item.language)} className="text-slate-500">{t('Remove')}</Button>
             </div>
           ))}
         </div>
@@ -407,12 +410,13 @@ function ProfileStep({
 
 function InterestsGoalsStep() {
   const { profile, setProfile } = useSkillCast();
+  const t = useT();
   return (
     <div className="space-y-6">
       <StepInterests />
       <section className="border-t border-blue-100 dark:border-slate-700 pt-6">
-        <Label htmlFor="career-goal" className="text-slate-800">What would you like to achieve in your career?</Label>
-        <Textarea id="career-goal" value={profile.objective} maxLength={500} onChange={(e) => setProfile({ objective: e.target.value.slice(0, 500) })} placeholder="Describe the role, change, or outcome you are working toward…" rows={4} className="mt-2 border-blue-100 dark:border-slate-700 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
+        <Label htmlFor="career-goal" className="text-slate-800">{t('What would you like to achieve in your career?')}</Label>
+        <Textarea id="career-goal" value={profile.objective} maxLength={500} onChange={(e) => setProfile({ objective: e.target.value.slice(0, 500) })} placeholder={t('Describe the role, change, or outcome you are working toward…')} rows={4} className="mt-2 border-blue-100 dark:border-slate-700 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
         <p className="mt-1 text-right text-xs text-slate-500">{profile.objective.length} / 500</p>
       </section>
     </div>
@@ -422,11 +426,12 @@ function InterestsGoalsStep() {
 export function FutureRadarStep({ details, onScenario }: { details: IndividualProfileDetails; onScenario: (scenario: 'moderate' | 'accelerated') => void }) {
   const { profile, scenario } = useSkillCast();
   const { loading, data, momentumMap } = useSignals();
+  const t = useT();
   const matches = useMemo(() => matchAll(profile, momentumMap), [profile, momentumMap]);
   const topRoles = matches.slice(0, 5).map((match) => ({ match, role: ROLE_MAP[match.roleSlug] })).filter((item) => item.role);
   const demandKey = scenario === 'moderate' ? 'demandModerate' : 'demandAccelerated';
   const marketDemand = topRoles.slice(0, 5).map(({ match, role }) => ({
-    name: role.title,
+    name: roleTitle(t, role.slug),
     demand: role[demandKey],
     score: match.score,
   }));
@@ -455,7 +460,7 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
     match.gap.forEach((gap) => {
       const current = skillGaps.get(gap.skill);
       const priority = gap.weight * (match.score / 100) * (0.5 + gap.momentum / 200);
-      if (!current || priority > current.priority) skillGaps.set(gap.skill, { role: role.title, priority });
+      if (!current || priority > current.priority) skillGaps.set(gap.skill, { role: roleTitle(t, role.slug), priority });
     });
   });
   const skillRecommendations = SKILLS
@@ -486,33 +491,33 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
       <header className="flex flex-col gap-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-gradient-to-r from-blue-50 dark:from-slate-800 to-indigo-50 dark:to-slate-900 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Your Future Skills Radar</h3>
-            <Badge className="border border-blue-200 bg-white dark:bg-slate-900 text-blue-700 dark:text-slate-200">Illustrative demo</Badge>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">{t('Your Future Skills Radar')}</h3>
+            <Badge className="border border-blue-200 bg-white dark:bg-slate-900 text-blue-700 dark:text-slate-200">{t('Illustrative demo')}</Badge>
           </div>
-          <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">Personalized from your profile, interests, skills, SkillCast pathways, and current signals.</p>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">{t('Personalized from your profile, interests, skills, SkillCast pathways, and current signals.')}</p>
         </div>
-        <div className="flex w-full rounded-xl border border-blue-100 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 sm:w-auto" role="group" aria-label="AI adoption scenario">
+        <div className="flex w-full rounded-xl border border-blue-100 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 sm:w-auto" role="group" aria-label={t('AI adoption scenario')}>
           {(['moderate', 'accelerated'] as const).map((option) => (
             <button key={option} type="button" aria-pressed={scenario === option} onClick={() => onScenario(option)} className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors sm:flex-none ${scenario === option ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-700'}`}>
-              {option === 'moderate' ? 'Moderate adoption' : 'Fast adoption'}
+              {option === 'moderate' ? t('Moderate adoption') : t('Fast adoption')}
             </button>
           ))}
         </div>
       </header>
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 dark:border-slate-700 bg-white px-4 py-3">
-        <Badge variant="outline" className="border-blue-200 text-blue-700">Demo indices</Badge>
-        <p className="text-xs leading-5 text-slate-600">Sample estimates only: not verified market statistics, live job opportunities, or guaranteed forecasts. {loading ? 'Loading current SkillCast signals; curated skill values are used where needed.' : data?.live ? 'Current signals inform skill momentum only.' : 'Curated fallback signals inform skill momentum where live data is unavailable.'}</p>
+        <Badge variant="outline" className="border-blue-200 text-blue-700">{t('Demo indices')}</Badge>
+        <p className="text-xs leading-5 text-slate-600">{t('Sample estimates only: not verified market statistics, live job opportunities, or guaranteed forecasts.')} {loading ? t('Loading current SkillCast signals; curated skill values are used where needed.') : data?.live ? t('Current signals inform skill momentum only.') : t('Curated fallback signals inform skill momentum where live data is unavailable.')}</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-blue-100 dark:border-slate-700 bg-white shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base text-slate-900">Market Demand</CardTitle>
-            <CardDescription>Scenario demand index for your highest-matching career pathways (0–100).</CardDescription>
+            <CardTitle className="text-base text-slate-900">{t('Market Demand')}</CardTitle>
+            <CardDescription>{t('Scenario demand index for your highest-matching career pathways (0–100).')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {marketDemand.length ? <div className="h-64 min-w-0 overflow-hidden" role="img" aria-label={`Illustrative ${scenario} demand index for top matching career pathways`}>
+            {marketDemand.length ? <div className="h-64 min-w-0 overflow-hidden" role="img" aria-label={t('Illustrative {scenario} demand index for top matching career pathways', { scenario: t(scenario === 'moderate' ? 'Moderate adoption' : 'Fast adoption') })}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={marketDemand} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
@@ -522,17 +527,17 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
                   <Bar dataKey="demand" fill="#2563EB" radius={[0, 6, 6, 0]} maxBarSize={24} />
                 </BarChart>
               </ResponsiveContainer>
-            </div> : <p className="py-12 text-center text-sm text-slate-500">Complete your profile to see pathway demand estimates.</p>}
+            </div> : <p className="py-12 text-center text-sm text-slate-500">{t('Complete your profile to see pathway demand estimates.')}</p>}
           </CardContent>
         </Card>
 
         <Card className="border-blue-100 dark:border-slate-700 bg-white shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base text-slate-900">Employment Outlook</CardTitle>
-            <CardDescription>Illustrative direction index across time horizons for the selected scenario.</CardDescription>
+            <CardTitle className="text-base text-slate-900">{t('Employment Outlook')}</CardTitle>
+            <CardDescription>{t('Illustrative direction index across time horizons for the selected scenario.')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {marketDemand.length ? <div className="h-64 min-w-0 overflow-hidden" role="img" aria-label={`Illustrative employment outlook index across time horizons under ${scenario} adoption`}>
+            {marketDemand.length ? <div className="h-64 min-w-0 overflow-hidden" role="img" aria-label={t('Illustrative employment outlook index across time horizons under {scenario} adoption', { scenario: t(scenario === 'moderate' ? 'Moderate adoption' : 'Fast adoption') })}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={employmentOutlook} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -542,48 +547,48 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
                   <Bar dataKey="outlook" fill="#2563EB" radius={[6, 6, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>
-            </div> : <p className="py-12 text-center text-sm text-slate-500">Outlook will appear when matching pathways are available.</p>}
-            <p className="mt-2 text-xs leading-5 text-slate-500">Time-horizon points are a demo interpolation from a 50-point baseline to existing role scenario indices; they are not observed employment data.</p>
+            </div> : <p className="py-12 text-center text-sm text-slate-500">{t('Outlook will appear when matching pathways are available.')}</p>}
+            <p className="mt-2 text-xs leading-5 text-slate-500">{t('Time-horizon points are a demo interpolation from a 50-point baseline to existing role scenario indices; they are not observed employment data.')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-blue-100 dark:border-slate-700 bg-white shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base text-slate-900">AI Task Exposure</CardTitle>
-            <CardDescription>Qualitative indicator based on matched-role exposure fields and the selected scenario.</CardDescription>
+            <CardTitle className="text-base text-slate-900">{t('AI Task Exposure')}</CardTitle>
+            <CardDescription>{t('Qualitative indicator based on matched-role exposure fields and the selected scenario.')}</CardDescription>
           </CardHeader>
           <CardContent>
             {topRoles.length ? <>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-2xl font-semibold text-blue-700">{exposureRating}</span>
-                <span className="text-xs text-slate-500">Illustrative rating</span>
+                <span className="text-2xl font-semibold text-blue-700">{t(exposureRating)}</span>
+                <span className="text-xs text-slate-500">{t('Illustrative rating')}</span>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2" role="img" aria-label={`${exposureRating} AI task exposure, shown on a three-level indicator`}>
+              <div className="mt-4 grid grid-cols-3 gap-2" role="img" aria-label={t('{rating} AI task exposure, shown on a three-level indicator', { rating: t(exposureRating) })}>
                 {['Lower', 'Moderate', 'Higher'].map((label, index) => <div key={label} className={`h-3 rounded-full ${index < exposureSegments ? 'bg-blue-600' : 'bg-blue-100 dark:bg-slate-700'}`} />)}
               </div>
-              <div className="mt-2 flex justify-between text-[11px] text-slate-500"><span>Lower</span><span>Moderate</span><span>Higher</span></div>
-              <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-slate-600">Task exposure describes how work tasks may be affected by AI. It is <strong>not</strong> the probability that your job will be replaced.</p>
-            </> : <p className="py-8 text-center text-sm text-slate-500">Exposure insights will appear when matching pathways are available.</p>}
+              <div className="mt-2 flex justify-between text-[11px] text-slate-500"><span>{t('Lower')}</span><span>{t('Moderate')}</span><span>{t('Higher')}</span></div>
+              <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-slate-600">{t('Task exposure describes how work tasks may be affected by AI. It is')} <strong>{t('not')}</strong> {t('the probability that your job will be replaced.')}</p>
+            </> : <p className="py-8 text-center text-sm text-slate-500">{t('Exposure insights will appear when matching pathways are available.')}</p>}
           </CardContent>
         </Card>
 
         <Card className="border-blue-100 dark:border-slate-700 bg-white shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base text-slate-900">Emerging Skills to Explore</CardTitle>
-            <CardDescription>Skill taxonomy recommendations informed by your pathway gaps, profile, and signal momentum.</CardDescription>
+            <CardTitle className="text-base text-slate-900">{t('Emerging Skills to Explore')}</CardTitle>
+            <CardDescription>{t('Skill taxonomy recommendations informed by your pathway gaps, profile, and signal momentum.')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading && <p className="mb-3 text-xs text-slate-500">Refreshing signal context… using curated momentum values as needed.</p>}
+            {loading && <p className="mb-3 text-xs text-slate-500">{t('Refreshing signal context… using curated momentum values as needed.')}</p>}
             {skillRecommendations.length ? <ul className="space-y-3">
               {skillRecommendations.map(({ skill, currentLevel, momentum, reason }) => <li key={skill.slug} className="rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div><p className="text-sm font-semibold text-slate-900">{skill.name}</p><p className="text-xs text-slate-500">{skill.category}</p></div>
-                  <Badge variant="outline" className="border-blue-200 text-blue-700">Momentum {momentum}/100</Badge>
+                  <div><p className="text-sm font-semibold text-slate-900">{skillName(t, skill.slug)}</p><p className="text-xs text-slate-500">{skillCategory(t, skill.category)}</p></div>
+                  <Badge variant="outline" className="border-blue-200 text-blue-700">{t('Momentum')} {momentum}/100</Badge>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{reason}</p>
-                {currentLevel > 0 && <p className="mt-1 text-[11px] text-slate-500">Current proficiency: {currentLevel}/5</p>}
+                {currentLevel > 0 && <p className="mt-1 text-[11px] text-slate-500">{t('Current proficiency:')} {currentLevel}/5</p>}
               </li>)}
-            </ul> : <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">Your profile currently covers the suggested skills. Continue refining your skill levels as your goals evolve.</p>}
+            </ul> : <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">{t('Your profile currently covers the suggested skills. Continue refining your skill levels as your goals evolve.')}</p>}
           </CardContent>
         </Card>
       </div>
@@ -601,6 +606,7 @@ const CAREER_STRATEGIES: Array<{ id: CareerStrategy; icon: typeof Target; title:
 function CareerStrategyStep({ details, patchDetails }: { details: IndividualProfileDetails; patchDetails: (patch: Partial<IndividualProfileDetails>) => void }) {
   const profile = useSkillCast((state) => state.profile);
   const { momentumMap } = useSignals();
+  const t = useT();
   const [showAllFields, setShowAllFields] = useState(false);
   const profileMatches = useMemo(() => matchAll(profile, momentumMap), [profile, momentumMap]);
   const matchBySlug = new Map(profileMatches.map((match) => [match.roleSlug, match]));
@@ -703,89 +709,89 @@ function CareerStrategyStep({ details, patchDetails }: { details: IndividualProf
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-600">Choose the direction that best fits your goals. Each path asks for the details needed to personalize your next steps.</p>
-      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Career strategy">
+      <p className="text-sm text-slate-600">{t('Choose the direction that best fits your goals. Each path asks for the details needed to personalize your next steps.')}</p>
+      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t('Career strategy')}>
         {CAREER_STRATEGIES.map((item) => (
           <button key={item.id} type="button" role="radio" aria-checked={details.careerStrategy === item.id} onClick={() => patchDetails(details.careerStrategy === item.id ? { careerStrategy: item.id } : { careerStrategy: item.id, strategyRole: '', focusSkill: '', newField: '', aiGoal: '', aiSkill: '' })} className={`min-h-36 rounded-xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${details.careerStrategy === item.id ? 'border-blue-500 dark:border-blue-500 bg-blue-50 ring-2 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700 bg-white hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40'}`}>
             <item.icon className="h-5 w-5 text-blue-600" aria-hidden />
-            <span className="mt-3 block font-semibold text-slate-900">{item.title}</span>
-            <span className="mt-1.5 block text-sm leading-5 text-slate-600">{item.desc}</span>
+            <span className="mt-3 block font-semibold text-slate-900">{t(item.title)}</span>
+            <span className="mt-1.5 block text-sm leading-5 text-slate-600">{t(item.desc)}</span>
           </button>
         ))}
       </div>
 
       {details.careerStrategy === 'enhance' && (
-        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label="Keep your career relevant with AI guidance">
-          <div><h3 className="font-semibold text-slate-900">Keep your experience relevant as AI changes work</h3><p className="mt-1 text-sm leading-6 text-slate-600">AI may change how tasks are completed in {details.profession || 'your profession'}, especially structured or repetitive work. Learning to guide these tools, check their output, and protect sensitive information can help you adapt while your expertise and judgment remain central. These practical suggestions use the current SkillCast skills taxonomy.</p></div>
-          <div className="rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4"><h4 className="text-sm font-semibold text-slate-900">Tasks AI may assist with</h4><ul className="mt-2 grid gap-1.5 text-sm text-slate-600 sm:grid-cols-3">{taskExamples.map((task) => <li key={task} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" aria-hidden />{task}</li>)}</ul><p className="mt-2 text-xs text-slate-500">Examples only; suitability depends on the task, approved tools, and workplace rules. Review outputs before relying on them.</p></div>
+        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label={t('Keep your career relevant with AI guidance')}>
+          <div><h3 className="font-semibold text-slate-900">{t('Keep your experience relevant as AI changes work')}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{t('AI may change how tasks are completed in')} {details.profession || t('your profession')}{t(', especially structured or repetitive work. Learning to guide these tools, check their output, and protect sensitive information can help you adapt while your expertise and judgment remain central. These practical suggestions use the current SkillCast skills taxonomy.')}</p></div>
+          <div className="rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4"><h4 className="text-sm font-semibold text-slate-900">{t('Tasks AI may assist with')}</h4><ul className="mt-2 grid gap-1.5 text-sm text-slate-600 sm:grid-cols-3">{taskExamples.map((task) => <li key={task} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" aria-hidden />{task}</li>)}</ul><p className="mt-2 text-xs text-slate-500">{t('Examples only; suitability depends on the task, approved tools, and workplace rules. Review outputs before relying on them.')}</p></div>
           <div className="space-y-3">
-            <div><h4 className="text-sm font-semibold text-slate-900">Personalized AI skills worth learning</h4><p className="mt-1 text-xs text-slate-600">Beginner-friendly ideas connected to {details.profession || details.fieldOfWork || (generalAiSuggestions ? 'general workplace tasks' : 'your profile')}. Open a suggestion to see a practical first step.</p></div>
-            {generalAiSuggestions && <p className="rounded-lg border border-blue-100 dark:border-slate-700 bg-white px-3 py-2 text-xs text-slate-600">General suggestions: add a profession or field in your profile for more tailored examples.</p>}
+            <div><h4 className="text-sm font-semibold text-slate-900">{t('Personalized AI skills worth learning')}</h4><p className="mt-1 text-xs text-slate-600">{t('Beginner-friendly ideas connected to')} {details.profession || details.fieldOfWork || (generalAiSuggestions ? t('general workplace tasks') : t('your profile'))}{t('. Open a suggestion to see a practical first step.')}</p></div>
+            {generalAiSuggestions && <p className="rounded-lg border border-blue-100 dark:border-slate-700 bg-white px-3 py-2 text-xs text-slate-600">{t('General suggestions: add a profession or field in your profile for more tailored examples.')}</p>}
             <div className="grid gap-3 sm:grid-cols-2">{aiRecommendations.map(({ skill, guidance }) => <details key={skill.slug} className="group rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4">
-              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-start justify-between gap-3"><span><span className="block text-sm font-semibold text-slate-900">{skill.name}</span><span className="mt-1 block text-xs leading-5 text-slate-600">{guidance.plain}</span></span><Badge variant="outline" className="shrink-0 border-blue-200 text-blue-700">{guidance.difficulty}</Badge></span><span className="mt-2 block text-xs font-medium text-blue-700 group-open:hidden">See a practical example and learning steps</span></summary>
-              <div className="mt-3 space-y-2 border-t border-blue-50 pt-3 text-xs leading-5 text-slate-600"><p><strong className="text-slate-800">Workplace example:</strong> {guidance.example}</p><p><strong className="text-slate-800">How it can help:</strong> {guidance.benefit}</p><p><strong className="text-slate-800">Start here:</strong> {guidance.start}</p><p><strong className="text-slate-800">Next:</strong> {guidance.next}</p></div>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-start justify-between gap-3"><span><span className="block text-sm font-semibold text-slate-900">{skillName(t, skill.slug)}</span><span className="mt-1 block text-xs leading-5 text-slate-600">{t(guidance.plain)}</span></span><Badge variant="outline" className="shrink-0 border-blue-200 text-blue-700">{t(guidance.difficulty)}</Badge></span><span className="mt-2 block text-xs font-medium text-blue-700 group-open:hidden">{t('See a practical example and learning steps')}</span></summary>
+              <div className="mt-3 space-y-2 border-t border-blue-50 pt-3 text-xs leading-5 text-slate-600"><p><strong className="text-slate-800">{t('Workplace example:')}</strong> {t(guidance.example)}</p><p><strong className="text-slate-800">{t('How it can help:')}</strong> {t(guidance.benefit)}</p><p><strong className="text-slate-800">{t('Start here:')}</strong> {t(guidance.start)}</p><p><strong className="text-slate-800">{t('Next:')}</strong> {t(guidance.next)}</p></div>
             </details>)}</div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm font-medium text-slate-800">Career goal / target role <span className="text-rose-600">*</span>
-              <Select value={details.strategyRole || '__unset__'} onValueChange={(value) => patchDetails({ strategyRole: value === '__unset__' ? '' : value, focusSkill: '' })}><SelectTrigger className={LIGHT_SELECT}><SelectValue placeholder="Choose a target role" /></SelectTrigger><SelectContent><SelectItem value="__unset__">Choose a target role</SelectItem>{enhanceRoleOptions.map(({ role }) => <SelectItem key={role.slug} value={role.slug}>{role.title}</SelectItem>)}</SelectContent></Select>
+            <label className="text-sm font-medium text-slate-800">{t('Career goal / target role')} <span className="text-rose-600">*</span>
+              <Select value={details.strategyRole || '__unset__'} onValueChange={(value) => patchDetails({ strategyRole: value === '__unset__' ? '' : value, focusSkill: '' })}><SelectTrigger className={LIGHT_SELECT}><SelectValue placeholder={t('Choose a target role')} /></SelectTrigger><SelectContent><SelectItem value="__unset__">{t('Choose a target role')}</SelectItem>{enhanceRoleOptions.map(({ role }) => <SelectItem key={role.slug} value={role.slug}>{roleTitle(t, role.slug)}</SelectItem>)}</SelectContent></Select>
             </label>
-            <div><p className="text-sm font-medium text-slate-800">Priority skill to strengthen <span className="text-rose-600">*</span></p>
-              <Select value={details.focusSkill || '__unset__'} onValueChange={(value) => patchDetails({ focusSkill: value === '__unset__' ? '' : value })}><SelectTrigger className={LIGHT_SELECT}><SelectValue placeholder="Choose a skill" /></SelectTrigger><SelectContent><SelectItem value="__unset__">Choose a skill</SelectItem>{enhanceSkillOptions.map(({ skill }) => <SelectItem key={skill.slug} value={skill.slug}>{skill.name}</SelectItem>)}</SelectContent></Select>
+            <div><p className="text-sm font-medium text-slate-800">{t('Priority skill to strengthen')} <span className="text-rose-600">*</span></p>
+              <Select value={details.focusSkill || '__unset__'} onValueChange={(value) => patchDetails({ focusSkill: value === '__unset__' ? '' : value })}><SelectTrigger className={LIGHT_SELECT}><SelectValue placeholder={t('Choose a skill')} /></SelectTrigger><SelectContent><SelectItem value="__unset__">{t('Choose a skill')}</SelectItem>{enhanceSkillOptions.map(({ skill }) => <SelectItem key={skill.slug} value={skill.slug}>{skillName(t, skill.slug)}</SelectItem>)}</SelectContent></Select>
             </div>
           </div>
-          {!hasPersonalData && <p className="text-xs text-slate-500">General suggestions shown because profile details are limited.</p>}
+          {!hasPersonalData && <p className="text-xs text-slate-500">{t('General suggestions shown because profile details are limited.')}</p>}
         </section>
       )}
 
       {details.careerStrategy === 'related-transition' && (
-        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label="Related role recommendations">
-          <div><h3 className="font-semibold text-slate-900">Roles that connect with your experience</h3><p className="mt-1 text-sm text-slate-600">Ranked using SkillCast's match formula, your skill levels, experience, and interests{details.profession ? `, with context from ${details.profession}` : ''}. These are pathways, not job openings.</p></div>
+        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label={t('Related role recommendations')}>
+          <div><h3 className="font-semibold text-slate-900">{t('Roles that connect with your experience')}</h3><p className="mt-1 text-sm text-slate-600">{t("Ranked using SkillCast's match formula, your skill levels, experience, and interests")}. {t('. These are pathways, not job openings.')}</p></div>
           <div className="grid gap-3 sm:grid-cols-2">{relatedRoles.map(({ role, match, contextual, transfer, needs }) => <button key={role.slug} type="button" aria-pressed={details.strategyRole === role.slug} onClick={() => patchDetails({ strategyRole: role.slug })} className={`rounded-xl border bg-white p-4 text-left transition hover:border-blue-300 dark:hover:border-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${details.strategyRole === role.slug ? 'border-blue-500 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700'}`}>
-            <span className="flex items-start justify-between gap-2"><span><span className="block font-semibold text-slate-900">{role.title}</span><span className="mt-1 block text-xs text-slate-500">{role.category}</span></span>{details.strategyRole === role.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span>
-            <span className="mt-3 block text-sm leading-5 text-slate-600">{role.tagline}</span>
-            <span className="mt-2 block text-xs font-medium text-blue-700">SkillCast profile fit: {match.score}/100</span><span className="mt-1 block text-[11px] leading-4 text-slate-500">Based on skill overlap, transferable skills, experience, and interests{contextual ? ' · profile wording also relates to this pathway' : ''}.</span>
-            <span className="mt-3 grid gap-2 border-t border-blue-50 pt-3 text-xs text-slate-600 sm:grid-cols-2"><span><strong className="block text-slate-800">Transferable skills</strong>{transfer.slice(0, 3).map((item) => SKILL_MAP[item.slug]?.name ?? item.slug).join(', ') || 'No direct mapped overlap yet.'}</span><span><strong className="block text-slate-800">Skills to develop</strong>{needs.filter((item) => item.current < item.req.minLevel).slice(0, 3).map((item) => item.skill.name).join(', ') || 'Current levels meet listed requirements.'}</span></span>
+            <span className="flex items-start justify-between gap-2"><span><span className="block font-semibold text-slate-900">{roleTitle(t, role.slug)}</span><span className="mt-1 block text-xs text-slate-500">{skillCategory(t, role.category)}</span></span>{details.strategyRole === role.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span>
+            <span className="mt-3 block text-sm leading-5 text-slate-600">{roleTagline(t, role.slug)}</span>
+            <span className="mt-2 block text-xs font-medium text-blue-700">{t('SkillCast profile fit:')} {match.score}/100</span><span className="mt-1 block text-[11px] leading-4 text-slate-500">{t('Based on skill overlap, transferable skills, experience, and interests')}{contextual ? ` · ${t('profile wording also relates to this pathway')}` : ''}.</span>
+            <span className="mt-3 grid gap-2 border-t border-blue-50 pt-3 text-xs text-slate-600 sm:grid-cols-2"><span><strong className="block text-slate-800">{t('Transferable skills')}</strong>{transfer.slice(0, 3).map((item) => skillName(t, item.slug)).join(', ') || t('No direct mapped overlap yet.')}</span><span><strong className="block text-slate-800">{t('Skills to develop')}</strong>{needs.filter((item) => item.current < item.req.minLevel).slice(0, 3).map((item) => skillName(t, item.skill.slug)).join(', ') || t('Current levels meet listed requirements.')}</span></span>
           </button>)}</div>
-          {!hasPersonalData && <p className="text-xs text-slate-500">General pathway suggestions shown because profile details are limited.</p>}
+          {!hasPersonalData && <p className="text-xs text-slate-500">{t('General pathway suggestions shown because profile details are limited.')}</p>}
         </section>
       )}
 
       {details.careerStrategy === 'new-field' && (
-        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label="Explore a different field">
-          <div><h3 className="font-semibold text-slate-900">Explore fields that fit your interests</h3><p className="mt-1 text-sm text-slate-600">Choose a field to see example careers, everyday activities, entry skills, and mapped SDG connections.</p></div>
+        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label={t('Explore a different field')}>
+          <div><h3 className="font-semibold text-slate-900">{t('Explore fields that fit your interests')}</h3><p className="mt-1 text-sm text-slate-600">{t('Choose a field to see example careers, everyday activities, entry skills, and mapped SDG connections.')}</p></div>
           <div className="grid gap-3 sm:grid-cols-2">{shownCategories.map(({ category, roles, interestMatch }) => {
             const examples = roles.slice(0, 2);
             const entryRoleSet = roles.some(({ role }) => role.entryLevel) ? roles.filter(({ role }) => role.entryLevel) : roles;
             const entrySkills = [...new Set(entryRoleSet.flatMap(({ role }) => role.skills.map((req) => req.skill)))].slice(0, 3);
             const selected = details.newField === category;
             return <div key={category} className={`rounded-xl border bg-white p-4 transition ${selected ? 'border-blue-500 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700'}`}>
-              <button type="button" aria-pressed={selected} onClick={() => patchDetails({ newField: category, strategyRole: '' })} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-center justify-between gap-2"><span className="font-semibold text-slate-900">{category}</span>{selected && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span><span className="mt-1.5 block text-sm leading-5 text-slate-600">{fieldDescriptions[category] ?? `Explore practical roles and skills in ${category.toLowerCase()}.`}</span>{interestMatch && <span className="mt-2 inline-block rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700">Matches your interests</span>}</button>
-              <p className="mt-3 text-xs text-slate-600"><strong className="text-slate-800">Example careers:</strong> {examples.map(({ role }) => role.title).join('; ') || 'No mapped example yet.'}</p>
-              <details className="mt-3 rounded-lg bg-blue-50/60 p-3 text-xs text-slate-600"><summary className="cursor-pointer font-semibold text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Activities, entry skills & SDGs</summary>
-                {examples.length > 0 && <div className="mt-2 space-y-2">{examples.map(({ role }) => <div key={role.slug}><p><strong className="text-slate-800">Typical activity · {role.title}:</strong> {role.tagline}</p><p className="mt-1"><strong className="text-slate-800">SDG connection:</strong> {role.sdgMechanism} <span className="inline-flex gap-1 align-middle">{role.sdgTags.map((goal) => <SdgBadge key={goal} goal={goal} />)}</span></p></div>)}</div>}
-                <p className="mt-2"><strong className="text-slate-800">Entry skills to explore:</strong> {entrySkills.map((slug) => SKILL_MAP[slug]?.name ?? slug).join(', ') || 'Communication and problem-solving foundations.'}</p>
+              <button type="button" aria-pressed={selected} onClick={() => patchDetails({ newField: category, strategyRole: '' })} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-center justify-between gap-2"><span className="font-semibold text-slate-900">{category}</span>{selected && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span><span className="mt-1.5 block text-sm leading-5 text-slate-600">{fieldDescriptions[category] ?? `Explore practical roles and skills in ${category.toLowerCase()}.`}</span>{interestMatch && <span className="mt-2 inline-block rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700">{t('Matches your interests')}</span>}</button>
+              <p className="mt-3 text-xs text-slate-600"><strong className="text-slate-800">{t('Example careers:')}</strong> {examples.map(({ role }) => roleTitle(t, role.slug)).join('; ') || t('No mapped example yet.')}</p>
+              <details className="mt-3 rounded-lg bg-blue-50/60 p-3 text-xs text-slate-600"><summary className="cursor-pointer font-semibold text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">{t('Activities, entry skills & SDGs')}</summary>
+                {examples.length > 0 && <div className="mt-2 space-y-2">{examples.map(({ role }) => <div key={role.slug}><p><strong className="text-slate-800">{t('Typical activity ·')} {roleTitle(t, role.slug)}:</strong> {roleTagline(t, role.slug)}</p><p className="mt-1"><strong className="text-slate-800">{t('SDG connection:')}</strong> {roleSdgMechanism(t, role.slug)} <span className="inline-flex gap-1 align-middle">{role.sdgTags.map((goal) => <SdgBadge key={goal} goal={goal} />)}</span></p></div>)}</div>}
+                <p className="mt-2"><strong className="text-slate-800">{t('Entry skills to explore:')}</strong> {entrySkills.map((slug) => skillName(t, slug)).join(', ') || t('Communication and problem-solving foundations.')}</p>
               </details>
             </div>;
           })}</div>
           {categorySuggestions.length > 4 && <Button type="button" variant="outline" onClick={() => setShowAllFields((shown) => !shown)} className="border-blue-200 text-blue-700 hover:bg-blue-50">{showAllFields ? 'Show fewer fields' : 'Show all fields'}</Button>}
-          {!hasPersonalData && <p className="text-xs text-slate-500">General field suggestions shown because profile details are limited.</p>}
-          {details.newField && <div className="space-y-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4"><h4 className="font-semibold text-slate-900">{details.newField}: related roles and learning priorities</h4>
-            {fieldRoles.length ? <div className="grid gap-3 sm:grid-cols-2">{fieldRoles.slice(0, 4).map(({ role, match }) => <div key={role.slug} className="rounded-lg border border-blue-50 p-3"><p className="text-sm font-medium text-slate-900">{role.title}</p><p className="mt-1 text-xs leading-5 text-slate-600">{role.tagline}</p><p className="mt-2 text-xs text-blue-700">SkillCast profile match: {match?.score ?? '—'}/100</p><div className="mt-2 flex gap-1">{role.sdgTags.map((goal) => <SdgBadge key={goal} goal={goal} />)}</div></div>)}</div> : <p className="text-sm text-slate-600">No current roles are mapped to this field.</p>}
-            <div><p className="text-sm font-semibold text-slate-900">Learning priorities</p>{fieldNeeds.length ? <ul className="mt-2 flex flex-wrap gap-2">{fieldNeeds.map(({ skill, current, target }) => <li key={skill.slug} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs text-blue-800">{skill.name} · {current}/5 → role level {target}</li>)}</ul> : <p className="mt-1 text-sm text-slate-600">Your current levels cover the mapped skill requirements.</p>}</div>
+          {!hasPersonalData && <p className="text-xs text-slate-500">{t('General field suggestions shown because profile details are limited.')}</p>}
+          {details.newField && <div className="space-y-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4"><h4 className="font-semibold text-slate-900">{details.newField}{t(': related roles and learning priorities')}</h4>
+            {fieldRoles.length ? <div className="grid gap-3 sm:grid-cols-2">{fieldRoles.slice(0, 4).map(({ role, match }) => <div key={role.slug} className="rounded-lg border border-blue-50 p-3"><p className="text-sm font-medium text-slate-900">{roleTitle(t, role.slug)}</p><p className="mt-1 text-xs leading-5 text-slate-600">{roleTagline(t, role.slug)}</p><p className="mt-2 text-xs text-blue-700">{t('SkillCast profile match:')} {match?.score ?? '—'}/100</p><div className="mt-2 flex gap-1">{role.sdgTags.map((goal) => <SdgBadge key={goal} goal={goal} />)}</div></div>)}</div> : <p className="text-sm text-slate-600">{t('No current roles are mapped to this field.')}</p>}
+            <div><p className="text-sm font-semibold text-slate-900">{t('Learning priorities')}</p>{fieldNeeds.length ? <ul className="mt-2 flex flex-wrap gap-2">{fieldNeeds.map(({ skill, current, target }) => <li key={skill.slug} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs text-blue-800">{skillName(t, skill.slug)} · {current}/5 → {t('/5 → role level')} {target}</li>)}</ul> : <p className="mt-1 text-sm text-slate-600">{t('Your current levels cover the mapped skill requirements.')}</p>}</div>
           </div>}
         </section>
       )}
 
       {details.careerStrategy === 'ai-skills' && (
-        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label="Practical AI skills recommendations">
-          <div><h3 className="font-semibold text-slate-900">Start with practical AI skills</h3><p className="mt-1 text-sm leading-6 text-slate-600">AI skills don't necessarily mean coding. They can help you work smarter, automate repetitive tasks, and adapt as your profession changes.</p>{generalAiSuggestions && <p className="mt-2 text-xs text-slate-500">General beginner suggestions shown because profession details are limited.</p>}</div>
+        <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label={t('Practical AI skills recommendations')}>
+          <div><h3 className="font-semibold text-slate-900">{t('Start with practical AI skills')}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{t("AI skills don't necessarily mean coding. They can help you work smarter, automate repetitive tasks, and adapt as your profession changes.")}</p>{generalAiSuggestions && <p className="mt-2 text-xs text-slate-500">{t('General beginner suggestions shown because profession details are limited.')}</p>}</div>
           <div className="grid gap-3 sm:grid-cols-2">{aiRecommendations.map(({ skill, guidance }) => <div key={skill.slug} className={`rounded-xl border bg-white p-4 transition ${details.aiSkill === skill.slug ? 'border-blue-500 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700'}`}>
-            <button type="button" aria-pressed={details.aiSkill === skill.slug} onClick={() => patchDetails({ aiSkill: skill.slug })} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-start justify-between gap-2"><span><span className="block text-sm font-semibold text-slate-900">{skill.name}</span><span className="mt-1 block text-xs text-slate-500">{guidance.difficulty} · {skill.category}</span></span>{details.aiSkill === skill.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span><span className="mt-2 block text-sm leading-5 text-slate-600">{guidance.plain}</span></button>
-            <details className="mt-3 rounded-lg bg-blue-50/60 p-3 text-xs leading-5 text-slate-600"><summary className="cursor-pointer font-semibold text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Workplace example and learning steps</summary><p className="mt-2"><strong className="text-slate-800">Example:</strong> {guidance.example}</p><p className="mt-1"><strong className="text-slate-800">How it can help:</strong> {guidance.benefit}</p><p className="mt-1"><strong className="text-slate-800">Start here:</strong> {guidance.start}</p><p className="mt-1"><strong className="text-slate-800">Learn next:</strong> {guidance.next}</p></details>
+            <button type="button" aria-pressed={details.aiSkill === skill.slug} onClick={() => patchDetails({ aiSkill: skill.slug })} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><span className="flex items-start justify-between gap-2"><span><span className="block text-sm font-semibold text-slate-900">{skillName(t, skill.slug)}</span><span className="mt-1 block text-xs text-slate-500">{t(guidance.difficulty)} · {skillCategory(t, skill.category)}</span></span>{details.aiSkill === skill.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span><span className="mt-2 block text-sm leading-5 text-slate-600">{t(guidance.plain)}</span></button>
+            <details className="mt-3 rounded-lg bg-blue-50/60 p-3 text-xs leading-5 text-slate-600"><summary className="cursor-pointer font-semibold text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">{t('Workplace example and learning steps')}</summary><p className="mt-2"><strong className="text-slate-800">{t('Example:')}</strong> {t(guidance.example)}</p><p className="mt-1"><strong className="text-slate-800">{t('How it can help:')}</strong> {t(guidance.benefit)}</p><p className="mt-1"><strong className="text-slate-800">{t('Start here:')}</strong> {t(guidance.start)}</p><p className="mt-1"><strong className="text-slate-800">{t('Learn next:')}</strong> {t(guidance.next)}</p></details>
           </div>)}</div>
-          <label className="block text-sm font-medium text-slate-800">What would you like to improve in your work or studies? <span className="text-rose-600">*</span>
-            <Textarea value={details.aiGoal ?? ''} maxLength={300} onChange={(e) => patchDetails({ aiGoal: e.target.value.slice(0, 300) })} placeholder="For example: spend less time preparing reports, or organize research notes faster…" rows={3} className="mt-1.5" />
+          <label className="block text-sm font-medium text-slate-800">{t('What would you like to improve in your work or studies?')} <span className="text-rose-600">*</span>
+            <Textarea value={details.aiGoal ?? ''} maxLength={300} onChange={(e) => patchDetails({ aiGoal: e.target.value.slice(0, 300) })} placeholder={t('For example: spend less time preparing reports, or organize research notes faster…')} rows={3} className="mt-1.5" />
           </label>
         </section>
       )}
@@ -806,6 +812,7 @@ const WORK_PREFERENCES: Array<{ value: string; label: string; description: strin
 
 function WorkPreferencesStep({ details, patchDetails, onSkip }: { details: IndividualProfileDetails; patchDetails: (patch: Partial<IndividualProfileDetails>) => void; onSkip: () => void }) {
   const { profile, setProfile } = useSkillCast();
+  const t = useT();
   const selected = details.workPreferences ?? ['none'];
   const toggle = (value: string) => {
     const next = value === 'none'
@@ -824,14 +831,14 @@ function WorkPreferencesStep({ details, patchDetails, onSkip }: { details: Indiv
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-600">Optional: choose the work environment and support that helps you do your best work, or skip this step.</p>
+      <p className="text-sm text-slate-600">{t('Optional: choose the work environment and support that helps you do your best work, or skip this step.')}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         {WORK_PREFERENCES.map((item) => {
           const active = selected.includes(item.value);
-          return <button key={item.value} type="button" aria-pressed={active} onClick={() => toggle(item.value)} className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${active ? 'border-blue-500 dark:border-blue-500 bg-blue-50 ring-1 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700 bg-white hover:border-blue-300 dark:hover:border-blue-700'}`}><item.icon className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden /><span className="flex-1"><span className="block text-sm font-medium text-slate-800">{item.label}</span><span className="mt-1 block text-xs leading-5 text-slate-600">{item.description}</span></span>{active && <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" aria-hidden />}</button>;
+          return <button key={item.value} type="button" aria-pressed={active} onClick={() => toggle(item.value)} className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${active ? 'border-blue-500 dark:border-blue-500 bg-blue-50 ring-1 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700 bg-white hover:border-blue-300 dark:hover:border-blue-700'}`}><item.icon className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden /><span className="flex-1"><span className="block text-sm font-medium text-slate-800">{t(item.label)}</span><span className="mt-1 block text-xs leading-5 text-slate-600">{t(item.description)}</span></span>{active && <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" aria-hidden />}</button>;
         })}
       </div>
-      <p className="text-xs text-slate-500">You can change these preferences later. This step is optional.</p>
+      <p className="text-xs text-slate-500">{t('You can change these preferences later. This step is optional.')}</p>
     </div>
   );
 }
@@ -1129,7 +1136,7 @@ function EmployerStepParams() {
       <div>
         <Label>{t('onb.emp.budget.pref')}</Label>
         <div className="mt-2 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={t('onb.emp.budget.pref')}>
-          {(['free', 'hrd'] as const).map((b) => (
+          {(['free', 'paid'] as const).map((b) => (
             <button
               key={b}
               type="button"
@@ -1340,20 +1347,20 @@ function InstitutionStepAccess() {
       <div>
         <Label>{t('onb.inst.lang.q')}</Label>
         <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t('onb.inst.lang.q')}>
-          {(['en', 'ms', 'zh', 'ru'] as const).map((l) => (
+          {LANGS.map(({ code, label }) => (
             <button
-              key={l}
+              key={code}
               type="button"
               role="radio"
-              aria-checked={lang === l}
-              onClick={() => setLang(l)}
+              aria-checked={lang === code}
+              onClick={() => setLang(code)}
               className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
-                lang === l
+                lang === code
                   ? 'border-blue-600 bg-blue-50 font-medium ring-1 ring-blue-200 dark:ring-blue-800'
                   : 'border-border hover:border-blue-400'
               }`}
             >
-              {t(`lang.${l}`)}
+              {label}
             </button>
           ))}
         </div>
@@ -1489,33 +1496,33 @@ function StepSkills() {
       <section aria-labelledby="your-skills-heading" className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h3 id="your-skills-heading" className="text-base font-semibold text-slate-900">Your Skills</h3>
-            <p className="mt-1 text-sm text-slate-500">Set your current proficiency from 1 to 5.</p>
+          <h3 id="your-skills-heading" className="text-base font-semibold text-slate-900">{t('Your Skills')}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t('Set your current proficiency from 1 to 5.')}</p>
           </div>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{entries.length} selected</span>
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{entries.length} {t('selected')}</span>
         </div>
         {entries.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-sm text-slate-600">{t('onb.skills.none')} Search below to add your skills.</p>
+          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-sm text-slate-600">{t('onb.skills.none')} {t('Search below to add your skills.')}</p>
         ) : null}
         <ul className="space-y-2">
         {entries.map(([slug, level]) => (
           <li key={slug} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white px-4 py-3 shadow-sm">
-            <span className="min-w-0 flex-1 text-sm font-medium text-slate-900">{SKILL_MAP[slug]?.name ?? slug}<span className="mt-0.5 block text-xs font-normal text-slate-500">{SKILL_MAP[slug]?.category ?? 'Skill'}</span></span>
+            <span className="min-w-0 flex-1 text-sm font-medium text-slate-900">{skillName(t, slug)}<span className="mt-0.5 block text-xs font-normal text-slate-500">{skillCategory(t, SKILL_MAP[slug]?.category ?? 'Skill')}</span></span>
             <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
-              <span className="sr-only">{SKILL_MAP[slug]?.name ?? slug} proficiency</span>
+              <span className="sr-only">{skillName(t, slug)} {t('proficiency')}</span>
               <Select value={String(level)} onValueChange={(value) => setSkillLevel(slug, Number(value))}>
                 <SelectTrigger className="h-11 w-44 rounded-xl border-blue-100 dark:border-slate-700 bg-white text-sm text-slate-900 shadow-sm hover:border-blue-200 focus:ring-2 focus:ring-blue-100"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">0 · Remove</SelectItem>
-                  <SelectItem value="1">1 · Beginner</SelectItem>
-                  <SelectItem value="2">2 · Developing</SelectItem>
-                  <SelectItem value="3">3 · Intermediate</SelectItem>
-                  <SelectItem value="4">4 · Proficient</SelectItem>
-                  <SelectItem value="5">5 · Advanced</SelectItem>
+                  <SelectItem value="0">{t('0 · Remove')}</SelectItem>
+                  <SelectItem value="1">{t('1 · Beginner')}</SelectItem>
+                  <SelectItem value="2">{t('2 · Developing')}</SelectItem>
+                  <SelectItem value="3">{t('3 · Intermediate')}</SelectItem>
+                  <SelectItem value="4">{t('4 · Proficient')}</SelectItem>
+                  <SelectItem value="5">{t('5 · Advanced')}</SelectItem>
                 </SelectContent>
               </Select>
             </label>
-            <button type="button" onClick={() => setSkillLevel(slug, 0)} aria-label={`Remove ${SKILL_MAP[slug]?.name ?? slug}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <button type="button" onClick={() => setSkillLevel(slug, 0)} aria-label={`${t('Remove')} ${skillName(t, slug)}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
               <X className="h-4 w-4" aria-hidden />
             </button>
           </li>
@@ -1525,28 +1532,28 @@ function StepSkills() {
 
       <section aria-labelledby="find-skills-heading" className="space-y-3">
         <div>
-          <h3 id="find-skills-heading" className="text-base font-semibold text-slate-900">Find Skills to Add</h3>
-          <p className="mt-1 text-sm text-slate-500">Search the existing SkillCast skill taxonomy by name or category.</p>
+          <h3 id="find-skills-heading" className="text-base font-semibold text-slate-900">{t('Find Skills to Add')}</h3>
+          <p className="mt-1 text-sm text-slate-500">{t('Search the existing SkillCast skill taxonomy by name or category.')}</p>
         </div>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search skills or categories" aria-label="Search skills or categories" className="h-11 rounded-xl border-blue-100 dark:border-slate-700 bg-white pl-10 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('Search skills or categories')} aria-label={t('Search skills or categories')} className="h-11 rounded-xl border-blue-100 dark:border-slate-700 bg-white pl-10 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
         </div>
         {results.length ? (
           <ul className="grid gap-3 sm:grid-cols-2">
             {results.map((skill) => (
               <li key={skill.slug}>
                 <button type="button" onClick={() => setSkillLevel(skill.slug, 1)} className="group flex min-h-[76px] w-full items-center justify-between gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                  <span className="min-w-0"><span className="block truncate text-sm font-medium text-slate-900">{skill.name}</span><span className="mt-1 block text-xs text-slate-500">{skill.category}</span></span>
+                  <span className="min-w-0"><span className="block truncate text-sm font-medium text-slate-900">{skillName(t, skill.slug)}</span><span className="mt-1 block text-xs text-slate-500">{skillCategory(t, skill.category)}</span></span>
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 transition group-hover:bg-blue-600 group-hover:text-white"><Plus className="h-4 w-4" aria-hidden /></span>
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">{normalizedQuery ? 'No skills match your search. Try another skill name or category.' : 'All available skills have been added.'}</p>
+          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">{normalizedQuery ? t('No skills match your search. Try another skill name or category.') : t('All available skills have been added.')}</p>
         )}
-        {results.length === 12 && <p className="text-xs text-slate-500">Showing up to 12 matches. Refine your search to find more.</p>}
+        {results.length === 12 && <p className="text-xs text-slate-500">{t('Showing up to 12 matches. Refine your search to find more.')}</p>}
       </section>
     </div>
   );

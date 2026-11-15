@@ -5,9 +5,9 @@ import { ChevronDown, ChevronRight, Database, ExternalLink, FileWarning, RadioTo
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CURATED_SIGNALS, LIVE_SOURCES } from '@/data/curated';
+import { CURATED_SIGNALS } from '@/data/curated';
 import { SKILL_MAP } from '@/data/skills';
-import { useSignals, SourceChip, useT } from './shared';
+import { skillName, useSignals, SourceChip, useT } from './shared';
 
 // ─── Signals view: every source with its date — the transparency page ──────
 
@@ -124,15 +124,9 @@ export function SignalsView() {
                   </Badge>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {s.postings > 0 ? `${s.postings} ${t('sig.postings')}` : s.kind}
+                  {s.postings > 0 ? `${s.postings} ${t('sig.postings')}` : t('sig.live')}
                 </p>
                 <SourceChip href={s.ok ? s.url : undefined}>{s.url}</SourceChip>
-              </div>
-            ))}
-            {LIVE_SOURCES.filter((s) => s.kind === 'planned').map((s) => (
-              <div key={s.name} className="rounded-lg border border-dashed p-3 opacity-75">
-                <span className="text-sm font-semibold">{s.name}</span>
-                <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
               </div>
             ))}
             <Button variant="outline" size="sm" className="w-full" onClick={() => setShowSample((v) => !v)}>
@@ -142,8 +136,7 @@ export function SignalsView() {
             {showSample && (
               <div className="rounded-lg border bg-muted/40 p-3">
                 <p className="text-xs text-muted-foreground">
-                  Momentum pipeline: postings → alias matching against the taxonomy (word boundaries) →
-                  frequency / trend → blend with cited research horizon. Sample skills in the corpus:
+                  {t('Momentum pipeline: postings → alias matching against the taxonomy (word boundaries) → frequency / trend → blend with cited research horizon. Sample skills in the corpus:')}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(data?.snapshots ?? [])
@@ -161,7 +154,7 @@ export function SignalsView() {
                         ) : (
                           <ChevronRight className="h-3 w-3" aria-hidden />
                         )}
-                        {SKILL_MAP[s.skillSlug]?.name ?? s.skillSlug}: {s.momentum}
+                        {skillName(t, s.skillSlug)}: {s.momentum}
                         <span className="text-[10px] opacity-70">({s.postings} {t('sig.postings').split(' ')[0]})</span>
                       </button>
                     ))}
@@ -180,7 +173,7 @@ export function SignalsView() {
                           <p className="text-muted-foreground">{new Date(sample.date).toLocaleDateString()}</p>
                           {sample.url ? (
                             <a href={sample.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-teal-700 dark:text-teal-400">
-                              <ExternalLink className="h-3 w-3" aria-hidden /> View posting
+                              <ExternalLink className="h-3 w-3" aria-hidden /> {t('View posting')}
                             </a>
                           ) : null}
                           <p className="mt-1 italic text-muted-foreground/70">{sample.snippet}</p>

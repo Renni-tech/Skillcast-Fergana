@@ -28,6 +28,12 @@ import { useSkillCast } from '@/lib/store';
 import {
   LevelDots,
   MomentumPill,
+  courseProvider,
+  courseTitle as translateCourseTitle,
+  roleSdgMechanism,
+  roleTitle,
+  skillCategory,
+  skillName,
   SdgBadge,
   useSignals,
   useT,
@@ -37,52 +43,50 @@ const TASKS = [
   {
     title: 'Map the foundations',
     hours: 1,
-    describe: (skill: string, role: string) =>
-      `List the main ideas behind ${skill} and where they appear in ${role}.`,
+    describe: (t: ReturnType<typeof useT>, skill: string, role: string) =>
+      t('List the main ideas behind {skill} and where they appear in {role}.', { skill, role }),
   },
   {
     title: 'Study a guided resource',
     hours: 2,
-    describe: (skill: string, course?: string) =>
-      course
-        ? `Work through ${course} and note the parts that build ${skill}.`
-        : `Use a trusted beginner resource to learn the core concepts of ${skill}.`,
+    describe: (t: ReturnType<typeof useT>, skill: string, course: string) =>
+      t('Work through {course} and note the parts that build {skill}.', { course, skill }),
   },
   {
     title: 'Practice the core technique',
     hours: 2,
-    describe: (skill: string) =>
-      `Complete a short exercise using one core ${skill} technique.`,
+    describe: (t: ReturnType<typeof useT>, skill: string) =>
+      t('Complete a short exercise using one core {skill} technique.', { skill }),
   },
   {
     title: 'Apply it to the target career',
     hours: 2,
-    describe: (skill: string, role: string) =>
-      `Use ${skill} to work through a small, realistic task from ${role}.`,
+    describe: (t: ReturnType<typeof useT>, skill: string, role: string) =>
+      t('Use {skill} to work through a small, realistic task from {role}.', { skill, role }),
   },
   {
     title: 'Create a small work sample',
     hours: 3,
-    describe: (skill: string, role: string) =>
-      `Create a brief work sample showing how you would use ${skill} in ${role}.`,
+    describe: (t: ReturnType<typeof useT>, skill: string, role: string) =>
+      t('Create a brief work sample showing how you would use {skill} in {role}.', { skill, role }),
   },
   {
     title: 'Check quality and responsible use',
     hours: 1,
-    describe: (skill: string) =>
-      `Review your ${skill} work for accuracy, privacy, accessibility, and responsible practice.`,
+    describe: (t: ReturnType<typeof useT>, skill: string) =>
+      t('Review your {skill} work for accuracy, privacy, accessibility, and responsible practice.', { skill }),
   },
   {
     title: 'Get feedback and identify a gap',
     hours: 1,
-    describe: (skill: string) =>
-      `Ask a peer, mentor, or trusted reviewer to assess your ${skill} sample and name one gap.`,
+    describe: (t: ReturnType<typeof useT>, skill: string) =>
+      t('Ask a peer, mentor, or trusted reviewer to assess your {skill} sample and name one gap.', { skill }),
   },
   {
     title: 'Revise and reflect',
     hours: 1,
-    describe: (skill: string) =>
-      `Revise the sample using feedback and record what you can now do with ${skill}.`,
+    describe: (t: ReturnType<typeof useT>, skill: string) =>
+      t('Revise the sample using feedback and record what you can now do with {skill}.', { skill }),
   },
 ] as const;
 
@@ -101,17 +105,17 @@ function RoadmapSdgContribution({
   goals: number[];
   explanation: string;
 }) {
+  const t = useT();
   const uniqueGoals = [...new Set(goals)];
 
   return (
     <Card className="border-blue-100 bg-white dark:border-slate-700 dark:bg-slate-900">
       <CardHeader className="pb-2">
         <CardTitle className="text-base text-slate-900 dark:text-slate-100">
-          Your roadmap’s SDG contribution
+          {t('Your roadmap’s SDG contribution')}
         </CardTitle>
         <CardDescription>
-          How your selected career connects to the UN Sustainable Development
-          Goals.
+          {t('How your selected career connects to the UN Sustainable Development Goals.')}
         </CardDescription>
       </CardHeader>
 
@@ -126,19 +130,17 @@ function RoadmapSdgContribution({
 
             <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
               {explanation ||
-                'An explanation has not been added for this role yet.'}
+                t('An explanation has not been added for this role yet.')}
             </p>
           </>
         ) : (
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            No SDG connection has been documented for this role yet.
+            {t('No SDG connection has been documented for this role yet.')}
           </p>
         )}
 
         <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
-          These connections describe potential applications of the career.
-          Completing roadmap tasks records learning progress; it does not
-          measure real-world SDG impact.
+          {t('These connections describe potential applications of the career. Completing roadmap tasks records learning progress; it does not measure real-world SDG impact.')}
         </p>
       </CardContent>
     </Card>
@@ -358,7 +360,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
     );
   }
 
-  const vision = `Build toward ${role.title} by strengthening ${
+  const vision = `Build toward ${roleTitle(t, role.slug)} by strengthening ${
     match.gap.length
       ? `${match.gap.length} priority skill gaps, starting with ${
           roadmapSkills[0]?.name ?? 'your role skills'
@@ -380,7 +382,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base text-slate-900">
               <Target className="h-5 w-5 text-blue-600" aria-hidden />
-              Objective (yours)
+              {t('harada.objective')}
             </CardTitle>
           </CardHeader>
 
@@ -388,7 +390,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             <p className="rounded-xl bg-blue-50/70 p-4 text-sm text-slate-700">
               {profile.objective ||
                 profile.extended?.aiGoal ||
-                `Develop toward ${role.title}`}
+                `Develop toward ${roleTitle(t, role.slug)}`}
             </p>
           </CardContent>
         </Card>
@@ -397,7 +399,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base text-slate-900">
               <Compass className="h-5 w-5 text-indigo-600" aria-hidden />
-              1-year vision
+              {t('1-year vision')}
             </CardTitle>
           </CardHeader>
 
@@ -407,7 +409,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
               variant="outline"
               className="mt-3 border-blue-200 text-blue-700"
             >
-              Harada Method · Open Window 64
+              {t('Harada Method · Open Window 64')}
             </Badge>
           </CardContent>
         </Card>
@@ -416,25 +418,22 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
       <Card className="border-blue-100 bg-white dark:border-slate-700">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg text-slate-900">
-            Harada Method Roadmap · Open Window 64
+            {t('Harada Method Roadmap · Open Window 64')}
           </CardTitle>
           <CardDescription>
-            Eight role skills, each developed through eight practical tasks.
-            Select a skill to open its task plan.
+            {t('Eight role skills, each developed through eight practical tasks. Select a skill to open its task plan.')}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <p className="text-xs text-slate-500">
-            Direct skills use the selected role&apos;s required level.
-            Adjacent supporting skills use a level 2 foundation target unless
-            another role defines a requirement.
+            {t('Direct skills use the selected role&apos;s required level. Adjacent supporting skills use a level 2 foundation target unless another role defines a requirement.')}
           </p>
 
           <div
             className="grid grid-cols-3 gap-2 sm:gap-3"
             role="group"
-            aria-label="Open Window 64 skill roadmap"
+            aria-label={t('Open Window 64 skill roadmap')}
           >
             {Array.from({ length: 9 }, (_, index) => {
               if (index === 4) {
@@ -443,7 +442,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                     key="career-goal"
                     className="flex min-h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-3 text-center text-sm font-semibold text-white shadow-sm sm:min-h-36"
                   >
-                    {profile.objective || role.title}
+                    {profile.objective || roleTitle(t, role.slug)}
                   </div>
                 );
               }
@@ -489,13 +488,13 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   className={`min-h-28 min-w-0 overflow-hidden rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-36 sm:p-4 ${cellStyle}`}
                 >
                   <span className="line-clamp-2 block text-xs font-semibold leading-5 text-slate-900 sm:text-sm">
-                    {skill.name}
+                    {skillName(t, skill.skill)}
                   </span>
                   <span className="mt-2 block text-[11px] text-slate-600 sm:text-xs">
                     {skill.current} → {skill.target}
                   </span>
                   <span className="mt-1 block text-[11px] text-blue-700 sm:text-xs">
-                    {done}/8 tasks
+                    {done}{t('/8 tasks')}
                   </span>
                 </button>
               );
@@ -506,12 +505,12 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h3 className="font-semibold text-slate-900">
-                  {selected?.name ?? 'Select a skill'}
+                  {selected?.name ?? t('Choose a skill')}
                 </h3>
                 <p className="mt-1 text-sm text-slate-600">
                   {selected
-                    ? `${selected.current}/5 current · ${selected.target}/5 target · ${selected.category}`
-                    : 'No role skills are available.'}
+                    ? `${selected.current}/5 current · ${selected.target}/5 target · ${skillCategory(t, selected.category)}`
+                    : t('No role skills are available.')}
                 </p>
               </div>
 
@@ -520,7 +519,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   variant="outline"
                   className="border-blue-200 bg-white text-blue-700"
                 >
-                  {selectedCompleted}/8 completed
+                  {selectedCompleted}{t('/8 completed')}
                 </Badge>
               )}
             </div>
@@ -532,13 +531,21 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                     statuses[taskKey(selected.skill, index)] ??
                     'not-started';
 
-                  const courseTitle = COURSES.find((course) =>
+                  const recommendedCourse = COURSES.find((course) =>
                     course.skills.includes(selected.skill),
-                  )?.title;
+                  );
+                  const recommendedCourseTitle = recommendedCourse
+                    ? translateCourseTitle(t, recommendedCourse.slug)
+                    : undefined;
 
+                  const skill = skillName(t, selected.skill);
+                  const context = index === 1
+                    ? recommendedCourseTitle ?? t('a suitable guided resource')
+                    : roleTitle(t, role.slug);
                   const description = task.describe(
-                    selected.name,
-                    index === 1 ? courseTitle ?? 'a suitable guided resource' : role.title,
+                    t,
+                    skill,
+                    context,
                   );
 
                   return (
@@ -548,15 +555,14 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                     >
                       <div>
                         <p className="text-sm font-semibold text-slate-900">
-                          {index + 1}. {task.title}
+                          {index + 1}. {t(task.title)}
                         </p>
                         <p className="mt-1 text-sm leading-5 text-slate-600">
                           {description}
                         </p>
                         <span className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
                           <Clock3 className="h-3 w-3" aria-hidden />
-                          {task.hours} estimated{' '}
-                          {task.hours === 1 ? 'hour' : 'hours'}
+                          {task.hours} {t('estimated')} {t('hours')}
                         </span>
                       </div>
 
@@ -572,7 +578,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                       >
                         <SelectTrigger
                           className="h-10 w-full border-blue-100 bg-white dark:border-slate-700 sm:w-40"
-                          aria-label={`${task.title} status`}
+                          aria-label={t('{task} status', { task: t(task.title) })}
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -580,7 +586,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                           {(Object.keys(STATUS_LABELS) as TaskStatus[]).map(
                             (option) => (
                               <SelectItem key={option} value={option}>
-                                {STATUS_LABELS[option]}
+                                {t(STATUS_LABELS[option])}
                               </SelectItem>
                             ),
                           )}
@@ -595,7 +601,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             <section className="mt-5 border-t border-blue-100 pt-4 dark:border-slate-700">
               <h4 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <BookOpen className="h-4 w-4 text-blue-600" aria-hidden />
-                Relevant courses
+                {t('Relevant courses')}
               </h4>
 
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
@@ -609,16 +615,16 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                       className="rounded-xl border border-blue-100 bg-white p-3 text-sm transition hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:hover:border-blue-700"
                     >
                       <span className="block font-medium text-slate-800">
-                        {course.title}
+                        {translateCourseTitle(t, course.slug)}
                       </span>
                       <span className="mt-1 block text-xs text-slate-500">
-                        {course.provider} · {course.totalHours} hours
+                         {courseProvider(t, course.slug)} · {course.totalHours} {t('hours')}
                       </span>
                     </a>
                   ))
                 ) : (
                   <p className="text-sm text-slate-600">
-                    No curated courses are directly mapped to this skill yet.
+                    {t('No curated courses are directly mapped to this skill yet.')}
                   </p>
                 )}
               </div>
@@ -629,25 +635,24 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
 
       <RoadmapSdgContribution
         goals={role.sdgTags}
-        explanation={role.sdgMechanism}
+        explanation={roleSdgMechanism(t, role.slug)}
       />
 
       <Card className="border-blue-100 bg-white dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base text-slate-900">
-            Overall roadmap progress
+            {t('Overall roadmap progress')}
           </CardTitle>
           <CardDescription>
-            Task estimates use the selected skills and your weekly learning
-            budget.
+            {t('Task estimates use the selected skills and your weekly learning budget.')}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-3">
           <div className="flex flex-wrap justify-between gap-2 text-sm text-slate-600">
-            <span>{completedCount} completed</span>
-            <span>{inProgressCount} in progress</span>
-            <span>{roadmapTaskEntries.length} total tasks</span>
+            <span>{completedCount} {t('completed')}</span>
+            <span>{inProgressCount} {t('in progress')}</span>
+            <span>{roadmapTaskEntries.length} {t('total tasks')}</span>
           </div>
 
           <Progress
@@ -656,25 +661,24 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                 ? ((totalHours - remainingHours) / totalHours) * 100
                 : 0
             }
-            aria-label="Harada roadmap completion by estimated task hours"
+            aria-label={t('Harada roadmap completion by estimated task hours')}
           />
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <span className="inline-flex items-center gap-1.5 text-slate-700">
               <Clock3 className="h-4 w-4 text-blue-600" aria-hidden />
-              {remainingHours} estimated hours remaining
+              {remainingHours} {t('estimated hours remaining')}
             </span>
 
             <Badge
               variant="outline"
               className="border-blue-200 text-blue-700"
             >
-              About {weeksRemaining} weeks at {weeklyHours} hrs/week
+              {t('About')} {weeksRemaining} {t('weeks at')} {weeklyHours} {t('harada.hrs')}
             </Badge>
 
             <span className="text-xs text-slate-500">
-              {targetTaskCount}/{roadmapSkills.length} skills have all tasks
-              completed · {totalHours} total estimated hours
+              {targetTaskCount}/{roadmapSkills.length} {t('skills have all tasks completed ·')} {totalHours} {t('total estimated hours')}
             </span>
           </div>
         </CardContent>
@@ -683,11 +687,10 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
       <Card className="border-blue-100 bg-white dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base text-slate-900">
-            Role Skill Profile
+            {t('Role Skill Profile')}
           </CardTitle>
           <CardDescription>
-            Current profile levels compared with the selected career&apos;s
-            required skills and available momentum signals.
+            {t('Current profile levels compared with the selected career&apos;s required skills and available momentum signals.')}
           </CardDescription>
         </CardHeader>
 
@@ -695,11 +698,11 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b text-left text-xs text-slate-500">
-                <th className="pb-2 font-medium">Skill</th>
-                <th className="pb-2 font-medium">Current</th>
-                <th className="pb-2 font-medium">Required</th>
-                <th className="pb-2 font-medium">Skill Momentum</th>
-                <th className="pb-2 font-medium">Gap</th>
+                <th className="pb-2 font-medium">{t('inst.skill')}</th>
+                <th className="pb-2 font-medium">{t('harada.current')}</th>
+                <th className="pb-2 font-medium">{t('harada.required')}</th>
+                <th className="pb-2 font-medium">{t('Skill Momentum')}</th>
+                <th className="pb-2 font-medium">{t('Gap')}</th>
               </tr>
             </thead>
 
@@ -714,7 +717,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                         {row.name}
                       </span>
                       <span className="block text-xs text-slate-500">
-                        {row.category}
+                        {skillCategory(t, row.category)}
                       </span>
                     </td>
 
@@ -744,7 +747,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                       ) : (
                         <Badge className="bg-blue-600 text-white">
                           <Check className="mr-1 h-3 w-3" aria-hidden />
-                          Ready
+                          {t('Ready')}
                         </Badge>
                       )}
                     </td>
@@ -755,7 +758,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
           </table>
 
           <p className="mt-3 text-xs text-slate-500">
-            {completedCourses.length} pathway courses marked complete.
+            {completedCourses.length} {t('pathway courses marked complete.')}
           </p>
         </CardContent>
       </Card>

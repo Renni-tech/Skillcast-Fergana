@@ -1,7 +1,15 @@
 import type { Lang } from '@/lib/types';
+import { COURSES } from '@/data/courses';
+import { ROLES } from '@/data/roles';
+import { SKILLS } from '@/data/skills';
+import { ROLE_SDG_COPY, SKILL_CATEGORY_COPY, SKILL_COPY } from './catalog-i18n';
+import { COURSE_COPY, COURSE_OUTCOME_COPY } from './course-i18n';
+import { GUIDANCE_COPY } from './guidance-i18n';
 import { HR_DICTIONARIES } from './hr-i18n';
+import inlineCopy from './i18n-inline';
+import uz from './i18n-uz';
 
-// ─── i18n: English · Bahasa Malaysia · 中文 · Русский ──────────────────────
+// ─── i18n: English · Uzbek · Russian ───────────────────────────────────────
 // Interface-owned UI and HR registry labels are translated. Real third-party
 // course/provider and report titles retain their source wording for traceability.
 
@@ -258,8 +266,8 @@ const en: Dict = {
   'onb.emp.obj.risk.d': 'See which roles and staff are most exposed, with a ranked mitigation list.',
   'onb.emp.obj.transition': 'Transition existing staff into high-demand AI/Green tech roles',
   'onb.emp.obj.transition.d': 'Target roles, team-level gap plans, and a phased timeline.',
-  'onb.emp.obj.budget': 'Optimise training budgets using HRD Corp-claimable programmes',
-  'onb.emp.obj.budget.d': 'Split the plan into free/open-source vs HRD Corp-claimable certification tracks.',
+  'onb.emp.obj.budget': 'Compare free and paid training programmes',
+  'onb.emp.obj.budget.d': 'Compare training options and confirm prices or funding directly with providers.',
   'onb.emp.timeline': 'Timeline',
   'onb.emp.months.3': '3 months',
   'onb.emp.months.6': '6 months',
@@ -267,8 +275,8 @@ const en: Dict = {
   'onb.emp.budget.pref': 'Budget preference',
   'onb.emp.budget.free': 'Focus on free / open-source materials',
   'onb.emp.budget.free.d': 'freeCodeCamp, Microsoft Learn, AWS Skill Builder, audit tracks — zero cash outlay.',
-  'onb.emp.budget.hrd': 'Consider HRD Corp-eligible paid programmes',
-  'onb.emp.budget.hrd.d': 'HRD Corp is Malaysia’s Human Resource Development Corporation. Explore paid programmes, including Google Career Certificates, and confirm levy reimbursement eligibility with a registered provider.',
+  'onb.emp.budget.paid': 'Consider paid training programmes',
+  'onb.emp.budget.paid.d': 'Review paid courses and certificates, and confirm current fees and any funding eligibility with each provider.',
 
   'industry.technology': 'Technology',
   'industry.manufacturing': 'Manufacturing',
@@ -315,8 +323,7 @@ const en: Dict = {
   'onb.inst.lowbw.d': 'Text-first tables instead of charts — lighter pages, cheaper data plans.',
 
   'lang.en': 'English',
-  'lang.ms': 'Bahasa Malaysia',
-  'lang.zh': '中文',
+  'lang.uz': 'Uzbek',
   'lang.ru': 'Русский',
 
   // ── Employer view additions ──
@@ -329,7 +336,7 @@ const en: Dict = {
   'emp.obj.title': 'Primary objective',
   'emp.obj.risk.desc': 'Ranked by automation exposure with the staff whose current skills carry the lowest market momentum.',
   'emp.obj.transition.desc': 'Heatmap of team skills vs top market demand, with a target-role gap plan.',
-  'emp.obj.budget.desc': 'The same plan split into free and HRD Corp-claimable tracks.',
+  'emp.obj.budget.desc': 'The same plan separated into free and paid learning options.',
   'emp.atrisk': 'Roles at risk of AI disruption',
   'emp.atrisk.d': 'Automation-exposure parameters, cited per role (WEF / Stanford AI Index blend).',
   'emp.exposed.staff': 'Most exposed staff',
@@ -341,14 +348,14 @@ const en: Dict = {
   'emp.phase2': 'Applied practice',
   'emp.phase2.d': 'Role-specific gap courses per team; project work on live tasks.',
   'emp.phase3': 'Certify & shadow',
-  'emp.phase3.d': 'HRD Corp-claimable certifications plus role shadowing; measure with the skills radar again.',
+  'emp.phase3.d': 'Professional certificates plus role shadowing; check progress again with the skills radar.',
   'emp.budget.split': 'Training-hours split · not a cost forecast',
   'emp.budget.free.first': 'Priority: free and open learning materials.',
-  'emp.budget.hrd.first': 'Priority: programmes potentially eligible for HRD Corp reimbursement. Confirm eligibility with a registered provider.',
+  'emp.budget.paid.first': 'Priority: paid programmes when they fit the team plan. Confirm fees and terms with the provider.',
   'emp.free.mat': 'Free / open-source',
-  'emp.hrd.mat': 'Paid / potentially HRD Corp-eligible',
+  'emp.paid.mat': 'Paid programmes',
   'emp.courses': 'courses',
-  'emp.hrd.note': 'HRD Corp (Human Resource Development Corporation, Malaysia) administers a training levy. Reimbursement depends on employer, provider and programme eligibility. Confirm current terms and quotes with the provider; no prices are estimated here.',
+  'emp.paid.note': 'Paid-course labels describe a cost category, not confirmed funding or reimbursement. Confirm current terms and prices with providers; this demo does not estimate costs.',
   'emp.intake.batch': 'Batch intake (12 CVs, synthetic)',
   'emp.intake.matrix': 'Linked skills matrix (demo team)',
 
@@ -405,7 +412,7 @@ const en: Dict = {
   'pw.internship': 'Then: internship / on-the-job practice (entry-level-ready roles are flagged)',
   'pw.hours': '{n} hrs total',
   'pw.provider': 'Provider',
-  'pw.hrd': 'HRD Corp claimable route',
+  'pw.paid': 'Paid course',
   'pw.free': 'Free',
   'pw.access.note': 'Reordered for your learning needs: {needs}',
 
@@ -478,7 +485,7 @@ const en: Dict = {
   'sig.refresh': 'Refresh now',
   'sig.sample': 'Sample postings from the corpus',
   'sig.changelog': 'Forecast changelog',
-  'sig.note': 'Live sources skew to English-language remote jobs; MyFutureJobs (PERKESO) integration is planned for local-market fidelity.',
+  'sig.note': 'Live sources lean toward English-language remote postings. Local vacancy feeds are not integrated, so these signals are not an Uzbekistan labour-market forecast.',
   'sig.method': 'Methodology: momentum = 50% posting frequency + 30% recent-vs-earlier trend + 20% research horizon (cited).',
   'sig.demoBanner': '⚠ Demo data — showing a cached baseline snapshot from {date}. Live sources unreachable or database not initialised.',
   'sig.lowConfidence': 'low confidence · {n} postings',
@@ -1720,8 +1727,8 @@ const ru: Dict = {
   'onb.emp.obj.risk.d': 'Самые уязвимые роли и сотрудники + ранжированный план снижения риска.',
   'onb.emp.obj.transition': 'Перевести сотрудников в востребованные ИИ/зелёные роли',
   'onb.emp.obj.transition.d': 'Целевые роли, планы пробелов команды и поэтапный график.',
-  'onb.emp.obj.budget': 'Оптимизировать бюджет на HRD Corp-программах',
-  'onb.emp.obj.budget.d': 'Разделить план на бесплатные/открытые и HRD Corp-сертификации.',
+  'onb.emp.obj.budget': 'Сравнить бесплатные и платные программы обучения',
+  'onb.emp.obj.budget.d': 'Сравните варианты обучения и уточните стоимость и возможное финансирование у провайдеров.',
   'onb.emp.timeline': 'Срок',
   'onb.emp.months.3': '3 месяца',
   'onb.emp.months.6': '6 месяцев',
@@ -1729,8 +1736,8 @@ const ru: Dict = {
   'onb.emp.budget.pref': 'Предпочтение по бюджету',
   'onb.emp.budget.free': 'Бесплатные / открытые материалы',
   'onb.emp.budget.free.d': 'freeCodeCamp, Microsoft Learn, AWS Skill Builder, аудиторные треки — без затрат.',
-  'onb.emp.budget.hrd': 'Рассмотреть платные программы с возмещением HRD Corp',
-  'onb.emp.budget.hrd.d': 'HRD Corp — Корпорация развития человеческих ресурсов Малайзии. Изучите платные программы, включая Google Career Certificates, и уточните условия возмещения из учебного сбора у зарегистрированного провайдера.',
+  'onb.emp.budget.paid': 'Рассмотреть платные программы обучения',
+  'onb.emp.budget.paid.d': 'Изучите платные курсы и сертификаты, а стоимость и условия возможного финансирования уточните у провайдера.',
 
   'industry.technology': 'Технологии',
   'industry.manufacturing': 'Производство',
@@ -1777,8 +1784,7 @@ const ru: Dict = {
   'onb.inst.lowbw.d': 'Текстовые таблицы вместо графиков — страницы легче, трафик дешевле.',
 
   'lang.en': 'English',
-  'lang.ms': 'Bahasa Malaysia',
-  'lang.zh': '中文',
+  'lang.uz': 'Узбекский',
   'lang.ru': 'Русский',
 
   // ── Панель работодателя ──
@@ -1791,7 +1797,7 @@ const ru: Dict = {
   'emp.obj.title': 'Главная цель',
   'emp.obj.risk.desc': 'Ранжирование по подверженности автоматизации + сотрудники с самым низким импульсом навыков.',
   'emp.obj.transition.desc': 'Тепловая карта навыков против спроса рынка и план пробелов по целевой роли.',
-  'emp.obj.budget.desc': 'Тот же план, разделённый на бесплатные и HRD Corp-треки.',
+  'emp.obj.budget.desc': 'Тот же план, разделённый на бесплатные и платные варианты обучения.',
   'emp.atrisk': 'Роли под риском ИИ-нарушений',
   'emp.atrisk.d': 'Параметры подверженности автоматизации со ссылками по каждой роли (WEF / Stanford AI Index).',
   'emp.exposed.staff': 'Самые уязвимые сотрудники',
@@ -1803,14 +1809,14 @@ const ru: Dict = {
   'emp.phase2': 'Прикладная практика',
   'emp.phase2.d': 'Курсы под пробелы каждой подкоманды; проекты на живых задачах.',
   'emp.phase3': 'Сертификация и стажировка',
-  'emp.phase3.d': 'HRD Corp-сертификаты плюс стажировка роли; повторный замер радаром навыков.',
+  'emp.phase3.d': 'Профессиональные сертификаты и стажировка по роли; затем повторная проверка навыков.',
   'emp.budget.split': 'Распределение учебных часов · не прогноз расходов',
   'emp.budget.free.first': 'Приоритет: бесплатные и открытые учебные материалы.',
-  'emp.budget.hrd.first': 'Приоритет: программы с возможностью возмещения через HRD Corp. Подтвердите соответствие условиям у зарегистрированного провайдера.',
+  'emp.budget.paid.first': 'Приоритет — платные программы, подходящие команде. Уточните стоимость и условия у провайдера.',
   'emp.free.mat': 'Бесплатно / открытые',
-  'emp.hrd.mat': 'Платные / с возможным возмещением HRD Corp',
+  'emp.paid.mat': 'Платные программы',
   'emp.courses': 'курсов',
-  'emp.hrd.note': 'HRD Corp (Корпорация развития человеческих ресурсов Малайзии) администрирует учебный сбор. Возмещение зависит от соответствия работодателя, провайдера и программы условиям. Уточняйте актуальные условия и цены у провайдера; здесь цены не рассчитываются.',
+  'emp.paid.note': 'Метка платного курса обозначает категорию стоимости, а не подтверждённое финансирование или возмещение. Уточняйте условия и цены у провайдера; демо не рассчитывает расходы.',
   'emp.intake.batch': 'Пакетная загрузка (12 резюме, синтетика)',
   'emp.intake.matrix': 'Подключённая матрица навыков (демо-команда)',
 
@@ -1867,7 +1873,7 @@ const ru: Dict = {
   'pw.internship': 'Затем: стажировка / практика (роли для входа отмечены)',
   'pw.hours': 'всего {n} ч',
   'pw.provider': 'Поставщик',
-  'pw.hrd': 'Компенсируется HRD Corp',
+  'pw.paid': 'Платный курс',
   'pw.free': 'Бесплатно',
   'pw.access.note': 'Порядок адаптирован под ваши потребности: {needs}',
 
@@ -1940,7 +1946,7 @@ const ru: Dict = {
   'sig.refresh': 'Обновить сейчас',
   'sig.sample': 'Примеры вакансий из корпуса',
   'sig.changelog': 'Журнал изменений прогноза',
-  'sig.note': 'Живые источники смещены к англоязычным удалённым вакансиям; интеграция MyFutureJobs (PERKESO) запланирована.',
+  'sig.note': 'Вакансии из текущих источников преимущественно удалённые и англоязычные. Локальные источники вакансий не подключены, поэтому эти сигналы не являются прогнозом рынка труда Узбекистана.',
   'sig.method': 'Методология: импульс = 50% частота в вакансиях + 30% тренд + 20% исследовательский горизонт.',
   'sig.demoBanner': '⚠ Демо-данные — показан кешированный базовый снимок от {date}. Живые источники недоступны или база данных не инициализирована.',
   'sig.lowConfidence': 'низкая уверенность · {n} вакансий',
@@ -1961,22 +1967,92 @@ const ru: Dict = {
 
 const DICTS: Record<Lang, Dict> = {
   en: { ...en, ...HR_DICTIONARIES.en },
-  ms: { ...ms, ...HR_DICTIONARIES.ms },
-  zh: { ...zh, ...HR_DICTIONARIES.zh },
+  uz: { ...uz, ...HR_DICTIONARIES.uz },
   ru: { ...ru, ...HR_DICTIONARIES.ru },
 };
 
+for (const skill of SKILLS) {
+  const translation = SKILL_COPY[skill.slug];
+  if (!translation) throw new Error(`Missing catalog translations for skill "${skill.slug}"`);
+  const key = `skill.${skill.slug}`;
+  DICTS.en[key] = skill.name;
+  DICTS.uz[key] = translation.uz;
+  DICTS.ru[key] = translation.ru;
+}
+
+for (const [category, translation] of Object.entries(SKILL_CATEGORY_COPY)) {
+  const key = `skill.category.${category}`;
+  DICTS.en[key] = category;
+  DICTS.uz[key] = translation.uz;
+  DICTS.ru[key] = translation.ru;
+}
+
+for (const role of ROLES) {
+  const translation = ROLE_SDG_COPY[role.slug];
+  if (!translation) throw new Error(`Missing catalog translations for role "${role.slug}"`);
+  const key = `hr.role.${role.slug}.sdgMechanism`;
+  DICTS.en[key] = role.sdgMechanism;
+  DICTS.uz[key] = translation.uz;
+  DICTS.ru[key] = translation.ru;
+}
+
+for (const course of COURSES) {
+  const translation = COURSE_COPY[course.slug];
+  const outcome = COURSE_OUTCOME_COPY[course.slug];
+  if (!translation || !outcome) throw new Error(`Missing catalog translations for course "${course.slug}"`);
+  const titleKey = `course.${course.slug}.title`;
+  const providerKey = `course.${course.slug}.provider`;
+  const outcomeKey = `course.${course.slug}.outcome`;
+  DICTS.en[titleKey] = course.title;
+  DICTS.uz[titleKey] = translation.titleUz;
+  DICTS.ru[titleKey] = translation.titleRu;
+  DICTS.en[providerKey] = course.provider;
+  DICTS.uz[providerKey] = translation.providerUz;
+  DICTS.ru[providerKey] = translation.providerRu;
+  DICTS.en[outcomeKey] = course.outcome;
+  DICTS.uz[outcomeKey] = outcome.uz;
+  DICTS.ru[outcomeKey] = outcome.ru;
+}
+
+for (const [source, translation] of Object.entries(GUIDANCE_COPY)) {
+  DICTS.en[source] = source;
+  DICTS.uz[source] = translation.uz;
+  DICTS.ru[source] = translation.ru;
+}
+
+for (const [source, translations] of Object.entries(inlineCopy)) {
+  DICTS.en[source] = source;
+  DICTS.uz[source] = translations.uz;
+  DICTS.ru[source] = translations.ru;
+}
+
+const referenceKeys = Object.keys(DICTS.en).sort();
+for (const code of Object.keys(DICTS) as Lang[]) {
+  const keys = Object.keys(DICTS[code]).sort();
+  const missing = referenceKeys.filter((key) => !Object.hasOwn(DICTS[code], key));
+  const extra = keys.filter((key) => !Object.hasOwn(DICTS.en, key));
+  const empty = keys.filter((key) => !DICTS[code][key]?.trim());
+  if (missing.length || extra.length || empty.length) {
+    throw new Error(
+      `Incomplete ${code} translations: ${missing.length} missing, ${extra.length} extra, ${empty.length} empty`,
+    );
+  }
+}
+
 export const LANGS: Array<{ code: Lang; label: string; short: string }> = [
   { code: 'en', label: 'English', short: 'EN' },
-  { code: 'ms', label: 'Bahasa Malaysia', short: 'BM' },
-  { code: 'zh', label: '中文', short: '中文' },
+  { code: 'uz', label: 'Uzbek', short: 'UZ' },
   { code: 'ru', label: 'Русский', short: 'RU' },
 ];
 
 export function makeT(lang: Lang) {
   const dict = DICTS[lang] ?? DICTS.en;
   return (key: string, vars?: Record<string, string | number>): string => {
-    let s = dict[key] ?? DICTS.en[key] ?? key;
+    const value = dict[key];
+    if (value === undefined) {
+      throw new Error(`Missing ${lang} translation for "${key}"`);
+    }
+    let s = value;
     if (vars) {
       for (const [k, v] of Object.entries(vars)) {
         s = s.replaceAll(`{${k}}`, String(v));

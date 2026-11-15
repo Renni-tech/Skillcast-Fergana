@@ -55,7 +55,7 @@ export const ROLES: RoleDef[] = [
     automationExposure: 0.3, demandModerate: 70, demandAccelerated: 76,
     sdgTags: [4, 5, 8],
     sdgMechanism: 'Embodies targets 4.4 and 8.5 — reskilling at scale (SDG 4.4) and gender-inclusive talent practices (SDG 5) driven by data rather than bias.',
-    signalsNote: 'Reskilling demand is itself a signal: MOSTI expects 600,000+ Malaysian workers to need reskilling within 3-5 years (see curated sources).',
+    signalsNote: 'Reskilling demand is itself a signal; this outlook uses cited international research and is not a local workforce forecast.',
     skills: [
       { skill: 'teaching-training', weight: 1.0, minLevel: 3 },
       { skill: 'data-analysis', weight: 0.7, minLevel: 2 },
@@ -138,7 +138,7 @@ export const ROLES: RoleDef[] = [
     pathType: 'pivot', category: 'Health', entryLevel: true, experience: 'entry',
     automationExposure: 0.2, demandModerate: 68, demandAccelerated: 72,
     sdgTags: [3, 10],
-    sdgMechanism: 'Directly serves SDG 3.8 (universal health coverage) and SDG 10 — telehealth extends care to rural and underserved communities in Malaysia and beyond.',
+    sdgMechanism: 'Directly serves SDG 3.8 (universal health coverage) and SDG 10 — telehealth can extend care to rural and underserved communities.',
     signalsNote: 'Digital-health aliases grow steadily; an ageing population plus connectivity rollout makes this demand structural rather than cyclical.',
     skills: [
       { skill: 'telehealth', weight: 1.0, minLevel: 3 },
@@ -206,7 +206,7 @@ export const ROLES: RoleDef[] = [
     automationExposure: 0.2, demandModerate: 76, demandAccelerated: 86,
     sdgTags: [4, 8, 10],
     sdgMechanism: 'The purest SDG 4.4 play in the whole system: target 4.4 explicitly demands a big increase of workers with relevant skills for decent work — this role delivers it.',
-    signalsNote: 'In the accelerated scenario, reskilling demand compounds — Malaysia alone expects 600,000+ workers needing reskilling within 3-5 years (MOSTI, see curated sources).',
+    signalsNote: 'The accelerated scenario assumes stronger demand for reskilling; this is a planning scenario, not a local workforce forecast.',
     skills: [
       { skill: 'teaching-training', weight: 1.0, minLevel: 3 },
       { skill: 'communication', weight: 0.9, minLevel: 4 },
@@ -259,7 +259,7 @@ export const ROLES: RoleDef[] = [
     automationExposure: 0.15, demandModerate: 68, demandAccelerated: 82,
     sdgTags: [9, 10, 16],
     sdgMechanism: 'The system SDG 10/16 guardian: AI governance roles exist to keep automation\u2019s benefits inclusive (SDG 10.2) and institutions trustworthy (SDG 16.6).',
-    signalsNote: 'Demand scales with regulation (EU AI Act, Malaysia\u2019s AI code of practice) rather than postings — modelled via research-horizon weighting.',
+    signalsNote: 'Demand can scale with regulation and organisational policy, not only job postings — modelled using cited research horizons.',
     skills: [
       { skill: 'responsible-ai', weight: 1.0, minLevel: 3 },
       { skill: 'privacy-compliance', weight: 0.8, minLevel: 3 },

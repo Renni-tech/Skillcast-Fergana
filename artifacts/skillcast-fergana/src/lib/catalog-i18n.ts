@@ -1,0 +1,120 @@
+export const SKILL_COPY: Record<string, { uz: string; ru: string }> = {
+  'prompt-engineering': { uz: 'Prompt muhandisligi va GenAI orkestratsiyasi', ru: 'Промт-инжиниринг и оркестрация GenAI' },
+  'ai-agents': { uz: 'AI agentlarini loyihalash va boshqarish', ru: 'Проектирование и эксплуатация ИИ-агентов' },
+  'machine-learning': { uz: 'Mashinali o‘qitish (Machine Learning)', ru: 'Машинное обучение' },
+  'data-analysis': { uz: 'Ma’lumotlar tahlili va vizualizatsiyasi', ru: 'Анализ и визуализация данных' },
+  'data-engineering': { uz: 'Ma’lumotlar muhandisligi', ru: 'Инженерия данных' },
+  mlops: { uz: 'MLOps va AI joriy etish', ru: 'MLOps и развертывание ИИ' },
+  'responsible-ai': { uz: 'Mas’uliyatli AI va boshqaruv', ru: 'Ответственный ИИ и управление' },
+  python: { uz: 'Python dasturlash', ru: 'Программирование на Python' },
+  cloud: { uz: 'Bulutli hisoblash (Cloud Computing)', ru: 'Облачные вычисления' },
+  devops: { uz: 'DevOps va avtomatlashtirish', ru: 'DevOps и автоматизация' },
+  'software-engineering': { uz: 'Dasturiy ta’minot muhandisligi', ru: 'Разработка программного обеспечения' },
+  robotics: { uz: 'Robototexnika va avtomatlashtirish tizimlari', ru: 'Робототехника и системы автоматизации' },
+  iot: { uz: 'IoT va aqlli tizimlar', ru: 'IoT и умные системы' },
+  blockchain: { uz: 'Blockchain / Web3', ru: 'Блокчейн / Web3' },
+  'renewable-energy': { uz: 'Qayta tiklanuvchi energiya tizimlari', ru: 'Системы возобновляемой энергии' },
+  'energy-efficiency': { uz: 'Energiya samaradorligi va audit', ru: 'Энергоэффективность и аудит' },
+  'ev-mobility': { uz: 'Elektromobillar va batareya texnologiyalari', ru: 'Электромобили и аккумуляторные технологии' },
+  'climate-data': { uz: 'Iqlim va ESG ma’lumotlarini tahlil qilish', ru: 'Анализ данных по климату и ESG' },
+  'smart-agriculture': { uz: 'Aqlli qishloq xo‘jaligi', ru: 'Умное сельское хозяйство' },
+  telehealth: { uz: 'Telemeditsina va raqamli sog‘liqni saqlash', ru: 'Телемедицина и цифровое здравоохранение' },
+  'health-informatics': { uz: 'Sog‘liqni saqlash informatikasi', ru: 'Медицинская информатика' },
+  eldercare: { uz: 'Keksalarni parvarish qilish va ijtimoiy yordam', ru: 'Уход за пожилыми и социальная поддержка' },
+  'mental-health': { uz: 'Ruhiy salomatlik va psixosotsial yordam', ru: 'Психическое здоровье и психосоциальная поддержка' },
+  'project-management': { uz: 'Loyiha boshqaruvi', ru: 'Управление проектами' },
+  'product-management': { uz: 'Mahsulot boshqaruvi', ru: 'Управление продуктом' },
+  'business-analysis': { uz: 'Biznes va jarayonlar tahlili', ru: 'Бизнес-анализ и анализ процессов' },
+  'ai-augmented-ops': { uz: 'AI bilan avtomatlashtirilgan ofis operatsiyalari', ru: 'Офисные операции с поддержкой ИИ' },
+  'supply-chain': { uz: 'Ta’minot zanjiri va logistika tahlili', ru: 'Аналитика цепочек поставок и логистики' },
+  'customer-experience': { uz: 'Insoniylikka yo‘naltirilgan mijozlarga xizmat ko‘rsatish', ru: 'Человекоцентричное обслуживание клиентов' },
+  'teaching-training': { uz: 'O‘qitish va xodimlarni tayyorlash', ru: 'Преподавание и профессиональное обучение' },
+  'critical-thinking': { uz: 'Tahliliy va tanqidiy fikrlash', ru: 'Аналитическое и критическое мышление' },
+  communication: { uz: 'Muloqot va hikoya qilish (Storytelling)', ru: 'Коммуникация и сторителлинг' },
+  collaboration: { uz: 'Hamkorlik va jamoaviy ishlash', ru: 'Коллаборация и командная работа' },
+  adaptability: { uz: 'Moslashuvchanlik va o‘rganish qobiliyati', ru: 'Адаптивность и обучаемость' },
+  leadership: { uz: 'Jamoa boshqaruvi va kouching', ru: 'Лидерство и коучинг' },
+  'creative-framing': { uz: 'Ijodiy muammolarni aniqlash', ru: 'Креативная постановка задач' },
+  cybersecurity: { uz: 'Kiberxavfsizlik operatsiyalari', ru: 'Операции по кибербезопасности' },
+  'privacy-compliance': { uz: 'Ma’lumotlar maxfiyligi va muvofiqligi', ru: 'Конфиденциальность данных и соответствие требованиям' },
+  'digital-marketing': { uz: 'Raqamli marketing', ru: 'Цифровой маркетинг' },
+  'ai-content-ops': { uz: 'AI yordamida kontent boshqaruvi', ru: 'Управление контентом с помощью ИИ' },
+};
+
+export const SKILL_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {
+  'AI & Data': { uz: 'AI va ma’lumotlar', ru: 'ИИ и данные' },
+  'Engineering & Cloud': { uz: 'Muhandislik va bulutli texnologiyalar', ru: 'Инженерия и облачные технологии' },
+  'Green & Sustainability': { uz: 'Ekologiya va barqarorlik', ru: 'Экология и устойчивое развитие' },
+  'Health & Care': { uz: 'Salomatlik va parvarish', ru: 'Здоровье и уход' },
+  'Business & Operations': { uz: 'Biznes va operatsiyalar', ru: 'Бизнес и операции' },
+  'Human & Creative': { uz: 'Insoniy va ijodiy ko‘nikmalar', ru: 'Человеческие и творческие навыки' },
+  'Security & Trust': { uz: 'Xavfsizlik va ishonch', ru: 'Безопасность и доверие' },
+  'Marketing & Content': { uz: 'Marketing va kontent', ru: 'Маркетинг и контент' },
+};
+
+export const ROLE_SDG_COPY: Record<string, { uz: string; ru: string }> = {
+  'ai-ops-specialist': {
+    uz: 'Innovatsiya orqali mahsuldorlikni oshirish (SDG 8.2) va 4.4-maqsadni qo‘llab-quvvatlaydi: takrorlanuvchi vazifalari avtomatlashtirilgan xodimlar ishdan bo‘shatilmasdan, yuqori qiymatli nazorat ishlariga o‘tadilar.',
+    ru: 'Способствует повышению производительности через инновации (ЦУР 8.2) и цели 4.4: работники, чьи рутинные задачи автоматизируются, переходят на более высококвалифицированную работу, а не попадают под сокращение.',
+  },
+  'ai-marketing-strategist': {
+    uz: 'Muntazam kontent ishlab chiqarish avtomatlashtirilganda marketing mutaxassislarini qiymat zanjirida yuqoriga ko‘tarish orqali to‘liq va samarali bandlikni (SDG 8.5) qo‘llab-quvvatlaydi.',
+    ru: 'Поддерживает полную и продуктивную занятость (ЦУР 8.5), продвигая специалистов по маркетингу вверх по цепочке создания стоимости по мере автоматизации рутинного производства контента.',
+  },
+  'ai-hr-partner': {
+    uz: '4.4 va 8.5-maqsadlarni mujassam etadi: keng ko‘lamli qayta o‘qitish (SDG 4.4) va tarafkashlikka emas, balki ma’lumotlarga asoslangan gender-inklyuziv iste’dodlar amaliyoti (SDG 5).',
+    ru: 'Воплощает задачи 4.4 и 8.5: масштабное переобучение (ЦУР 4.4) и гендерно-инклюзивные кадровые практики (ЦУР 5), основанные на данных, а не на предвзятости.',
+  },
+  'ai-business-analyst': {
+    uz: 'Har bir korporativ funksiyada soha tajribasini AI vositalari bilan birlashtirib, innovatsiyalar orqali mahsuldorlikni (SDG 8.2) oshiradi.',
+    ru: 'Продвигает ЦУР 8.2 — повышение производительности через инновации — путем объединения отраслевого опыта с инструментами ИИ в каждой корпоративной функции.',
+  },
+  'ai-cx-lead': {
+    uz: 'Avtomatlashtirishdan eng ko‘p zarar ko‘rgan xizmat ko‘rsatish sohalarida bandlik yo‘llarini (SDG 8.5) saqlab qoladi va qulay, inklyuziv xizmat kanallarini loyihalash orqali tengsizlikni kamaytirishga (SDG 10) hissa qo‘shadi.',
+    ru: 'Поддерживает пути занятости (ЦУР 8.5) в секторах услуг, наиболее пострадавших от автоматизации, и способствует достижению ЦУР 10, создавая доступные и инклюзивные каналы обслуживания.',
+  },
+  'solar-technician': {
+    uz: 'Arzon va toza energiya (SDG 7) hamda iqlim harakati (SDG 13): har bir o‘rnatish dekarbonizatsiya salohiyatini anglatadi; shuningdek, o‘sib borayotgan sektorda sifatli ish o‘rinlarini (SDG 8.5) qo‘llab-quvvatlaydi.',
+    ru: 'Способствует ЦУР 7 (доступная и экологически чистая энергия) и 13 (борьба с изменением климата): каждая установка увеличивает потенциал декарбонизации; поддерживает качественные рабочие места (ЦУР 8.5) в растущем секторе.',
+  },
+  'esg-analyst': {
+    uz: 'Iqlim bo‘yicha siyosat va amaliyotdagi choralar (SDG 13.2) hamda korporativ ta’sirni o‘lchanadigan qiladigan barqarorlik hisobotini (SDG 12.6) ilgari suradi.',
+    ru: 'Реализует ЦУР 13.2 (климатические меры в политике и практике) и ЦУР 12.6 — отчетность по устойчивому развитию, делающая корпоративное влияние измеримым.',
+  },
+  'telehealth-coordinator': {
+    uz: 'Umumjahon sog‘liqni saqlash qamrovi (SDG 3.8) va tengsizlikni kamaytirishga (SDG 10) bevosita xizmat qiladi; telemeditsina qishloq va kam ta’minlangan hududlarga tibbiy xizmatni kengaytira oladi.',
+    ru: 'Напрямую служит достижению ЦУР 3.8 (всеобщий охват услугами здравоохранения) и ЦУР 10 — телемедицина позволяет расширить доступ к медицинской помощи для сельских и недостаточно обслуживаемых сообществ.',
+  },
+  'cyber-analyst': {
+    uz: 'Umumjahon texnologik kirish (SDG 9.c) va ishonchli raqamli institutlarni (SDG 16) qo‘llab-quvvatlaydi; kiberxavfsizlik ko‘nikmalari 2030-yilgacha eng tez o‘sadigan yo‘nalishlardan biri hisoblanadi.',
+    ru: 'Поддерживает ЦУР 9.c (всеобщий доступ к технологиям) и ЦУР 16 — надежные цифровые институты; навыки в области безопасности прогнозируются как одни из самых быстрорастущих до 2030 года.',
+  },
+  'data-analyst': {
+    uz: 'Munosib mehnat uchun zarur bo‘lgan ko‘nikmalarni rivojlantirish (SDG 4.4) uchun asosiy roldir: tahliliy malaka AI davrida iqtisodiyotga kirishning keng qo‘llanadigan yo‘lidir.',
+    ru: 'Базовая роль для реализации ЦУР 4.4 (соответствующие навыки для достойной работы): аналитические навыки являются универсальной точкой входа в экономику эпохи ИИ.',
+  },
+  'smart-ag-technologist': {
+    uz: 'Qishloq xo‘jaligining barqaror va samarali bo‘lishi (SDG 2.4) va kichik fermerlar hosildorligi hamda daromadini oshirish (SDG 2.3) — aniq dehqonchilik SDG bilan bevosita bog‘liq kasbiy yo‘nalishlardan biridir.',
+    ru: 'Поддерживает ЦУР 2.4 (устойчивое и продуктивное сельское хозяйство) и 2.3 (повышение продуктивности и дохода мелких фермеров) — точное земледелие напрямую связано с достижением этих целей.',
+  },
+  'digital-skills-trainer': {
+    uz: 'Munosib mehnat uchun zarur ko‘nikmalarga ega ishchilar sonini sezilarli oshirishni talab qiluvchi SDG 4.4 maqsadini qo‘llab-quvvatlaydi.',
+    ru: 'Напрямую поддерживает ЦУР 4.4, направленную на значительное увеличение числа работников с навыками, необходимыми для достойной работы.',
+  },
+  'prompt-workflow-designer': {
+    uz: 'AI imkoniyatlarini nafaqat yirik texnologik kompaniyalarda, balki oddiy tashkilotlarda ham qo‘llash orqali texnologiya afzalliklaridan foydalanish imkoniyatini (SDG 9.c) kengaytiradi.',
+    ru: 'Расширяет доступ к преимуществам технологий (ЦУР 9.c), делая возможности ИИ применимыми в обычных организациях, а не только в крупных технологических компаниях.',
+  },
+  'agent-ops-engineer': {
+    uz: 'Innovatsiyalar orqali mahsuldorlikni oshirish (SDG 8.2): agentlar avtopilotlardan keyingi mahsuldorlik bosqichi bo‘lib, inson nazoratini talab qiladi.',
+    ru: 'Повышение производительности через инновации (ЦУР 8.2): агенты — следующий уровень производительности после ИИ-помощников, и они нуждаются в человеческом контроле.',
+  },
+  'responsible-ai-associate': {
+    uz: 'SDG 10 va 16 himoyachisi: AI boshqaruvi avtomatlashtirish afzalliklarini inklyuziv (SDG 10.2), institutlarni esa ishonchli (SDG 16.6) saqlashga yordam beradi.',
+    ru: 'Поддерживает ЦУР 10 и 16: управление ИИ помогает сделать преимущества автоматизации инклюзивными (ЦУР 10.2), а институты — надежными (ЦУР 16.6).',
+  },
+  'ml-engineer': {
+    uz: 'SDG 9.5 uchun innovatsion asos yaratadi: tadqiqot imkoniyatlarini samarali sanoat yechimlariga tatbiq etadi.',
+    ru: 'Создает основу инноваций для ЦУР 9.5: внедряет исследовательские возможности в продуктивные промышленные решения.',
+  },
+};

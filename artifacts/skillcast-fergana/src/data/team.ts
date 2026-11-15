@@ -272,23 +272,23 @@ export const TEMPLATE_MAP: Record<string, DeptTemplate> = Object.fromEntries(
   DEPT_TEMPLATES.map((tpl) => [tpl.id, tpl]),
 );
 
-// ─── Batch intake (synthetic): 12 short CV snippets with MY-style PII ───────
+// ─── Batch intake (synthetic): short sample CV snippets ────────────────────
 // Employer onboarding "Upload batch employee CVs/JDs" runs the same
 // client-side scrubber over every file — nothing leaves the browser.
 
 export const BATCH_CVS: string[] = [
-  'Nurul Huda binti Ahmad, NRIC 901012-14-5234, 25 Jalan Kuching, KL. Customer service officer, 4 yrs. Skills: CRM, customer support, complaint handling.',
-  'Mohd Faizal bin Omar, NRIC 850523-08-1237, 12 Taman Melawati, Selangor. Data entry clerk, 9 yrs. Skills: Excel, data entry, invoicing, filing.',
-  'Lim Wei Chin, NRIC 880902-07-5566, 88 Jalan Ipoh, KL. Accounts assistant, 6 yrs. Skills: bookkeeping, reconciliations, UBS accounting, GST filing.',
-  'Siti Aminah binti Roslan, NRIC 920717-05-6677, 5 Jalan Bangsar, KL. Marketing executive, 5 yrs. Skills: social media, content writing, Canva, email marketing.',
-  'Rajesh Kumar a/l Muniandy, NRIC 870330-10-2233, 23 Jalan Brickfields, KL. Warehouse supervisor, 11 yrs. Skills: inventory, WMS, team supervision, safety.',
-  'Tan Mei Yee, NRIC 950121-01-3456, 44 Jalan Cheras, KL. HR executive, 3 yrs. Skills: payroll, recruitment, onboarding, employment act compliance.',
-  'Ahmad Zulhilmi bin Bakar, NRIC 910404-14-7890, 9 Jalan Sentul, KL. IT support, 5 yrs. Skills: Windows admin, networking, helpdesk, hardware repair.',
-  'Priya d/o Raman, NRIC 930812-05-4411, 67 Jalan Klang Lama, KL. Admin executive, 7 yrs. Skills: scheduling, procurement, vendor management, Powerpoint.',
-  'Muhammad Hafiz bin Salleh, NRIC 890216-11-9087, 31 Jalan Wangsa Maju, KL. Quality inspector, 8 yrs. Skills: QC reports, ISO 9001, calibration, sampling.',
-  'Chong Wei Lok, NRIC 941205-07-1122, 78 Jalan Kepong, KL. Junior accountant, 4 yrs. Skills: audit prep, SQL Ledger, tax forms, bank reconciliation.',
-  'Nadia binti Kamal, NRIC 960309-01-5544, 16 Jalan Damansara, KL. Content creator, 2 yrs. Skills: TikTok, CapCut, copywriting, basic analytics.',
-  'Suresh a/l Kumaran, NRIC 860628-10-3399, 52 Jalan Setapak, KL. Facilities technician, 13 yrs. Skills: electrical wiring, ACMV, preventive maintenance.',
+  'Employee 01. Customer service officer, 4 years. Skills: CRM, customer support, complaint handling.',
+  'Employee 02. Data entry clerk, 9 years. Skills: Excel, data entry, invoicing, filing.',
+  'Employee 03. Accounts assistant, 6 years. Skills: bookkeeping, reconciliations, accounting, tax filing.',
+  'Employee 04. Marketing executive, 5 years. Skills: social media, content writing, Canva, email marketing.',
+  'Employee 05. Warehouse supervisor, 11 years. Skills: inventory, warehouse systems, team supervision, safety.',
+  'Employee 06. HR executive, 3 years. Skills: payroll, recruitment, onboarding, employment compliance.',
+  'Employee 07. IT support, 5 years. Skills: Windows administration, networking, helpdesk, hardware repair.',
+  'Employee 08. Administration executive, 7 years. Skills: scheduling, procurement, vendor management, presentations.',
+  'Employee 09. Quality inspector, 8 years. Skills: quality reports, ISO 9001, calibration, sampling.',
+  'Employee 10. Junior accountant, 4 years. Skills: audit preparation, ledger software, tax forms, reconciliation.',
+  'Employee 11. Content creator, 2 years. Skills: short-form video, copywriting, basic analytics.',
+  'Employee 12. Facilities technician, 13 years. Skills: electrical wiring, building systems, preventive maintenance.',
 ];
 
 // The batch pipeline extracts roles + skills from the (scrubbed) CV text.

@@ -9,7 +9,7 @@ import { SAMPLE_CV } from '@/data/sample-cv';
 import { scrubCV, skillsFromCV, extractSkills, type ExtractedSkill, type ScrubReport } from '@/lib/cv';
 import { SKILL_MAP } from '@/data/skills';
 import { useSkillCast } from '@/lib/store';
-import { LevelDots, useT } from './shared';
+import { LevelDots, skillName, useT } from './shared';
 
 // ─── Step 3: CV intake with in-browser PII scrubbing ───────────────────────
 // The raw CV never leaves this component: scrub in-browser, then send only the
@@ -120,7 +120,7 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
           variant="outline"
           onClick={() => setCvText(SAMPLE_CV)}
           className="gap-2"
-          title="Synthetic CV — contains no real person's data"
+          title={t("Synthetic CV — contains no real person's data")}
         >
           <Sparkles className="h-4 w-4" aria-hidden /> {t('onb.cv.sample')}
         </Button>
@@ -209,10 +209,10 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
                     key={s.slug}
                     className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm"
                   >
-                    <span className="truncate">{SKILL_MAP[s.slug]?.name ?? s.slug}</span>
+                    <span className="truncate">{skillName(t, s.slug)}</span>
                     <span className="flex items-center gap-2">
                       {s.strongContext && (
-                        <Badge variant="secondary" className="text-[10px]">title context</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{t('title context')}</Badge>
                       )}
                       <LevelDots level={s.level} />
                     </span>

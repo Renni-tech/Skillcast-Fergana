@@ -102,20 +102,19 @@ export function EmployerView() {
   const demandRoles = [...ROLES].sort((a, b) =>
     (a.demandAccelerated - a.demandModerate) - (b.demandAccelerated - b.demandModerate));
 
-  // Budget split: courses covering the team's gap skills, free vs HRD-claimable
+  // Budget split: courses covering the team's gap skills, free vs paid
   const budgetSplit = useMemo(() => {
-    let freeHrs = 0, hrdHrs = 0, freeN = 0, hrdN = 0;
+    let freeHrs = 0, paidHrs = 0, freeN = 0, paidN = 0;
     const covered = new Set<string>();
     for (const [slug] of teamGaps) {
       if (covered.has(slug)) continue;
       const course = COURSES.find((c) => c.skills.includes(slug));
       if (!course) continue;
-      if (course.hrdClaimable) { hrdHrs += course.totalHours; hrdN++; }
-      else if (course.free) { freeHrs += course.totalHours; freeN++; }
-      else { hrdHrs += course.totalHours; hrdN++; }
+      if (course.free) { freeHrs += course.totalHours; freeN++; }
+      else { paidHrs += course.totalHours; paidN++; }
       course.skills.forEach((s) => covered.add(s));
     }
-    return { freeHrs, hrdHrs, freeN, hrdN };
+    return { freeHrs, paidHrs, freeN, paidN };
   }, [teamGaps]);
 
   // Roles at risk (deterministic: automation exposure parameter, cited per role)
@@ -505,7 +504,7 @@ export function EmployerView() {
               {t('emp.budget.split')}
             </CardTitle>
             <CardDescription>
-              {budgetPref === 'free' ? t('emp.budget.free.first') : budgetPref === 'hrd' ? t('emp.budget.hrd.first') : t('hr.budget.preference.unset')}
+              {budgetPref === 'free' ? t('emp.budget.free.first') : budgetPref === 'paid' ? t('emp.budget.paid.first') : t('hr.budget.preference.unset')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -519,15 +518,14 @@ export function EmployerView() {
               </div>
               <div className="rounded-lg border border-amber-300 p-3 dark:border-amber-900">
                 <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden /> {t('emp.hrd.mat')}
+                  <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden /> {t('Paid courses')}
                 </p>
-                <p className="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-400">{t('hr.study.hours', { n: budgetSplit.hrdHrs })}</p>
-                <p className="text-xs text-muted-foreground">{t('hr.course.count', { n: budgetSplit.hrdN })}</p>
+                <p className="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-400">{t('hr.study.hours', { n: budgetSplit.paidHrs })}</p>
+                <p className="text-xs text-muted-foreground">{t('hr.course.count', { n: budgetSplit.paidN })}</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">{t('emp.hr.budget.scope')}</p>
-            <p className="text-xs text-muted-foreground">{t('emp.hrd.note')}</p>
-            <SourceChip href="https://hrdcorp.gov.my/">hrdcorp.gov.my</SourceChip>
+            <p className="text-xs text-muted-foreground">{t('Free/paid course labels come from the catalog; prices and local funding eligibility are not assessed.')}</p>
           </CardContent>
         </Card>
       </div>

@@ -16,7 +16,7 @@ import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
-import { SdgBadge, useSignals, useT } from './shared';
+import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, SdgBadge, useSignals, useT } from './shared';
 
 const FORKS = [
   {
@@ -42,6 +42,7 @@ const FORKS = [
 function recommendationReason(
   roleSlug: string,
   profile: ReturnType<typeof useSkillCast.getState>['profile'],
+  t: ReturnType<typeof useT>,
 ): string {
   const role = ROLE_MAP[roleSlug];
   const details = profile.extended;
@@ -50,34 +51,34 @@ function recommendationReason(
   switch (details?.careerStrategy) {
     case 'enhance':
       return priority === 0
-        ? `Prioritized because ${role.category} aligns with your current profession or field.`
+        ? t('Prioritized because {category} aligns with your current profession or field.', { category: skillCategory(t, role.category) })
         : priority === 1
-          ? 'Prioritized as a role that works with AI for your current-career strategy.'
-          : 'Recommended by your profile compatibility as another career option.';
+          ? t('Prioritized as a role that works with AI for your current-career strategy.')
+          : t('Recommended by your profile compatibility as another career option.');
 
     case 'related-transition':
       return priority === 0
-        ? 'This is the target role you selected during onboarding.'
+        ? t('This is the target role you selected during onboarding.')
         : priority === 1
-          ? `This role shares the ${role.category} category with your selected target.`
+          ? t('This role shares the {category} category with your selected target.', { category: skillCategory(t, role.category) })
           : priority === 2
-            ? 'Included as a pivot pathway, ranked by your profile compatibility.'
-            : 'Recommended by your profile compatibility.';
+            ? t('Included as a pivot pathway, ranked by your profile compatibility.')
+            : t('Recommended by your profile compatibility.');
 
     case 'new-field':
       return priority < 2
-        ? `Prioritized because it aligns with your selected ${details.newField} field.`
-        : 'Recommended by your profile compatibility beyond your selected field.';
+        ? t('Prioritized because it aligns with your selected {field} field.', { field: details.newField ?? '' })
+        : t('Recommended by your profile compatibility beyond your selected field.');
 
     case 'ai-skills':
       return priority === 0
-        ? 'This role requires the AI skill you selected during onboarding.'
+        ? t('This role requires the AI skill you selected during onboarding.')
         : priority === 1
-          ? 'Prioritized as an AI or governance career pathway.'
-          : 'Recommended by your profile compatibility.';
+          ? t('Prioritized as an AI or governance career pathway.')
+          : t('Recommended by your profile compatibility.');
 
     default:
-      return 'Recommended from your skill readiness, interests, experience, and available work-preference data.';
+      return t('Recommended from your skill readiness, interests, experience, and available work-preference data.');
   }
 }
 
@@ -273,13 +274,13 @@ function MatchCard({ match }: { match: RoleMatch }) {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <CardTitle className="flex flex-wrap items-center gap-2 text-xl text-slate-900">
-              {role.title}
+              {roleTitle(t, role.slug)}
 
               <Badge
                 variant="outline"
                 className="border-blue-200 bg-blue-50 text-blue-700"
               >
-                {role.category}
+                {skillCategory(t, role.category)}
               </Badge>
 
               <Badge
@@ -304,7 +305,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
             </CardTitle>
 
             <CardDescription className="mt-2 max-w-3xl text-sm leading-relaxed">
-              {role.tagline}
+              {roleTagline(t, role.slug)}
             </CardDescription>
           </div>
 
@@ -318,12 +319,12 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 {match.score}%
               </span>
               <span className="mt-2 text-sm font-medium tracking-wide">
-                match
+                {t('match')}
               </span>
             </div>
 
             <Button size="sm" variant="outline" onClick={openRoadmap}>
-              Explore Roadmap
+              {t('Explore Roadmap')}
             </Button>
           </div>
         </div>
@@ -331,16 +332,16 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
       <CardContent className="space-y-4">
         <section
-          aria-label="Current readiness"
+          aria-label={t('Current readiness')}
           className="rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/70 p-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-slate-900">
-                Current Readiness
+                {t('Current Readiness')}
               </p>
               <p className="text-xs text-slate-600">
-                Skills needed for this role
+                {t('Skills needed for this role')}
               </p>
             </div>
             <span className="text-lg font-bold tabular-nums text-blue-700">
@@ -351,7 +352,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
           <Progress
             value={match.skillReadiness}
             className="mt-2 h-2.5"
-            aria-label={`Skill readiness ${match.skillReadiness}%`}
+            aria-label={`${t('Current readiness')} ${match.skillReadiness}%`}
           />
 
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -374,7 +375,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
         <div className="grid gap-3 md:grid-cols-2">
           <section className="rounded-xl border border-blue-100 dark:border-slate-700 p-4">
             <h3 className="text-sm font-semibold text-slate-900">
-              Matching Skills
+              {t('Matching Skills')}
             </h3>
 
             {currentSkills.length ? (
@@ -388,21 +389,21 @@ function MatchCard({ match }: { match: RoleMatch }) {
                       {item.skillName}
                     </span>
                     <span className="shrink-0 text-xs text-slate-600">
-                      {item.userLevel}/5 current · {item.requiredLevel} required
+                      {item.userLevel}/5 {t('harada.current')} · {item.requiredLevel} {t('harada.required')}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="mt-2 text-sm text-slate-600">
-                No mapped role skills selected yet.
+                {t('No mapped role skills selected yet.')}
               </p>
             )}
           </section>
 
           <section className="rounded-xl border border-indigo-100 p-4">
             <h3 className="text-sm font-semibold text-slate-900">
-              Skills to Build
+              {t('Skills to Build')}
             </h3>
 
             {match.missingSkills.length ? (
@@ -416,14 +417,14 @@ function MatchCard({ match }: { match: RoleMatch }) {
                       {gap.skillName}
                     </span>
                     <span className="shrink-0 text-xs text-slate-600">
-                      {gap.userLevel}/5 current · {gap.minLevel} required
+                      {gap.userLevel}/5 {t('harada.current')} · {gap.minLevel} {t('harada.required')}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="mt-2 text-sm text-slate-600">
-                Your current levels meet the mapped requirements for this role.
+                {t('Your current levels meet the mapped requirements for this role.')}
               </p>
             )}
           </section>
@@ -431,22 +432,22 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
         <section className="rounded-xl border border-blue-100 dark:border-slate-700 p-4">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">
-            Career Outlook
+            {t('Career Outlook')}
           </h3>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg bg-slate-50 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-slate-700">
-                  Market Outlook
+                  {t('Market Outlook')}
                 </span>
                 <Badge
                   variant="outline"
                   className="border-blue-200 bg-white text-blue-700"
                 >
                   {scenario === 'accelerated'
-                    ? 'Fast adoption'
-                    : 'Moderate adoption'}
+                    ? t('Fast adoption')
+                    : t('Moderate adoption')}
                 </Badge>
               </div>
 
@@ -461,7 +462,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
             <div className="rounded-lg bg-slate-50 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-slate-700">
-                  AI Task Exposure
+                  {t('AI Task Exposure')}
                 </span>
                 <Badge
                   variant="outline"
@@ -481,32 +482,31 @@ function MatchCard({ match }: { match: RoleMatch }) {
         <section className="rounded-xl border border-blue-100 dark:border-slate-700 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-900">
-              UN Sustainable Development Goals
+              {t('UN Sustainable Development Goals')}
             </h3>
             {role.sdgTags.map((goal) => (
               <SdgBadge key={goal} goal={goal} size="md" />
             ))}
           </div>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            {role.sdgMechanism}
+            {roleSdgMechanism(t, role.slug)}
           </p>
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-blue-50 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <details className="min-w-0 flex-1 rounded-lg">
             <summary className="cursor-pointer text-sm font-semibold text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-              Why this match?
+              {t('Why this match?')}
             </summary>
 
             <div className="mt-3 space-y-3 border-t border-blue-50 pt-3 text-sm text-slate-600">
               <p>
-                {recommendationReason(role.slug, profile)} The compatibility
-                score uses your saved profile and this role&apos;s requirements.
-                Skill readiness is shown separately.
+                {recommendationReason(role.slug, profile, t)}
+                {t('The compatibility score uses your saved profile and this role&apos;s requirements. Skill readiness is shown separately.')}
               </p>
 
               <p className="font-medium text-slate-700">
-                Score breakdown · {t('match.formula')}
+                {t('Score breakdown ·')} {t('match.formula')}
               </p>
 
               <ul className="grid gap-2 sm:grid-cols-2">
@@ -517,9 +517,9 @@ function MatchCard({ match }: { match: RoleMatch }) {
                   >
                     <strong className="text-slate-800">
                       {factorLabels[factor.label] ?? factor.label} (
-                      {Math.round(factor.weight * 100)}% weight):
+                      {Math.round(factor.weight * 100)}{t('% weight):')}
                     </strong>{' '}
-                    {Math.round(factor.value * 100)}% factor value
+                    {Math.round(factor.value * 100)}{t('% factor value')}
                     {factor.label === 'Skills'
                       ? ` · ${currentSkills.length} of ${role.skills.length} required skills selected; readiness ${match.skillReadiness}%`
                       : factor.label === 'Experience'
@@ -538,9 +538,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
               </ul>
 
               <p>
-                Market outlook values are estimates from existing SkillCast
-                data. AI task exposure describes potential task change, not
-                employment or replacement probability.
+                {t('Market outlook values are estimates from existing SkillCast data. AI task exposure describes potential task change, not employment or replacement probability.')}
               </p>
 
               <Button

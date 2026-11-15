@@ -35,7 +35,7 @@ import { ROLE_MAP } from '@/data/roles';
 import { COURSE_MAP } from '@/data/courses';
 import { useSkillCast } from '@/lib/store';
 import { matchAll } from '@/lib/matching';
-import { MomentumPill, SourceChip, TrendArrow, useSignals, useT } from './shared';
+import { courseProvider, courseTitle, MomentumPill, roleTitle, skillName, SourceChip, TrendArrow, useSignals, useT } from './shared';
 import { MatchesTab } from './matches';
 import { PathwayTab } from './pathway';
 import { HaradaTab } from './harada';
@@ -65,9 +65,9 @@ export function Dashboard() {
         <TabsList className="flex h-auto w-full flex-wrap gap-1">
           <TabsTrigger value="overview" className="gap-1.5"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
           <TabsTrigger value="matches" className="gap-1.5">{t('tab.matches')}</TabsTrigger>
-          <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />Future Skills Radar</TabsTrigger>
-          <TabsTrigger value="harada" className="gap-1.5">Harada Method</TabsTrigger>
-          <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />Progress</TabsTrigger>
+          <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
+          <TabsTrigger value="harada" className="gap-1.5">{t('Harada Method')}</TabsTrigger>
+          <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
           <TabsTrigger value="sdg" className="gap-1.5">{t('tab.sdg')}</TabsTrigger>
           <TabsTrigger value="demand" className="gap-1.5">{t('tab.demand')}</TabsTrigger>
         </TabsList>
@@ -114,11 +114,11 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
       .map(([s]) => s);
     const slugs = [...new Set([...userSlugs.slice(0, 8), ...marketTop])].slice(0, 12);
     return slugs.map((slug) => ({
-      skill: (SKILL_MAP[slug]?.name ?? slug).split(' ').slice(0, 2).join(' '),
+      skill: skillName(t, slug).split(' ').slice(0, 2).join(' '),
       you: Math.round((profile.skills[slug] ?? 0) * 20),
       market: momentumMap[slug] ?? 0,
     }));
-  }, [profile.skills, momentumMap]);
+  }, [profile.skills, momentumMap, t]);
 
   const movers = data?.changelog?.[0]?.details?.movers ?? [];
 
@@ -144,7 +144,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   const profileDetails = profile.extended;
 
   if (loading) {
-    return <div className="py-20 text-center text-muted-foreground">Loading signals…</div>;
+    return <div className="py-20 text-center text-muted-foreground">{t('Loading signals…')}</div>;
   }
 
   return (
@@ -152,14 +152,14 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
       <Card className="border-blue-100 dark:border-slate-700 bg-gradient-to-r from-white dark:from-slate-900 via-blue-50/70 dark:via-slate-800 to-indigo-50/70 dark:to-slate-900 shadow-sm">
         <CardContent className="grid gap-5 pt-6 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="border-blue-200 bg-white text-blue-700">Your career snapshot</Badge>{profileDetails?.employmentStatus && <Badge variant="secondary">{profileDetails.employmentStatus.replace('-', ' ')}</Badge>}</div>
-            <h2 className="mt-2 text-xl font-semibold text-slate-900">{profileDetails?.profession || 'Your future-ready career plan'}</h2>
-            <p className="mt-1 text-sm text-slate-600">{profileDetails?.specialization ? `${profileDetails.specialization} · ` : ''}{profile.skills ? Object.keys(profile.skills).length : 0} skills in your profile · {profile.budget} learning hours per week</p>
-            {leadingRole && <p className="mt-2 text-sm text-slate-700">Leading match: <strong>{leadingRole.title}</strong> · {leadingMatch.score}% fit based on your profile</p>}
-            {leadingRole && <p className="mt-1 text-sm text-slate-600">AI task exposure: {leadingExposure} · this describes task change, not a job replacement probability.</p>}
-            <p className="mt-1 text-sm text-slate-600">Learning: {completedCourses.length} completed course{completedCourses.length === 1 ? '' : 's'} · Next: {nextCourse?.title ?? 'review your pathway'}</p>
+            <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="border-blue-200 bg-white text-blue-700">{t('Your career snapshot')}</Badge>{profileDetails?.employmentStatus && <Badge variant="secondary">{profileDetails.employmentStatus.replace('-', ' ')}</Badge>}</div>
+            <h2 className="mt-2 text-xl font-semibold text-slate-900">{profileDetails?.profession || t('Your future-ready career plan')}</h2>
+            <p className="mt-1 text-sm text-slate-600">{profileDetails?.specialization ? `${profileDetails.specialization} · ` : ''}{profile.skills ? Object.keys(profile.skills).length : 0} {t('skills in your profile ·')} {profile.budget} {t('learning hours per week')}</p>
+            {leadingRole && <p className="mt-2 text-sm text-slate-700">{t('Leading match:')} <strong>{roleTitle(t, leadingRole.slug)}</strong> · {leadingMatch.score}{t('% fit based on your profile')}</p>}
+            {leadingRole && <p className="mt-1 text-sm text-slate-600">{t('AI task exposure:')} {t(leadingExposure ?? '')} {t('· this describes task change, not a job replacement probability.')}</p>}
+            <p className="mt-1 text-sm text-slate-600">{t('Learning:')} {completedCourses.length} {t('completed course')} · {t('· Next:')} {nextCourse?.title ?? t('review your pathway')}</p>
           </div>
-          <div className="flex flex-wrap gap-2"><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>Explore your radar</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('harada')}>Open pathway</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>View next steps</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('harada')}>{t('Open pathway')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button></div>
         </CardContent>
       </Card>
 
@@ -231,7 +231,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
                 <ul className="space-y-1.5">
                   {movers.slice(0, 5).map((m) => (
                     <li key={m.skill} className="flex items-center justify-between gap-2 text-sm">
-                      <span className="truncate">{SKILL_MAP[m.skill]?.name ?? m.skill}</span>
+                      <span className="truncate">{skillName(t, m.skill)}</span>
                       <span className="flex items-center gap-2">
                         <TrendArrow delta={m.delta} />
                         <MomentumPill momentum={m.momentum} />
@@ -250,12 +250,12 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <ul className="space-y-1.5">
                 {strongest.slice(0, 4).map((s) => (
                   <li key={s.slug} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate">{SKILL_MAP[s.slug]?.name ?? s.slug}</span>
+                    <span className="truncate">{skillName(t, s.slug)}</span>
                     <MomentumPill momentum={s.m} />
                   </li>
                 ))}
                 {strongest.length > 4 && (
-                  <li className="text-xs text-muted-foreground">{t('ov.weak')}: {strongest.slice(-2).map((s) => SKILL_MAP[s.slug]?.name ?? s.slug).join(', ')}</li>
+                  <li className="text-xs text-muted-foreground">{t('ov.weak')}: {strongest.slice(-2).map((s) => skillName(t, s.slug)).join(', ')}</li>
                 )}
               </ul>
             </CardContent>
@@ -271,18 +271,17 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   <CardHeader>
     <CardTitle className="flex items-center gap-2">
       <ScrollText className="h-5 w-5" />
-      Forecast Changelog
+      {t('Forecast Changelog')}
     </CardTitle>
     <CardDescription>
-      Historical changes in market skill demand
-      based on recorded signal updates.
+      {t('Historical changes in market skill demand based on recorded signal updates.')}
     </CardDescription>
   </CardHeader>
 
   <CardContent>
     {(!data?.changelog || data.changelog.length === 0) ? (
       <p className="text-sm text-muted-foreground">
-        No market updates recorded yet.
+        {t('No market updates recorded yet.')}
       </p>
     ) : (
       <div className="space-y-6">
@@ -298,7 +297,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
                 </p>
               </div>
               <Badge variant={entry.live ? 'default' : 'secondary'}>
-                {entry.live ? 'Live' : 'Cached'}
+                {entry.live ? t('sig.live') : t('Cached')}
               </Badge>
             </div>
 
@@ -306,10 +305,10 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left">Skill</th>
-                    <th className="px-4 py-3 text-center">Previous</th>
-                    <th className="px-4 py-3 text-center">Current</th>
-                    <th className="px-4 py-3 text-center">Change</th>
+                    <th className="px-4 py-3 text-left">{t('inst.skill')}</th>
+                    <th className="px-4 py-3 text-center">{t('Previous')}</th>
+                    <th className="px-4 py-3 text-center">{t('harada.current')}</th>
+                    <th className="px-4 py-3 text-center">{t('Change')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -319,15 +318,14 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
                         colSpan={4}
                         className="px-4 py-5 text-center text-muted-foreground"
                       >
-                        No comparable momentum changes
-                        recorded for this update.
+                        {t('No comparable momentum changes recorded for this update.')}
                       </td>
                     </tr>
                   ) : (
                     entry.details.movers.map((m) => (
                       <tr key={m.skill} className="border-t">
                         <td className="px-4 py-3 font-medium">
-                          {SKILL_MAP[m.skill]?.name ?? m.skill}
+                          {skillName(t, m.skill)}
                         </td>
                         <td className="px-4 py-3 text-center">
                           {m.momentum - m.delta}
@@ -375,7 +373,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <ul className="mb-3 list-inside list-disc text-muted-foreground">
                 {movers.slice(0, 3).map((m) => (
                   <li key={m.skill}>
-                    {SKILL_MAP[m.skill]?.name ?? m.skill} {m.delta >= 0 ? '↑' : '↓'}{Math.abs(m.delta)} → {m.momentum}/100
+                    {skillName(t, m.skill)} {m.delta >= 0 ? '↑' : '↓'}{Math.abs(m.delta)} → {m.momentum}/100
                   </li>
                 ))}
               </ul>
@@ -384,7 +382,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
             )}
             <p className="mb-1 font-semibold">{t('ov.email.next')}</p>
             <p className="mb-3 text-muted-foreground">
-              {nextCourse ? `${nextCourse.title} (${nextCourse.provider})` : '—'}
+              {nextCourse ? `${courseTitle(t, nextCourse.slug)} (${courseProvider(t, nextCourse.slug)})` : '—'}
             </p>
             <Button size="sm" className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
               {t('ov.email.cta')}

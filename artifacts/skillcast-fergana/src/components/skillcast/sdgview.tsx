@@ -9,7 +9,7 @@ import { SKILL_MAP } from '@/data/skills';
 import { SDG_TITLES } from '@/lib/i18n';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { SdgBadge, SourceChip, useT } from './shared';
+import { roleSdgMechanism, roleTitle, SdgBadge, SourceChip, useT } from './shared';
 
 // ─── SDG tab: the ledger. Mechanisms, not decoration. ──────────────────────
 
@@ -66,7 +66,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{role.title} — {t('sdg.why')}</CardTitle>
+          <CardTitle className="text-base">{roleTitle(t, role.slug)} — {t('sdg.why')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
@@ -75,7 +75,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
                 <SdgBadge key={g} goal={g} />
               ))}
             </div>
-            <p className="text-sm">{role.sdgMechanism}</p>
+            <p className="text-sm">{roleSdgMechanism(t, role.slug)}</p>
           </div>
 
           {ledger.perGoal.size > 0 && (
@@ -93,7 +93,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
                       {entry.learning.length > 0 && (
                         <span className="text-muted-foreground/80">
                           {entry.have.length > 0 ? '; ' : ' — '}
-                          <span className="italic">in your pathway:</span> {entry.learning.join(', ')}
+                          <span className="italic">{t('in your pathway:')}</span> {entry.learning.join(', ')}
                         </span>
                       )}
                     </span>
@@ -104,7 +104,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
           )}
 
           <div className="flex flex-wrap gap-2">
-            <SourceChip href="https://sdgs.un.org/goals">UN SDG framework · targets 4.4 / 8.2 / 8.5</SourceChip>
+            <SourceChip href="https://sdgs.un.org/goals">{t('UN SDG framework · targets 4.4 / 8.2 / 8.5')}</SourceChip>
             <SourceChip>{t('sdg.aggregate')}</SourceChip>
           </div>
         </CardContent>

@@ -214,6 +214,14 @@ export const useSkillCast = create<SkillCastState>()(
         haradaTaskStatus: s.haradaTaskStatus,
         onboarded: s.onboarded,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state && !['en', 'uz', 'ru'].includes(String(state.lang))) {
+          state.setLang('en');
+        }
+        if (state && String(state.employer?.budgetPref) === 'hrd') {
+          state.setEmployer({ budgetPref: 'paid' });
+        }
+      },
     },
   ),
 );

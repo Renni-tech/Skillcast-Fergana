@@ -31,12 +31,6 @@ export const LIVE_SOURCES = [
     kind: 'live',
     description: 'notion, perplexity, mux, linear, ramp. Each org fetched independently; per-org failures isolated.',
   },
-  {
-    name: 'MyFutureJobs (planned)',
-    url: 'https://myfuturejobs.gov.my/',
-    kind: 'planned',
-    description: "Malaysia's national employment portal by PERKESO — production integration planned for local-market fidelity.",
-  },
 ] as const;
 
 export const CURATED_SIGNALS: CuratedSignal[] = [
@@ -53,29 +47,6 @@ export const CURATED_SIGNALS: CuratedSignal[] = [
       { label: 'Fastest-growing skills', value: 'AI & big data, networks & cybersecurity, technological literacy' },
     ],
     usedFor: 'Research-horizon weights per skill; scenario demand directions; uncertainty framing.',
-  },
-  {
-    id: 'hays-asia-2025',
-    publisher: 'Hays Asia',
-    title: 'Asia Salary Guide 2025 (Malaysia)',
-    date: 'January 2025',
-    url: 'https://www.hays.com.my/',
-    keyStats: [
-      { label: 'Malaysian professionals using AI tools at work', value: '56%' },
-      { label: 'Who have received formal AI training', value: '26%' },
-    ],
-    usedFor: 'Problem framing — the skills-gap headline used in the landing page and proposal.',
-  },
-  {
-    id: 'mosti-reskilling',
-    publisher: 'Ministry of Science, Technology & Innovation (MOSTI), Malaysia',
-    title: 'National AI reskilling estimate (as cited in the Aiversecity brief)',
-    date: '2025',
-    url: 'https://www.mosti.gov.my/',
-    keyStats: [
-      { label: 'Workers needing reskilling within 3–5 years', value: '600,000+' },
-    ],
-    usedFor: 'Accelerated-scenario demand for teaching/training and reskilling roles.',
   },
   {
     id: 'stanford-ai-index-2025',

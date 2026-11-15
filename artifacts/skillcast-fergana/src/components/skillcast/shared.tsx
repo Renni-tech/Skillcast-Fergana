@@ -79,17 +79,30 @@ export function useT() {
   return makeT(lang);
 }
 
+type Translate = ReturnType<typeof makeT>;
+
+export const roleTitle = (t: Translate, slug: string) => t(`hr.role.${slug}.title`);
+export const roleTagline = (t: Translate, slug: string) => t(`hr.role.${slug}.tagline`);
+export const roleSignals = (t: Translate, slug: string) => t(`hr.role.${slug}.signals`);
+export const roleSdgMechanism = (t: Translate, slug: string) => t(`hr.role.${slug}.sdgMechanism`);
+export const skillName = (t: Translate, slug: string) => t(`skill.${slug}`);
+export const skillCategory = (t: Translate, category: string) => t(`skill.category.${category}`);
+export const courseTitle = (t: Translate, slug: string) => t(`course.${slug}.title`);
+export const courseProvider = (t: Translate, slug: string) => t(`course.${slug}.provider`);
+export const courseOutcome = (t: Translate, slug: string) => t(`course.${slug}.outcome`);
+
 // ─── Small shared UI atoms ─────────────────────────────────────────────────
 
 export function SdgBadge({ goal, size = 'sm', label }: { goal: number; size?: 'sm' | 'md'; label?: string }) {
+  const t = useT();
   return (
     <span
       className={`inline-flex items-center rounded-md font-semibold text-white ${
         size === 'sm' ? 'h-5 w-5 justify-center text-[10px]' : 'h-6 min-w-6 px-1.5 justify-center text-xs'
       }`}
       style={{ backgroundColor: SDG_HEX[goal] ?? '#555' }}
-      title={label ?? `SDG ${goal}`}
-      aria-label={label ?? `Sustainable Development Goal ${goal}`}
+      title={label ?? t('SDG {goal}', { goal })}
+      aria-label={label ?? t('Sustainable Development Goal {goal}', { goal })}
     >
       {goal}
     </span>
@@ -146,8 +159,9 @@ export function SourceChip({ children, href }: { children: ReactNode; href?: str
 }
 
 export function LevelDots({ level, max = 5, highlight = 0 }: { level: number; max?: number; highlight?: number }) {
+  const t = useT();
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`Level ${level} of ${max}`}>
+    <span className="inline-flex items-center gap-0.5" aria-label={t('Level {level} of {max}', { level, max })}>
       {Array.from({ length: max }).map((_, i) => (
         <span
           key={i}
@@ -165,8 +179,9 @@ export function LevelDots({ level, max = 5, highlight = 0 }: { level: number; ma
 }
 
 export function LevelPicker({ level, onChange }: { level: number; onChange: (n: number) => void }) {
+  const t = useT();
   return (
-    <span className="inline-flex items-center gap-1" role="radiogroup" aria-label="Skill level 0 to 5">
+    <span className="inline-flex items-center gap-1" role="radiogroup" aria-label={t('Skill level 0 to 5')}>
       <button
         type="button"
         role="radio"
@@ -184,7 +199,7 @@ export function LevelPicker({ level, onChange }: { level: number; onChange: (n: 
           type="button"
           role="radio"
           aria-checked={level === n}
-          aria-label={`Level ${n}`}
+          aria-label={t('Level {level}', { level: n })}
           onClick={() => onChange(n)}
           className={`h-4 w-4 rounded-full border transition-colors ${
             level >= n

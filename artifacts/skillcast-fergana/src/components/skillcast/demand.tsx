@@ -9,7 +9,7 @@ import { ROLES, ROLE_MAP } from '@/data/roles';
 import { SKILL_MAP } from '@/data/skills';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { SourceChip, useSignals, useT } from './shared';
+import { roleSignals, roleTitle, skillName, SourceChip, useSignals, useT } from './shared';
 
 // ─── Demand tab: "Will this profession be in demand?" ──────────────────────
 // Scenario-adjusted demand index + the momentum decomposition of the role's
@@ -31,7 +31,7 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
         const snap = data?.snapshots.find((s) => s.skillSlug === req.skill);
         return {
           slug: req.skill,
-          name: SKILL_MAP[req.skill]?.name ?? req.skill,
+          name: skillName(t, req.skill),
           weight: req.weight,
           momentum: snap?.momentum ?? SKILL_MAP[req.skill]?.seedMomentum ?? 50,
           freq: snap?.frequency ?? 0,
@@ -40,7 +40,7 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
         };
       })
       .sort((a, b) => b.momentum - a.momentum);
-  }, [role, data]);
+  }, [role, data, t]);
 
   const chartData = skillRows.slice(0, 6);
 
@@ -52,7 +52,7 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
           <p className="max-w-2xl text-sm text-muted-foreground">{t('demand.desc')}</p>
         </div>
         <Select value={roleSlug} onValueChange={setRoleSlug}>
-          <SelectTrigger className="w-64" aria-label="Role">
+          <SelectTrigger className="w-64" aria-label={t('Role')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -105,8 +105,8 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
       {/* Skill momentum decomposition */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('demand.momentum')} — {role.title}</CardTitle>
-          <CardDescription>{role.signalsNote}</CardDescription>
+          <CardTitle className="text-base">{t('demand.momentum')} — {roleTitle(t, role.slug)}</CardTitle>
+          <CardDescription>{roleSignals(t, role.slug)}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-64 min-w-0 overflow-hidden">
@@ -132,7 +132,7 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="pb-2 font-medium">Skill</th>
+                  <th className="pb-2 font-medium">{t('inst.skill')}</th>
                   <th className="pb-2 font-medium">{t('demand.freq')}</th>
                   <th className="pb-2 font-medium">{t('demand.trend')}</th>
                   <th className="pb-2 font-medium">{t('demand.horizon')}</th>
@@ -162,10 +162,10 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
               ))
             ) : (
               <SourceChip href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/">
-                WEF Future of Jobs 2025 · baseline snapshot
+                {t('WEF Future of Jobs 2025 · baseline snapshot')}
               </SourceChip>
             )}
-            <SourceChip href="https://hai.stanford.edu/ai-index/2025-ai-index-report">Stanford AI Index 2025</SourceChip>
+            <SourceChip href="https://hai.stanford.edu/ai-index/2025-ai-index-report">{t('Stanford AI Index 2025')}</SourceChip>
           </div>
         </CardContent>
       </Card>
