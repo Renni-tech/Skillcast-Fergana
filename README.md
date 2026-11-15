@@ -6,9 +6,9 @@
 | Challenge | Aiversecity Future-Ready Workforce |
 | Domain | Domain 1 — Survive AI |
 | SDG Tracks | **4:** Quality Education · **8:** Decent Work and Economic Growth · **10:** Reduced Inequalities |
-| Team Leader | Omirzak Aiym |
+| Team Leader | Raykhon Solijonova |
 | University | Xiamen University Malaysia |
-| Team Size | 5 members |
+| Team Size | 3 members |
 
 ## Project Links
 
