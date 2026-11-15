@@ -8,6 +8,7 @@ out-tsc
 .expo
 .expo-shared
 .next
+.local
 .turbo
 .svelte-kit
 .nuxt
@@ -53,3 +54,4 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+/artifacts/api-server/db/

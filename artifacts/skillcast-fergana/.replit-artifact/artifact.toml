@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SkillCast Fergana"
+description = "A smart-education and future-skills platform that helps learners understand changing career opportunities, identify skill gaps, and build practical learning paths, starting from Fergana and Uzbekistan with a global outlook."
+version = "1.0.0"
+id = "artifacts/skillcast-fergana"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18751
+
+[services.development]
+run = "pnpm --filter @workspace/skillcast-fergana run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/skillcast-fergana", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/skillcast-fergana/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18751"
+BASE_PATH = "/"
