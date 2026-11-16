@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/skillcast/"
+title = "SkillCast"
+description = "A career forecasting app that tracks job-market signals, matches skills to future roles, and builds personalised reskilling pathways for individuals, employers, and institutions."
+version = "1.0.0"
+id = "artifacts/skillcast"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/skillcast/" ]
+localPort = 19825
+
+[services.development]
+run = "pnpm --filter @workspace/skillcast run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/skillcast", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/skillcast/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19825"
+BASE_PATH = "/skillcast/"

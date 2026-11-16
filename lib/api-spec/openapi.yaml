@@ -11,6 +11,92 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /signals:
+    get:
+      operationId: getSignals
+      summary: Latest skill-market forecast and sources
+      responses:
+        "200":
+          description: Live or explicitly labelled seeded forecast
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Signals" }
+        "500":
+          $ref: "#/components/responses/PipelineError"
+    post:
+      operationId: refreshSignals
+      summary: Refresh market sources subject to the original cooldown
+      responses:
+        "200":
+          description: Refreshed forecast or latest run during cooldown
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Signals" }
+        "500":
+          $ref: "#/components/responses/PipelineError"
+  /signals/cron:
+    get:
+      operationId: ingestSignals
+      summary: Secret-protected scheduled market ingestion
+      security: [{ cronBearer: [] }]
+      responses:
+        "200":
+          description: Run created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, runId, live]
+                properties:
+                  ok: { type: boolean }
+                  runId: { type: string }
+                  live: { type: boolean }
+        "401":
+          $ref: "#/components/responses/PipelineError"
+        "501":
+          $ref: "#/components/responses/PipelineError"
+        "500":
+          $ref: "#/components/responses/PipelineError"
+  /coach:
+    post:
+      operationId: narrateCareer
+      summary: Explain deterministic career match or learning plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CoachInput" }
+      responses:
+        "200":
+          description: AI narration or clearly disclosed deterministic template
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [narration, model, fallback]
+                properties:
+                  narration: { type: string }
+                  model: { type: string }
+                  fallback: { type: boolean }
+        "400":
+          $ref: "#/components/responses/PipelineError"
+  /extract-cv:
+    post:
+      operationId: extractCv
+      summary: Extract skill taxonomy from de-identified CV text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CvInput" }
+      responses:
+        "200":
+          description: Extracted profile or explicit browser-fallback indicator
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CvResult" }
+        "400":
+          $ref: "#/components/responses/PipelineError"
   /healthz:
     get:
       operationId: healthCheck
@@ -25,7 +111,129 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 components:
+  securitySchemes:
+    cronBearer:
+      type: http
+      scheme: bearer
+  responses:
+    PipelineError:
+      description: Invalid request, unavailable configuration, or pipeline failure
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error: { type: string }
   schemas:
+    Signals:
+      type: object
+      required: [runId, fetchedAt, live, totalPostings, confidence, sources, snapshots, changelog]
+      properties:
+        runId: { type: string }
+        fetchedAt: { type: string }
+        live: { type: boolean }
+        totalPostings: { type: integer }
+        confidence: { type: string, enum: [low, ok] }
+        note: { type: string }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/SignalSource" }
+        snapshots:
+          type: array
+          items: { $ref: "#/components/schemas/SkillSnapshot" }
+        changelog:
+          type: array
+          items: { $ref: "#/components/schemas/ForecastChange" }
+    SignalSource:
+      type: object
+      required: [name, url, postings, ok, kind]
+      properties:
+        name: { type: string }
+        url: { type: string }
+        postings: { type: integer }
+        ok: { type: boolean }
+        kind: { type: string }
+    SkillSnapshot:
+      type: object
+      required: [skillSlug, postings, recentPostings, earlierPostings, frequency, trend, momentum]
+      properties:
+        skillSlug: { type: string }
+        postings: { type: integer }
+        recentPostings: { type: integer }
+        earlierPostings: { type: integer }
+        frequency: { type: number }
+        trend: { type: number }
+        momentum: { type: number }
+        samples:
+          type: array
+          items: { $ref: "#/components/schemas/PostingSample" }
+    PostingSample:
+      type: object
+      required: [title, company, date, snippet]
+      properties:
+        title: { type: string }
+        company: { type: string }
+        date: { type: string }
+        snippet: { type: string }
+        url: { type: string }
+        sourceDate: { type: string }
+        sourceDateKind: { type: string }
+    ForecastChange:
+      type: object
+      additionalProperties: true
+    CoachInput:
+      type: object
+      required: [roleSlug, score]
+      properties:
+        roleSlug: { type: string, minLength: 1 }
+        score: { type: number, minimum: 0, maximum: 100 }
+        factors:
+          type: array
+          default: []
+          items: { $ref: "#/components/schemas/MatchFactor" }
+        gap:
+          type: array
+          default: []
+          items: { $ref: "#/components/schemas/SkillGap" }
+        scenario: { type: string, enum: [moderate, accelerated], default: moderate }
+        lang: { type: string, enum: [en, ms, zh, ru], default: en }
+        mode: { type: string, enum: [match, harada] }
+        pathwayWeeks: { type: number }
+        budget: { type: number }
+        courses: { type: array, items: { type: string } }
+    MatchFactor:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: number }
+    SkillGap:
+      type: object
+      required: [skill, userLevel, minLevel, momentum]
+      properties:
+        skill: { type: string }
+        userLevel: { type: number }
+        minLevel: { type: number }
+        momentum: { type: number }
+    CvInput:
+      type: object
+      required: [text]
+      properties:
+        text: { type: string, minLength: 40, maxLength: 20000 }
+    CvResult:
+      type: object
+      required: [ok, fallback, model, skills, years, roles, education, certifications, languages]
+      properties:
+        ok: { type: boolean }
+        fallback: { type: boolean }
+        model: { type: string }
+        skills: { type: object, additionalProperties: { type: number } }
+        years: { type: number }
+        roles: { type: array, items: { type: string } }
+        education: { type: array, items: { type: string } }
+        certifications: { type: array, items: { type: string } }
+        languages: { type: array, items: { type: string } }
     HealthStatus:
       type: object
       properties:

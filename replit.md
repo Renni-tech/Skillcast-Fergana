@@ -1,45 +1,36 @@
-# [Project name]
+# SkillCast
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Career forecasting and reskilling proof of concept imported from Vercel. The original app is preserved at `/skillcast/`; the pre-existing SkillCast Fergana app remains at `/`.
 
-## Run & Operate
+## Run and verify
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Start the managed `artifacts/skillcast: web` and `artifacts/api-server: API Server` workflows.
+- The existing root app uses `artifacts/skillcast-fergana: web`.
+- Use Node.js 24 and pnpm workspaces. Do not run a root `pnpm dev`.
+- `pnpm --filter @workspace/skillcast test` runs the 47 imported HR, translation, and market-evidence regression tests using Bun.
+- `pnpm run typecheck:libs` builds shared declarations.
+- `pnpm --filter @workspace/skillcast run typecheck` checks the migrated frontend.
+- `pnpm --filter @workspace/api-server run typecheck` checks the backend.
+- `pnpm --filter @workspace/api-spec run codegen` regenerates the API clients and validation schemas.
 
-## Stack
+## Layout
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- `artifacts/skillcast/`: original React app converted to Vite, preserving the original screens, Tailwind styles, Geist fonts, translations, local profile storage, and matching logic.
+- `artifacts/api-server/`: shared Express backend. Four original API paths: `/api/signals` (GET/POST), `/api/signals/cron`, `/api/coach`, `/api/extract-cv`.
+- `artifacts/api-server/src/skillcast/`: imported signal ingestion, taxonomy and Prisma logic.
+- `artifacts/api-server/prisma/schema.prisma`: original SQLite schema.
+- `lib/api-spec/openapi.yaml`: API contract; generated helpers live in the existing shared API packages.
+- `.migration-backup/`: reference copy of the import; excluded from deployment.
 
-## Where things live
+## Storage and optional services
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Preserve SQLite rather than silently moving the imported store to PostgreSQL. Backend startup initializes `artifacts/api-server/db/skillcast.db` without destructive schema flags.
+- SQLite contains only rebuildable market-signal runs, snapshots, and changelog entries. This local cache is not a durable shared store across published instances or republishes.
+- Profiles, learning progress, and preferences remain in browser localStorage, as in the imported app. There are no user accounts or cross-device profile sync.
+- RunPod inference is optional: `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` enable the existing model service. Without these, the original browser extractor and deterministic coach template are explicitly disclosed as fallbacks.
+- `CRON_SECRET` optionally enables the protected ingestion endpoint; without it that endpoint returns 501. Normal signal retrieval and refresh do not require it.
+- Public job feeds work without credentials, with the original clearly labelled seeded fallback if all feeds fail.
 
-## Architecture decisions
+## Verification limits
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
-
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+Desktop and phone screenshots, API requests, the imported regression suite, and frontend/backend type checks were verified during migration. The interactive testing service was unavailable, so a full click-through browser journey was not verified.

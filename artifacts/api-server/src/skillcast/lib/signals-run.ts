@@ -1,5 +1,6 @@
 
 import { db } from '@/lib/db';
+import { logger } from '../../lib/logger';
 import { ingestLiveSignals, seedSnapshots } from '@/lib/momentum';
 import type { SignalsPayload, SkillSnapshot } from '@/lib/types';
 
@@ -258,7 +259,7 @@ export async function pruneOldRuns() {
       });
     }
   } catch (e) {
-    console.error('[signals] prune failed', e);
+    logger.error({ err: e }, 'Signal retention cleanup failed');
   }
 }
 

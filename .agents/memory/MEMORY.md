@@ -1,0 +1,1 @@
+- [Migration runtime requirements](migration-runtime.md) — Node 20 failed shared API generation; keep the workspace on Node 24.

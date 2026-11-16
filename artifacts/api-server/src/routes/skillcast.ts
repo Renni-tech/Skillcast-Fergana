@@ -1,48 +1,35 @@
 import { Router, type IRouter } from "express";
-import { z } from "zod";
+import { NarrateCareerBody, ExtractCvBody } from "@workspace/api-zod";
 import { ROLE_MAP } from "@/data/roles";
 import { SKILL_MAP } from "@/data/skills";
-import { seedSnapshots } from "@/lib/momentum";
 import { runpodChat, RUNPOD_MODEL } from "@/lib/runpod";
 import {
   buildRun,
   ensureFreshRun,
   payloadFor,
   pruneOldRuns,
-  SEED_SOURCE,
   writeChangelog,
 } from "@/lib/signals-run";
-import type { SignalsPayload } from "@/lib/types";
 
 const router: IRouter = Router();
 
-const signalFallback = () => ({
-  runId: "seed",
-  fetchedAt: new Date().toISOString(),
-  live: false,
-  totalPostings: 0,
-  confidence: "low" as const,
-  sources: [SEED_SOURCE],
-  note: "Showing the seeded baseline because signal storage is not ready.",
-  snapshots: seedSnapshots(),
-  changelog: [],
-});
-
-router.get("/signals", async (_req, res) => {
+router.get("/signals", async (req, res) => {
   try {
     const runId = await ensureFreshRun(false);
     res.json(await payloadFor(runId));
   } catch (error) {
-    res.json(signalFallback());
+    req.log.error({ err: error }, "Signal pipeline failed");
+    res.status(500).json({ error: "signal pipeline failed" });
   }
 });
 
-router.post("/signals", async (_req, res) => {
+router.post("/signals", async (req, res) => {
   try {
     const runId = await ensureFreshRun(true);
     res.json(await payloadFor(runId));
-  } catch {
-    res.json(signalFallback());
+  } catch (error) {
+    req.log.error({ err: error }, "Signal refresh failed");
+    res.status(500).json({ error: "signal refresh failed" });
   }
 });
 
@@ -75,24 +62,6 @@ router.get("/signals/cron", async (req, res) => {
   }
 });
 
-const CoachBody = z.object({
-  roleSlug: z.string().min(1),
-  score: z.number().min(0).max(100),
-  factors: z.array(z.object({ label: z.string(), value: z.number() })).default([]),
-  gap: z.array(z.object({
-    skill: z.string(),
-    userLevel: z.number(),
-    minLevel: z.number(),
-    momentum: z.number(),
-  })).default([]),
-  scenario: z.enum(["moderate", "accelerated"]).default("moderate"),
-  lang: z.enum(["en", "ms", "zh", "ru"]).default("en"),
-  mode: z.enum(["match", "harada"]).optional(),
-  pathwayWeeks: z.number().optional(),
-  budget: z.number().optional(),
-  courses: z.array(z.string()).optional(),
-});
-
 const languageInstruction: Record<string, string> = {
   en: "Reply in English.",
   ms: "Reply in Bahasa Malaysia.",
@@ -101,7 +70,7 @@ const languageInstruction: Record<string, string> = {
 };
 
 router.post("/coach", async (req, res) => {
-  const parsed = CoachBody.safeParse(req.body);
+  const parsed = NarrateCareerBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "invalid body", details: parsed.error.flatten() });
     return;
@@ -161,19 +130,15 @@ router.post("/coach", async (req, res) => {
     if (!narration) throw new Error("empty narration");
     res.json({ narration, model: RUNPOD_MODEL, fallback: false });
   } catch {
-    const strongest = [...input.factors].sort((a, b) => b.value - a.value)[0];
+    const strongest = [...input.factors].sort((a, b) => b.value - a.value)[0] ?? { label: "overall fit", value: input.score / 100 };
     const gapText = topGap
       ? ` The priority gap is ${SKILL_MAP[topGap.skill]?.name ?? topGap.skill} (level ${topGap.userLevel} of ${topGap.minLevel} needed).`
       : "";
     const narration = input.mode === "harada"
-      ? `Plan: ${role.title}. Why: ${role.tagline}.${gapText} Timeline: ~${input.pathwayWeeks ?? 0} weeks at ${input.budget ?? 0} hrs/week. Courses: ${(input.courses ?? []).join(", ") || "none selected yet"}.`
-      : `Match ${input.score}/100${strongest ? `, driven mainly by ${strongest.label.toLowerCase()} (${Math.round(strongest.value * 100)}%)` : ""}.${gapText} Under the ${input.scenario} scenario the demand outlook for ${role.title} is an estimate.`;
+      ? `Plan: ${role.title}. Why: ${role.tagline}.${gapText} Timeline: ~${input.pathwayWeeks ?? 0} weeks at ${input.budget ?? 0} hrs/week. Courses: ${(input.courses ?? []).join(", ") || "none yet — pick them from the pathway tab."} SDG: ${role.sdgTags.join(", ")}.`
+      : `Match ${input.score}/100, driven mainly by ${strongest.label.toLowerCase()} (${Math.round(strongest.value * 100)}%).${gapText} Under the ${input.scenario} scenario the demand outlook for ${role.title} is ${input.scenario === "accelerated" ? role.demandAccelerated : role.demandModerate}/100 (estimate).`;
     res.json({ narration, model: "deterministic template (LLM unavailable)", fallback: true });
   }
-});
-
-const ExtractBody = z.object({
-  text: z.string().trim().min(40).max(20000),
 });
 
 const extractionPrompt =
@@ -190,13 +155,18 @@ function mapExtractedSkills(value: unknown): Record<string, number> {
     if (!item || typeof item !== "object") continue;
     const candidate = item as { name?: unknown; level?: unknown };
     if (typeof candidate.name !== "string") continue;
+    if (["prompt engineering", "prompt engineer", "prompt writing"].includes(candidate.name.trim().toLowerCase())) {
+      const level = Math.round(Number(candidate.level));
+      out["prompt-engineering"] = Number.isFinite(level) ? Math.min(5, Math.max(0, level)) : 0;
+      continue;
+    }
     const tokens = skillTokens(candidate.name);
     let winner: string | undefined;
     let best = 0;
     for (const [slug, skill] of Object.entries(SKILL_MAP)) {
       const skillWords = skillTokens(skill.name);
       const overlap = tokens.filter((token) => skillWords.includes(token)).length;
-      const score = overlap === 0 ? 0 : overlap / Math.max(tokens.length, skillWords.length);
+      const score = overlap === 0 ? 0 : overlap === Math.min(tokens.length, skillWords.length) ? 1 : overlap / Math.max(tokens.length, skillWords.length);
       if (score >= 0.5 && score > best) {
         winner = slug;
         best = score;
@@ -217,7 +187,7 @@ function stringList(value: unknown) {
 }
 
 router.post("/extract-cv", async (req, res) => {
-  const parsed = ExtractBody.safeParse(req.body);
+  const parsed = ExtractCvBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "invalid body: text (40-20000 characters) required" });
     return;
@@ -247,7 +217,8 @@ router.post("/extract-cv", async (req, res) => {
       temperature: 0,
       responseFormat: { type: "json_object" },
     });
-    const output = JSON.parse(content ?? "{}") as Record<string, unknown>;
+    if (!content) throw new Error("empty extraction response");
+    const output = JSON.parse(content) as Record<string, unknown>;
     const years = Math.round(Number(output.yearsOfExperience));
     res.json({
       ok: true,

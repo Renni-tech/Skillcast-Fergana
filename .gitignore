@@ -55,3 +55,4 @@ Thumbs.db
 .cache/
 .local/
 /artifacts/api-server/db/
+/generated-artifacts/

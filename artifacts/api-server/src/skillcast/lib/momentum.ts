@@ -1,4 +1,5 @@
 import { SKILLS } from '@/data/skills';
+import { logger } from '../../lib/logger';
 import type { SkillSnapshot } from '@/lib/types';
 
 // ─── Signal ingestion + Skill Momentum Index (SMI) ────────────────────────
@@ -139,7 +140,7 @@ export async function fetchGreenhouse(): Promise<{ postings: Posting[]; boardRes
       }
       boardResults.push({ board, ok: true, count: jobs.length });
     } catch (e) {
-      console.error(`[signals] Greenhouse board ${board} failed:`, e);
+      logger.warn({ err: e, board }, 'Greenhouse board failed');
       boardResults.push({ board, ok: false, count: 0 });
     }
   }
@@ -184,7 +185,7 @@ export async function fetchAshby(): Promise<{ postings: Posting[]; boardResults:
       }
       boardResults.push({ board: org, ok: true, count: jobs.length });
     } catch (e) {
-      console.error(`[signals] Ashby org ${org} failed:`, e);
+      logger.warn({ err: e, org }, 'Ashby board failed');
       boardResults.push({ board: org, ok: false, count: 0 });
     }
   }
@@ -217,7 +218,7 @@ export async function ingestLiveSignals(): Promise<IngestResult> {
     postings.push(...list);
     sources.push({ name: 'Remotive Job API', url: REMOTIVE_URL, postings: list.length, ok: true, kind: 'live' });
   } catch (e) {
-    console.error('[signals] Remotive failed:', e);
+    logger.warn({ err: e }, 'Remotive failed');
     sources.push({ name: 'Remotive Job API', url: REMOTIVE_URL, postings: 0, ok: false, kind: 'live' });
   }
 
@@ -227,7 +228,7 @@ export async function ingestLiveSignals(): Promise<IngestResult> {
     postings.push(...list);
     sources.push({ name: 'Arbeitnow Job Board API', url: ARBEITNOW_URL, postings: list.length, ok: true, kind: 'live' });
   } catch (e) {
-    console.error('[signals] Arbeitnow failed:', e);
+    logger.warn({ err: e }, 'Arbeitnow failed');
     sources.push({ name: 'Arbeitnow Job Board API', url: ARBEITNOW_URL, postings: 0, ok: false, kind: 'live' });
   }
 
@@ -245,7 +246,7 @@ export async function ingestLiveSignals(): Promise<IngestResult> {
       });
     }
   } catch (e) {
-    console.error('[signals] Greenhouse all boards failed:', e);
+    logger.warn({ err: e }, 'All Greenhouse boards failed');
     // No individual entries — all boards failed
   }
 
@@ -263,7 +264,7 @@ export async function ingestLiveSignals(): Promise<IngestResult> {
       });
     }
   } catch (e) {
-    console.error('[signals] Ashby all orgs failed:', e);
+    logger.warn({ err: e }, 'All Ashby boards failed');
   }
 
   if (postings.length === 0) throw new Error('All live sources failed');
