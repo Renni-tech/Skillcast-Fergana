@@ -28,7 +28,7 @@ import { INTERESTS, PERSONAS, useSkillCast } from '@/lib/store';
 import { LANGS } from '@/lib/i18n';
 import { matchAll } from '@/lib/matching';
 import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualProfileDetails } from '@/lib/types';
-import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
+import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
 
 // ─── Onboarding router: three tracks ────────────────────────────────────────
@@ -115,8 +115,8 @@ function OnboardingShell({
 }) {
   const t = useT();
   const individualStepTitles = [
-    'Choose Your Path', 'Your Profile', 'Interests & Career Goals',
-    'Future Skills Radar', 'Career Strategy', 'Work Preferences',
+    'Choose Your Path', 'Your Profile', 'Interests & Learning Goals',
+    'Future Skills Radar', 'Learning & Career Direction', 'Work Preferences',
   ];
   return (
     <div className={light ? 'skillcast-onboarding px-4 py-8 sm:py-12' : undefined}>
@@ -264,9 +264,9 @@ function IndividualOnboarding() {
   const titles = [
     'Choose Your Path',
     'Your Profile',
-    'Interests & Career Goals',
+    'Interests & Learning Goals',
     'Future Skills Radar',
-    'Career Strategy',
+    'Learning & Career Direction',
     'Work Preferences',
   ];
 
@@ -275,7 +275,7 @@ function IndividualOnboarding() {
       step={step}
       total={INDIVIDUAL_STEPS}
       title={titles[step - 1]}
-      desc={step === 2 ? 'A few details help tailor the career outlook and recommendations to you.' : undefined}
+      desc={step === 2 ? t('A few details help tailor your learning pathways and career outlook.') : undefined}
       icon={step === 2 ? User : step === 3 ? Target : step === 4 ? Radar : step === 5 ? Briefcase : SlidersHorizontal}
       onBack={back}
       onNext={() => setStep((s) => Math.min(INDIVIDUAL_STEPS, s + 1))}
@@ -369,7 +369,7 @@ function ProfileStep({
       <section className="space-y-4 border-t border-blue-100 dark:border-slate-700 pt-6">
         <div>
           <h3 className="font-semibold text-slate-900">{t('Upload Your CV')}</h3>
-          <p className="text-sm text-slate-500">{t('Upload a CV for private, scrubbed extraction, or enter skills yourself below.')}</p>
+          <p className="text-sm text-slate-500">{t('Raw CV stays in your browser; only text after PII scrubbing is sent for skill extraction. You can enter skills manually instead.')}</p>
         </div>
         <CvStep onDone={() => {}} showContinue={false} preserveProfile />
       </section>
@@ -748,7 +748,7 @@ function CareerStrategyStep({ details, patchDetails }: { details: IndividualProf
         <section className="space-y-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 p-4 sm:p-5" aria-label={t('Related role recommendations')}>
           <div><h3 className="font-semibold text-slate-900">{t('Roles that connect with your experience')}</h3><p className="mt-1 text-sm text-slate-600">{t("Ranked using SkillCast's match formula, your skill levels, experience, and interests")}. {t('. These are pathways, not job openings.')}</p></div>
           <div className="grid gap-3 sm:grid-cols-2">{relatedRoles.map(({ role, match, contextual, transfer, needs }) => <button key={role.slug} type="button" aria-pressed={details.strategyRole === role.slug} onClick={() => patchDetails({ strategyRole: role.slug })} className={`rounded-xl border bg-white p-4 text-left transition hover:border-blue-300 dark:hover:border-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${details.strategyRole === role.slug ? 'border-blue-500 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900' : 'border-blue-100 dark:border-slate-700'}`}>
-            <span className="flex items-start justify-between gap-2"><span><span className="block font-semibold text-slate-900">{roleTitle(t, role.slug)}</span><span className="mt-1 block text-xs text-slate-500">{skillCategory(t, role.category)}</span></span>{details.strategyRole === role.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span>
+            <span className="flex items-start justify-between gap-2"><span><span className="block font-semibold text-slate-900">{roleTitle(t, role.slug)}</span><span className="mt-1 block text-xs text-slate-500">{roleCategory(t, role.category)}</span></span>{details.strategyRole === role.slug && <Check className="h-4 w-4 text-blue-600" aria-hidden />}</span>
             <span className="mt-3 block text-sm leading-5 text-slate-600">{roleTagline(t, role.slug)}</span>
             <span className="mt-2 block text-xs font-medium text-blue-700">{t('SkillCast profile fit:')} {match.score}/100</span><span className="mt-1 block text-[11px] leading-4 text-slate-500">{t('Based on skill overlap, transferable skills, experience, and interests')}{contextual ? ` · ${t('profile wording also relates to this pathway')}` : ''}.</span>
             <span className="mt-3 grid gap-2 border-t border-blue-50 pt-3 text-xs text-slate-600 sm:grid-cols-2"><span><strong className="block text-slate-800">{t('Transferable skills')}</strong>{transfer.slice(0, 3).map((item) => skillName(t, item.slug)).join(', ') || t('No direct mapped overlap yet.')}</span><span><strong className="block text-slate-800">{t('Skills to develop')}</strong>{needs.filter((item) => item.current < item.req.minLevel).slice(0, 3).map((item) => skillName(t, item.skill.slug)).join(', ') || t('Current levels meet listed requirements.')}</span></span>

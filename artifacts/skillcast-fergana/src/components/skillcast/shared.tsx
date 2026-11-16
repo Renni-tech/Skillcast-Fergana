@@ -87,6 +87,7 @@ export const roleSignals = (t: Translate, slug: string) => t(`hr.role.${slug}.si
 export const roleSdgMechanism = (t: Translate, slug: string) => t(`hr.role.${slug}.sdgMechanism`);
 export const skillName = (t: Translate, slug: string) => t(`skill.${slug}`);
 export const skillCategory = (t: Translate, category: string) => t(`skill.category.${category}`);
+export const roleCategory = (t: Translate, category: string) => t(`role.category.${category}`);
 export const courseTitle = (t: Translate, slug: string) => t(`course.${slug}.title`);
 export const courseProvider = (t: Translate, slug: string) => t(`course.${slug}.provider`);
 export const courseOutcome = (t: Translate, slug: string) => t(`course.${slug}.outcome`);

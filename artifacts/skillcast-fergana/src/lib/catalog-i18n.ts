@@ -52,6 +52,22 @@ export const SKILL_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {
   'Marketing & Content': { uz: 'Marketing va kontent', ru: 'Маркетинг и контент' },
 };
 
+export const ROLE_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {
+  AI: { uz: 'Sun’iy intellekt', ru: 'Искусственный интеллект' },
+  AgriTech: { uz: 'Agrotexnologiya', ru: 'Агротехнологии' },
+  Business: { uz: 'Biznes', ru: 'Бизнес' },
+  Education: { uz: 'Ta’lim', ru: 'Образование' },
+  Governance: { uz: 'Boshqaruv', ru: 'Управление' },
+  'Green Energy': { uz: 'Yashil energiya', ru: 'Зелёная энергетика' },
+  Health: { uz: 'Sog‘liqni saqlash', ru: 'Здравоохранение' },
+  Marketing: { uz: 'Marketing', ru: 'Маркетинг' },
+  Operations: { uz: 'Operatsiyalar', ru: 'Операции' },
+  People: { uz: 'Kadrlar va insonlar', ru: 'Работа с людьми' },
+  Service: { uz: 'Xizmat ko‘rsatish', ru: 'Сфера услуг' },
+  Sustainability: { uz: 'Barqaror rivojlanish', ru: 'Устойчивое развитие' },
+  Technology: { uz: 'Texnologiya', ru: 'Технологии' },
+};
+
 export const ROLE_SDG_COPY: Record<string, { uz: string; ru: string }> = {
   'ai-ops-specialist': {
     uz: 'Innovatsiya orqali mahsuldorlikni oshirish (SDG 8.2) va 4.4-maqsadni qo‘llab-quvvatlaydi: takrorlanuvchi vazifalari avtomatlashtirilgan xodimlar ishdan bo‘shatilmasdan, yuqori qiymatli nazorat ishlariga o‘tadilar.',

@@ -13,7 +13,7 @@ import { LevelDots, skillName, useT } from './shared';
 
 // ─── Step 3: CV intake with in-browser PII scrubbing ───────────────────────
 // The raw CV never leaves this component: scrub in-browser, then send only the
-// de-identified text to /api/extract-cv (self-hosted Qwen on RunPod) for
+// scrubbed text to /api/extract-cv (self-hosted Qwen on RunPod) for
 // structured extraction. If the AI path fails, the deterministic keyword
 // extractor takes over — the flow always renders a result the user confirms.
 

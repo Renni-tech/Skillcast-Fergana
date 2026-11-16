@@ -17,7 +17,7 @@ import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
 import { normalizeProfile } from '@/lib/profile';
-import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
+import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 
 const FORKS = [
   {
@@ -52,7 +52,7 @@ function recommendationReason(
   switch (details?.careerStrategy) {
     case 'enhance':
       return priority === 0
-        ? t('Prioritized because {category} aligns with your current profession or field.', { category: skillCategory(t, role.category) })
+        ? t('Prioritized because {category} aligns with your current profession or field.', { category: roleCategory(t, role.category) })
         : priority === 1
           ? t('Prioritized as a role that works with AI for your current-career strategy.')
           : t('Recommended by your profile compatibility as another career option.');
@@ -61,7 +61,7 @@ function recommendationReason(
       return priority === 0
         ? t('This is the target role you selected during onboarding.')
         : priority === 1
-          ? t('This role shares the {category} category with your selected target.', { category: skillCategory(t, role.category) })
+          ? t('This role shares the {category} category with your selected target.', { category: roleCategory(t, role.category) })
           : priority === 2
             ? t('Included as a pivot pathway, ranked by your profile compatibility.')
             : t('Recommended by your profile compatibility.');
@@ -329,7 +329,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 variant="outline"
                 className="border-blue-200 bg-blue-50 text-blue-700"
               >
-                {skillCategory(t, role.category)}
+                {roleCategory(t, role.category)}
               </Badge>
 
               <Badge

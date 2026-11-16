@@ -2,7 +2,7 @@ import type { Lang } from '@/lib/types';
 import { COURSES } from '@/data/courses';
 import { ROLES } from '@/data/roles';
 import { SKILLS } from '@/data/skills';
-import { ROLE_SDG_COPY, SKILL_CATEGORY_COPY, SKILL_COPY } from './catalog-i18n';
+import { ROLE_CATEGORY_COPY, ROLE_SDG_COPY, SKILL_CATEGORY_COPY, SKILL_COPY } from './catalog-i18n';
 import { COURSE_COPY, COURSE_OUTCOME_COPY } from './course-i18n';
 import { GUIDANCE_COPY } from './guidance-i18n';
 import { HR_DICTIONARIES } from './hr-i18n';
@@ -86,7 +86,7 @@ const en: Dict = {
   'landing.badge': 'Proof of concept · synthetic demo profiles only',
   'landing.steps.title': 'From who you are today to where you can be',
   'landing.step1': 'Tell us about yourself',
-  'landing.step1d': 'CV upload with in-browser PII scrubbing, or a short form. Nothing personal leaves your browser.',
+  'landing.step1d': 'Raw CV stays in your browser; only text after in-browser PII scrubbing is sent for skill extraction. You can also use the short form.',
   'landing.step2': 'See the Future Skills Radar',
   'landing.step2d': 'Skill momentum computed from live job postings and cited research — source and date on every number.',
   'landing.step3': 'Get matched — with a choice',
@@ -165,11 +165,11 @@ const en: Dict = {
   'onb.objective.ph': 'e.g. Run my team\u2019s AI workflows end-to-end by next year',
   'onb.finish': 'Build my forecast',
 
-  'dash.hello': 'Your career forecast',
+  'dash.hello': 'Your learning and career outlook',
   'dash.scenario': 'Scenario',
   'scenario.moderate': 'Moderate disruption',
   'scenario.accelerated': 'Accelerated disruption',
-  'scenario.note': 'Both futures are estimates, not predictions. AI progress is unpredictable — that is why you get two.',
+  'scenario.note': 'Both AI adoption scenarios are estimates, not predictions. AI progress is unpredictable, so your plan shows both.',
   'tab.overview': 'Overview',
   'tab.matches': 'Matches',
   'tab.pathway': 'Pathway',
@@ -241,7 +241,7 @@ const en: Dict = {
   'onb.ut.institution': 'Institution — my students',
   'onb.ut.institution.d': 'TVET & university career centres: advise cohorts, close syllabus gaps, align paths with the SDGs.',
   'onb.ut.institution.ex': 'e.g. XMUM, Politeknik, Kolej Komuniti',
-  'onb.privacy.browser': 'Privacy by design: scrubbing runs in your browser.',
+  'onb.privacy.browser': 'The raw CV stays in your browser. Only text after in-browser PII scrubbing is sent for skill extraction.',
 
   // ── Employer onboarding ──
   'onb.emp.step1.q': 'What is your company name, industry, and team size?',
@@ -1550,7 +1550,7 @@ const ru: Dict = {
   'landing.badge': 'Прототип · только синтетические демо-профили',
   'landing.steps.title': 'От того, кто вы сегодня, к тому, кем можете стать',
   'landing.step1': 'Расскажите о себе',
-  'landing.step1d': 'Загрузите CV — личные данные удаляются прямо в браузере, — или заполните короткую форму.',
+  'landing.step1d': 'Исходное резюме остаётся в браузере; для извлечения навыков отправляется только текст после очистки от персональных данных. Можно также заполнить короткую форму.',
   'landing.step2': 'Радар навыков будущего',
   'landing.step2d': 'Импульс навыков на основе живых вакансий и цитируемых исследований — источник и дата у каждой цифры.',
   'landing.step3': 'Подбор ролей — с выбором',
@@ -1626,11 +1626,11 @@ const ru: Dict = {
   'onb.objective.ph': 'напр., вести ИИ-процессы моей команды через год',
   'onb.finish': 'Построить прогноз',
 
-  'dash.hello': 'Ваш карьерный прогноз',
+  'dash.hello': 'Ваши учебные и карьерные перспективы',
   'dash.scenario': 'Сценарий',
   'scenario.moderate': 'Умеренный сценарий',
   'scenario.accelerated': 'Ускоренный сценарий',
-  'scenario.note': 'Оба будущего — оценки, не гарантии. Прогресс ИИ непредсказуем — поэтому их два.',
+  'scenario.note': 'Оба сценария внедрения ИИ — оценки, а не прогнозы. Развитие ИИ непредсказуемо, поэтому план показывает оба.',
   'tab.overview': 'Обзор',
   'tab.matches': 'Подбор',
   'tab.pathway': 'Маршрут',
@@ -1702,7 +1702,7 @@ const ru: Dict = {
   'onb.ut.institution': 'Учебное заведение — мои студенты',
   'onb.ut.institution.d': 'Центры карьеры TVET и вузов: консультирование групп, пробелы программ, ЦУР.',
   'onb.ut.institution.ex': 'напр., XMUM, Политехник, Комьюнити-колледж',
-  'onb.privacy.browser': 'Приватность по умолчанию: очистка данных идёт в вашем браузере.',
+  'onb.privacy.browser': 'Исходное резюме остаётся в браузере. Для извлечения навыков отправляется только текст, очищенный от персональных данных в браузере.',
 
   // ── Онбординг работодателя ──
   'onb.emp.step1.q': 'Название компании, отрасль и размер команды?',
@@ -1982,6 +1982,13 @@ for (const skill of SKILLS) {
 
 for (const [category, translation] of Object.entries(SKILL_CATEGORY_COPY)) {
   const key = `skill.category.${category}`;
+  DICTS.en[key] = category;
+  DICTS.uz[key] = translation.uz;
+  DICTS.ru[key] = translation.ru;
+}
+
+for (const [category, translation] of Object.entries(ROLE_CATEGORY_COPY)) {
+  const key = `role.category.${category}`;
   DICTS.en[key] = category;
   DICTS.uz[key] = translation.uz;
   DICTS.ru[key] = translation.ru;

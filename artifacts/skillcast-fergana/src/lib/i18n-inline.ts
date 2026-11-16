@@ -116,7 +116,7 @@ const inlineCopy: Record<string, { uz: string; ru: string }> = {
   "Select highest level": { uz: "Eng yuqori darajani tanlang", ru: "Выберите наивысший уровень" },
   "Fields marked * are required. Experience must be a whole number from 0 to 60.": { uz: "* bilan belgilangan maydonlar to'ldirilishi shart. Tajriba 0 dan 60 gacha bo'lgan butun son bo'lishi kerak.", ru: "Поля, отмеченные *, обязательны для заполнения. Опыт должен быть целым числом от 0 до 60." },
   "Upload Your CV": { uz: "Rezyumeni yuklash", ru: "Загрузить резюме" },
-  "Upload a CV for private, scrubbed extraction, or enter skills yourself below.": { uz: "Maxfiy va tahrirlangan ma'lumotlarni ajratib olish uchun rezyumeni yuklang yoki ko'nikmalaringizni quyida o'zingiz kiriting.", ru: "Загрузите резюме для конфиденциального извлечения данных или введите навыки самостоятельно ниже." },
+  "Raw CV stays in your browser; only text after PII scrubbing is sent for skill extraction. You can enter skills manually instead.": { uz: "Asl CV brauzeringizda qoladi; ko‘nikmalarni aniqlash uchun faqat shaxsiy ma’lumotlardan tozalangan matn yuboriladi. Ko‘nikmalarni o‘zingiz ham kiritishingiz mumkin.", ru: "Исходное резюме остаётся в браузере; для извлечения навыков отправляется только текст после очистки от персональных данных. Навыки можно также ввести вручную." },
   "Skills Assessment": { uz: "Ko'nikmalarni baholash", ru: "Оценка навыков" },
   "Choose skills and rate your current level. Add at least one skill to continue.": { uz: "Ko'nikmalarni tanlang va joriy darajangizni baholang. Davom etish uchun kamida bitta ko'nikma qo'shing.", ru: "Выберите навыки и оцените свой текущий уровень. Добавьте хотя бы один навык, чтобы продолжить." },
   "Languages": { uz: "Tillar", ru: "Языки" },
@@ -394,23 +394,20 @@ const inlineCopy: Record<string, { uz: string; ru: string }> = {
   ,"Work with AI": { uz: "AI bilan ishlash", ru: "Работа с ИИ" }
   ,"Pivot to another career": { uz: "Boshqa kasbga o‘tish", ru: "Переход в другую профессию" }
   ,"Emerging opportunities": { uz: "Yangi imkoniyatlar", ru: "Новые возможности" }
-  ,"Lower": { uz: "Past", ru: "Низкий" }
-  ,"Moderate": { uz: "O‘rtacha", ru: "Умеренный" }
-  ,"Higher": { uz: "Yuqori", ru: "Высокий" }
   ,"View Roadmap": { uz: "Yo‘l xaritasini ko‘rish", ru: "Посмотреть маршрут" }
-  ,"Open learning pathway": { uz: "O‘quv yo‘lini ochish", ru: "Открыть учебную траекторию" }
   ,"Your learning profile": { uz: "O‘quv profilingiz", ru: "Ваш учебный профиль" }
   ,"Your future-ready learning plan": { uz: "Kelajak ko‘nikmalari bo‘yicha o‘quv rejangiz", ru: "Ваш учебный план для навыков будущего" }
   ,"Leading pathway:": { uz: "Asosiy o‘quv yo‘li:", ru: "Основная траектория:" }
   ,"Learning outlook": { uz: "O‘quv yo‘li istiqboli", ru: "Перспективы учебной траектории" }
-  ,"Student": { uz: "Talaba", ru: "Студент" }
-  ,"Unemployed": { uz: "Ishsiz", ru: "Безработный" }
-  ,"Career changer": { uz: "Kasbini o‘zgartirayotgan", ru: "Меняющий профессию" }
   ,"Current status and years of experience are required. Other details, CV, and skills can be added to personalize your learning pathways.": { uz: "Joriy holat va ish tajribasi yillari majburiy. Boshqa ma’lumotlar, CV va ko‘nikmalarni o‘quv yo‘llarini shaxsiylashtirish uchun qo‘shishingiz mumkin.", ru: "Укажите текущий статус и стаж. Остальные данные, резюме и навыки можно добавить для персонализации учебных траекторий." }
   ,"Choose skills and rate your current level. Add skills to personalize your matches; you can continue without them.": { uz: "Ko‘nikmalarni tanlab, hozirgi darajangizni baholang. Mos tavsiyalar uchun ko‘nikmalarni qo‘shing; ularsiz ham davom etish mumkin.", ru: "Выберите навыки и оцените свой уровень. Добавьте навыки для персональных рекомендаций; можно продолжить и без них." }
   ,"What learning or career outcome would you like to work toward?": { uz: "Qaysi o‘quv yoki kasbiy maqsadga erishmoqchisiz?", ru: "Какой учебной или карьерной цели вы хотите достичь?" }
   ,"Describe the skills, study goal, or future role you want to work toward…": { uz: "Rivojlantirmoqchi bo‘lgan ko‘nikmalaringiz, o‘quv maqsadingiz yoki kelajakdagi lavozimingizni yozing…", ru: "Опишите навыки, учебную цель или будущую роль, к которой вы стремитесь…" }
   ,"Current skill readiness": { uz: "Ko‘nikmalarning hozirgi darajasi", ru: "Текущий уровень навыков" }
+  ,"Skills needed for this learning pathway": { uz: "Ushbu o‘quv yo‘li uchun zarur ko‘nikmalar", ru: "Навыки для этой учебной траектории" }
+  ,"A few details help tailor your learning pathways and career outlook.": { uz: "Bir nechta ma’lumot o‘quv yo‘llari va kasbiy istiqbolingizni moslashtirishga yordam beradi.", ru: "Несколько ответов помогут подобрать учебные траектории и карьерные перспективы." }
+  ,"Interests & Learning Goals": { uz: "Qiziqishlar va o‘quv maqsadlari", ru: "Интересы и учебные цели" }
+  ,"Learning & Career Direction": { uz: "O‘quv va kasbiy yo‘nalish", ru: "Учебное и карьерное направление" }
 };
 
 export default inlineCopy;

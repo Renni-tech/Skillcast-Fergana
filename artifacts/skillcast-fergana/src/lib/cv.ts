@@ -1,10 +1,10 @@
 import { SKILLS, SKILL_MAP } from '@/data/skills';
 
 // ─── PII scrubber + deterministic CV skill extractor ───────────────────────
-// PRIVACY BY DESIGN: the raw CV never leaves the browser — scrubbing and
-// skill extraction both run client-side. Only the extracted skill levels are
-// stored in the profile. In production the same rules apply before any LLM
-// narration call (see /api/coach — it receives skills, never CV text).
+// PRIVACY BY DESIGN: the raw CV stays in the browser and is scrubbed there
+// before optional model extraction. Only scrubbed text is sent to /api/extract-cv;
+// deterministic extraction runs locally, and only skill levels are stored in
+// the profile.
 
 export interface ScrubReport {
   originalLength: number;
