@@ -2,6 +2,7 @@ import { ROLE_MAP, ROLES } from '@/data/roles';
 import { SKILL_MAP } from '@/data/skills';
 import { COURSES } from '@/data/courses';
 import type { GapItem, MatchFactor, Profile, RoleMatch } from '@/lib/types';
+import { normalizeProfile } from '@/lib/profile';
 
 // ─── Deterministic matching engine (no AI in the numbers) ──────────────────
 // Published formula — displayed in the UI and in the methodology view:
@@ -51,9 +52,10 @@ function interestFit(profile: Profile, category: string): number {
     sustainability: ['sustainability', 'green energy'],
     creative: ['marketing'],
   };
-  if (!profile.interests.length) return 0.5;
-  const matched = profile.interests.filter((interest) => (map[interest] ?? [interest]).some((hit) => cat.includes(hit)));
-  return matched.length / profile.interests.length;
+  const interests = Array.isArray(profile.interests) ? profile.interests : [];
+  if (!interests.length) return 0.5;
+  const matched = interests.filter((interest) => (map[interest] ?? [interest]).some((hit) => cat.includes(hit)));
+  return matched.length / interests.length;
 }
 
 function workPreferenceFit(): number {
@@ -83,13 +85,16 @@ function categoryMatches(text: string, category: string): boolean {
   return (aliases[cat] ?? []).some((alias) => normalized.includes(alias));
 }
 
-export function strategyPriority(profile: Profile, roleSlug: string): number {
+export function strategyPriority(profileInput: Profile | Partial<Profile> | null | undefined, roleSlug: string): number {
+  const profile = normalizeProfile(profileInput);
   const role = ROLE_MAP[roleSlug];
   if (!role) return 99;
   const details = profile.extended;
   const strategy = details?.careerStrategy as string | undefined;
-  const currentWork = [details?.profession, details?.fieldOfWork, details?.specialization].filter(Boolean).join(' ');
+  const currentWork = [details?.profession, details?.fieldOfWork, details?.specialization, profile.objective].filter(Boolean).join(' ');
   const targetRole = details?.strategyRole ? ROLE_MAP[details.strategyRole] : undefined;
+
+  if (details?.strategyRole === roleSlug) return 0;
 
   if (strategy === 'enhance' || strategy === 'enhance-current') {
     if (categoryMatches(currentWork, role.category)) return 0;
@@ -116,10 +121,11 @@ export function strategyPriority(profile: Profile, roleSlug: string): number {
 }
 
 export function matchRole(
-  profile: Profile,
+  profileInput: Profile | Partial<Profile> | null | undefined,
   roleSlug: string,
   momentum: Record<string, number> = {},
 ): RoleMatch | null {
+  const profile = normalizeProfile(profileInput);
   const role = ROLE_MAP[roleSlug];
   if (!role) return null;
 
@@ -238,9 +244,10 @@ export function roleMarketMomentum(
  * It does not change the original compatibility score.
  */
 export function matchAll(
-  profile: Profile,
+  profileInput: Profile | Partial<Profile> | null | undefined,
   momentum: Record<string, number> = {},
 ): RoleMatch[] {
+  const profile = normalizeProfile(profileInput);
   const PROFILE_WEIGHT = 0.8;
   const MARKET_WEIGHT = 0.2;
   const STRATEGY_BONUS = 5;

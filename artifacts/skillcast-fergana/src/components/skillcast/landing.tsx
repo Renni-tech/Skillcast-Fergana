@@ -12,26 +12,19 @@ import { SDG_TITLES } from '@/lib/i18n';
 
 export function Landing() {
   const t = useT();
-  const { setView, setUserType, onboarded, lang } = useSkillCast();
+  const { setView, setUserType, onboarded, userType } = useSkillCast();
 
   const navigate = (type: 'individual' | 'employer' | 'institution') => {
     setUserType(type);
-    if (type === 'individual' && onboarded) setView('dashboard');
+    if (type === 'individual' && onboarded && userType === 'individual') setView('dashboard');
     else setView('onboarding');
   };
-
   const journey = [
     { icon: FileCheck2, title: t('landing.step1'), desc: t('landing.step1d') },
     { icon: Radar, title: t('landing.step2'), desc: t('landing.step2d') },
     { icon: GitBranch, title: t('landing.step3'), desc: t('landing.step3d') },
     { icon: GraduationCap, title: t('landing.step4'), desc: t('landing.step4d') },
   ];
-
-  const go = (type: 'individual' | 'employer' | 'institution') => {
-    setUserType(type);
-    if (type === 'individual' && onboarded) setView('dashboard');
-    else setView('onboarding');
-  };
 
   return (
     <div className="skillcast-landing overflow-hidden">

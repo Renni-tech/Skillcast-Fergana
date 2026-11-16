@@ -16,7 +16,8 @@ import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
-import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, SdgBadge, useSignals, useT } from './shared';
+import { normalizeProfile } from '@/lib/profile';
+import { roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 
 const FORKS = [
   {
@@ -84,8 +85,10 @@ function recommendationReason(
 
 export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
   const t = useT();
-  const { chosenRole, profile } = useSkillCast();
-  const strategy = profile.extended?.careerStrategy;
+  const { chosenRole, profile, setUserType, setView } = useSkillCast();
+  const safeProfile = normalizeProfile(profile);
+  const validMatches = Array.isArray(matches) ? matches.filter(isRenderableMatch) : [];
+  const strategy = safeProfile.extended?.careerStrategy;
 
   const defaultFork =
     strategy === 'enhance'
@@ -93,7 +96,7 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
       : strategy === 'related-transition'
         ? 'pivot'
         : strategy === 'new-field' || strategy === 'ai-skills'
-          ? ROLE_MAP[matches[0]?.roleSlug ?? '']?.pathType ?? 'work-with-ai'
+          ? ROLE_MAP[validMatches[0]?.roleSlug ?? '']?.pathType ?? 'work-with-ai'
           : ROLE_MAP[chosenRole ?? '']?.pathType ?? 'work-with-ai';
 
   const [fork, setFork] =
@@ -101,72 +104,115 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
 
   const forkMatches = useMemo(
     () =>
-      matches
+      validMatches
         .filter((match) => ROLE_MAP[match.roleSlug]?.pathType === fork)
         .slice(0, 6),
-    [matches, fork],
+    [validMatches, fork],
   );
-
-console.log('All matches:', matches);
-console.log('Selected fork:', fork);
-console.log('Filtered matches:', forkMatches);
+  const hasProfileSignals =
+    Object.keys(safeProfile.skills).length > 0 ||
+    safeProfile.interests.length > 0 ||
+    Boolean(safeProfile.objective || safeProfile.extended?.profession || safeProfile.extended?.fieldOfWork);
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
-      <h2 className="text-lg font-semibold">{t('match.title')}</h2>
+      <h2 className="text-lg font-semibold">{t('Learning pathways for future roles')}</h2>
 
       <p className="text-sm text-muted-foreground">
         {t('match.guidance')}
       </p>
 
-      <div
-        role="radiogroup"
-        aria-label={t('match.title')}
-        className="grid gap-3 sm:grid-cols-3"
-      >
-        {FORKS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            role="radio"
-            aria-checked={fork === item.id}
-            onClick={() => setFork(item.id)}
-            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
-              fork === item.id
-                ? 'border-blue-500 dark:border-blue-500 bg-blue-50 ring-1 ring-blue-200 dark:ring-blue-800'
-                : 'border-blue-100 dark:border-slate-700 bg-white hover:border-blue-300 dark:hover:border-blue-700'
-            }`}
-          >
-            <item.icon
-              className="mt-0.5 h-5 w-5 shrink-0 text-blue-600"
-              aria-hidden
-            />
-            <span>
-              <span className="block font-semibold">
-                {t(item.labelKey)}
-              </span>
-              <span className="block text-sm text-muted-foreground">
-                {t(item.descKey)}
-              </span>
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {forkMatches.length === 0 && (
-        <Card>
-          <CardContent className="p-4 text-sm text-muted-foreground">
-            {t('match.empty')}
+      {!hasProfileSignals && validMatches.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50/60 dark:bg-slate-900">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              {t('Your profile is still empty. These are broad starting points; add skills and interests for more relevant learning pathways.')}
+            </p>
+            <Button variant="outline" onClick={() => { setUserType('individual'); setView('onboarding'); }}>
+              {t('Complete learner profile')}
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      <div className="flex w-full min-w-0 flex-col gap-4">
-        {forkMatches.map((match) => (
-          <MatchCard key={match.roleSlug} match={match} />
-        ))}
-      </div>
+      {validMatches.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="text-sm text-muted-foreground">
+              {t('No valid pathway matches are available yet. Complete your learner profile to get recommendations.')}
+            </p>
+            <Button variant="outline" onClick={() => { setUserType('individual'); setView('onboarding'); }}>
+              {t('Complete learner profile')}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div
+            role="radiogroup"
+            aria-label={t('Learning pathways for future roles')}
+            className="grid gap-3 sm:grid-cols-3"
+          >
+            {FORKS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="radio"
+                aria-checked={fork === item.id}
+                onClick={() => setFork(item.id)}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
+                  fork === item.id
+                    ? 'border-blue-500 dark:border-blue-500 bg-blue-50 ring-1 ring-blue-200 dark:ring-blue-800'
+                    : 'border-blue-100 dark:border-slate-700 bg-white hover:border-blue-300 dark:hover:border-blue-700'
+                }`}
+              >
+                <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden />
+                <span>
+                  <span className="block font-semibold">{t(item.labelKey)}</span>
+                  <span className="block text-sm text-muted-foreground">{t(item.descKey)}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {forkMatches.length === 0 ? (
+            <Card>
+              <CardContent className="p-4 text-sm text-muted-foreground">
+                {t('match.empty')}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="flex w-full min-w-0 flex-col gap-4">
+              {forkMatches.map((match) => (
+                <MatchCard key={match.roleSlug} match={match} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
+  );
+}
+
+function isRenderableMatch(value: unknown): value is RoleMatch {
+  if (typeof value !== 'object' || value === null) return false;
+  const match = value as Partial<RoleMatch>;
+  const demand = match.demand;
+  return Boolean(
+    typeof match.roleSlug === 'string' &&
+    ROLE_MAP[match.roleSlug] &&
+    typeof match.score === 'number' &&
+    Number.isFinite(match.score) &&
+    typeof match.skillReadiness === 'number' &&
+    Number.isFinite(match.skillReadiness) &&
+    Array.isArray(match.matchingSkills) &&
+    Array.isArray(match.missingSkills) &&
+    Array.isArray(match.gap) &&
+    Array.isArray(match.factors) &&
+    typeof demand === 'object' &&
+    demand !== null &&
+    Number.isFinite(demand.moderate) &&
+    Number.isFinite(demand.accelerated),
   );
 }
 
@@ -183,11 +229,14 @@ function MatchCard({ match }: { match: RoleMatch }) {
   const { momentumMap } = useSignals();
 
   const role = ROLE_MAP[match.roleSlug];
+  const safeProfile = normalizeProfile(profile);
   const isChosen = chosenRole === match.roleSlug;
 
   const [coach, setCoach] = useState<string | null>(null);
   const [coachFallback, setCoachFallback] = useState(false);
   const [coachLoading, setCoachLoading] = useState(false);
+
+  if (!role) return null;
 
   const demand =
     scenario === 'accelerated'
@@ -198,10 +247,10 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
   const exposure =
     role.automationExposure < 0.3
-      ? 'Lower'
+      ? t('Lower')
       : role.automationExposure < 0.6
-        ? 'Moderate'
-        : 'Higher';
+        ? t('Moderate')
+        : t('Higher');
 
   const openRoadmap = () => {
     setChosenRole(match.roleSlug);
@@ -250,16 +299,16 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
   const pathLabel =
     role.pathType === 'work-with-ai'
-      ? 'Work with AI'
+      ? t('Work with AI')
       : role.pathType === 'pivot'
-        ? 'Pivot to another career'
-        : 'Emerging opportunities';
+        ? t('Pivot to another career')
+        : t('Emerging opportunities');
 
   const factorLabels: Record<string, string> = {
-    Skills: 'Skills',
-    Interests: 'Interests',
-    Experience: 'Experience',
-    'Work preferences': 'Work Preferences',
+    Skills: t('Skills'),
+    Interests: t('Interests'),
+    Experience: t('Experience'),
+    'Work preferences': t('Work preferences'),
   };
 
   return (
@@ -332,16 +381,16 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
       <CardContent className="space-y-4">
         <section
-          aria-label={t('Current readiness')}
+          aria-label={t('Current skill readiness')}
           className="rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/70 p-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-slate-900">
-                {t('Current Readiness')}
+                {t('Current skill readiness')}
               </p>
               <p className="text-xs text-slate-600">
-                {t('Skills needed for this role')}
+                {t('Skills needed for this learning pathway')}
               </p>
             </div>
             <span className="text-lg font-bold tabular-nums text-blue-700">
@@ -352,7 +401,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
           <Progress
             value={match.skillReadiness}
             className="mt-2 h-2.5"
-            aria-label={`${t('Current readiness')} ${match.skillReadiness}%`}
+            aria-label={`${t('Current skill readiness')} ${match.skillReadiness}%`}
           />
 
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -386,7 +435,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
                     className="flex items-center justify-between gap-3 rounded-lg bg-blue-50/70 px-3 py-2 text-sm"
                   >
                     <span className="font-medium text-slate-800">
-                      {item.skillName}
+                      {skillName(t, item.skill)}
                     </span>
                     <span className="shrink-0 text-xs text-slate-600">
                       {item.userLevel}/5 {t('harada.current')} · {item.requiredLevel} {t('harada.required')}
@@ -414,7 +463,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
                     className="flex items-center justify-between gap-3 rounded-lg bg-indigo-50/60 px-3 py-2 text-sm"
                   >
                     <span className="font-medium text-slate-800">
-                      {gap.skillName}
+                      {skillName(t, gap.skill)}
                     </span>
                     <span className="shrink-0 text-xs text-slate-600">
                       {gap.userLevel}/5 {t('harada.current')} · {gap.minLevel} {t('harada.required')}
@@ -432,7 +481,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
         <section className="rounded-xl border border-blue-100 dark:border-slate-700 p-4">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">
-            {t('Career Outlook')}
+              {t('Learning outlook')}
           </h3>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -501,7 +550,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
             <div className="mt-3 space-y-3 border-t border-blue-50 pt-3 text-sm text-slate-600">
               <p>
-                {recommendationReason(role.slug, profile, t)}
+                {recommendationReason(role.slug, safeProfile, t)}
                 {t('The compatibility score uses your saved profile and this role&apos;s requirements. Skill readiness is shown separately.')}
               </p>
 
@@ -521,17 +570,17 @@ function MatchCard({ match }: { match: RoleMatch }) {
                     </strong>{' '}
                     {Math.round(factor.value * 100)}{t('% factor value')}
                     {factor.label === 'Skills'
-                      ? ` · ${currentSkills.length} of ${role.skills.length} required skills selected; readiness ${match.skillReadiness}%`
+                      ? ` · ${t('Required skill coverage: {current} of {total}; readiness {readiness}%.', { current: currentSkills.length, total: role.skills.length, readiness: match.skillReadiness })}`
                       : factor.label === 'Experience'
-                        ? ` · ${profile.years} years recorded`
+                        ? ` · ${t('{years} years recorded', { years: safeProfile.years })}`
                         : factor.label === 'Interests'
-                          ? ` · ${profile.interests.length ? profile.interests.join(', ') : 'no interests selected'}`
+                          ? ` · ${safeProfile.interests.length ? t('Interests used: {interests}', { interests: safeProfile.interests.map((interest) => t(`interest.${interest}`)).join(', ') }) : t('No interests selected')}`
                           : ` · ${
-                              profile.extended?.workPreferences?.filter(
+                              safeProfile.extended?.workPreferences?.filter(
                                 (preference) => preference !== 'none',
                               ).length
-                                ? 'preferences are saved; role accommodation fit is unavailable, so this factor is neutral'
-                                : 'no additional preferences selected; this factor is neutral'
+                                ? t('Saved preferences are not represented in the role data, so this factor stays neutral.')
+                                : t('No additional preferences selected; this factor stays neutral.')
                             }`}
                   </li>
                 ))}
@@ -576,7 +625,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
             className="shrink-0 bg-green-600 text-white hover:bg-green-700"
             onClick={openRoadmap}
           >
-            {isChosen ? 'View Roadmap' : 'Explore Roadmap'}
+            {isChosen ? t('View Roadmap') : t('Explore Roadmap')}
           </Button>
         </div>
       </CardContent>

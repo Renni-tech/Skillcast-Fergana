@@ -78,10 +78,10 @@ const en: Dict = {
   'nav.reset': 'Reset demo',
   'nav.lang': 'Language',
 
-  'landing.title': 'A weather forecast for your career in the AI era',
+  'landing.title': 'A learning forecast for your future skills',
   'landing.subtitle':
-    'SkillCast tracks live job-market signals, shows which skills are rising or fading, matches you to future roles, and builds a step-by-step reskilling pathway — with every role linked to the UN SDGs.',
-  'landing.cta': 'Start my forecast',
+    'Build a learner profile, see which skills to strengthen next, and follow a practical learning path rooted in Fergana City and connected to opportunities across Uzbekistan and beyond.',
+  'landing.cta': 'Build my learner profile',
   'landing.cta2': 'Employer view',
   'landing.badge': 'Proof of concept · synthetic demo profiles only',
   'landing.steps.title': 'From who you are today to where you can be',
@@ -1542,10 +1542,10 @@ const ru: Dict = {
   'nav.reset': 'Сбросить демо',
   'nav.lang': 'Язык',
 
-  'landing.title': 'Прогноз погоды для вашей карьеры в эпоху ИИ',
+  'landing.title': 'План обучения для навыков будущего',
   'landing.subtitle':
-    'SkillCast отслеживает живые сигналы рынка труда, показывает, какие навыки растут, а какие устаревают, подбирает роли будущего и строит пошаговый план переобучения — каждая роль связана с ЦУР ООН.',
-  'landing.cta': 'Построить мой прогноз',
+    'Создайте профиль учащегося, узнайте, какие навыки развивать дальше, и следуйте практическому учебному маршруту из Ферганы к возможностям по всему Узбекистану и за его пределами.',
+  'landing.cta': 'Создать профиль учащегося',
   'landing.cta2': 'Взгляд работодателя',
   'landing.badge': 'Прототип · только синтетические демо-профили',
   'landing.steps.title': 'От того, кто вы сегодня, к тому, кем можете стать',

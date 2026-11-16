@@ -11,6 +11,8 @@ import type {
   ScenarioId,
   UserType,
 } from '@/lib/types';
+import { EMPTY_PROFILE, normalizeProfile } from '@/lib/profile';
+export { EMPTY_PROFILE } from '@/lib/profile';
 
 export type View =
   | 'landing'
@@ -53,41 +55,6 @@ interface SkillCastState {
   resetDemo: () => void;
   setDashTab: (tab: string) => void;
 }
-
-export const EMPTY_PROFILE: Profile = {
-  persona: null,
-  years: 0,
-  interests: [],
-  budget: 5,
-  skills: {},
-  inclusion: {
-    dyslexia: false,
-    visual: false,
-    hearing: false,
-    mobility: false,
-    none: true,
-  },
-  objective: '',
-  cvScrub: null,
-  intakeMode: null,
-  extended: {
-    employmentStatus: '',
-    fieldOfWork: '',
-    profession: '',
-    specialization: '',
-    educationLevel: '',
-    country: '',
-    city: '',
-    languages: [],
-    careerStrategy: '',
-    strategyRole: '',
-    focusSkill: '',
-    newField: '',
-    aiGoal: '',
-    aiSkill: '',
-    workPreferences: ['none'],
-  },
-};
 
 export const EMPTY_EMPLOYER: EmployerProfile = {
   company: '',
@@ -134,9 +101,22 @@ export const useSkillCast = create<SkillCastState>()(
       setScenario: (s) => set({ scenario: s }),
 
       setProfile: (p) =>
-        set((st) => ({
-          profile: { ...st.profile, ...p },
-        })),
+        set((st) => {
+          const inclusion = p.inclusion
+            ? { ...st.profile.inclusion, ...p.inclusion }
+            : st.profile.inclusion;
+          const extended = p.extended
+            ? { ...st.profile.extended, ...p.extended }
+            : st.profile.extended;
+          return {
+            profile: normalizeProfile({
+              ...st.profile,
+              ...p,
+              inclusion,
+              extended,
+            }),
+          };
+        }),
 
       setEmployer: (p) =>
         set((st) => ({
@@ -215,6 +195,7 @@ export const useSkillCast = create<SkillCastState>()(
         onboarded: s.onboarded,
       }),
       onRehydrateStorage: () => (state) => {
+        if (state) state.setProfile(normalizeProfile(state.profile));
         if (state && !['en', 'uz', 'ru'].includes(String(state.lang))) {
           state.setLang('en');
         }

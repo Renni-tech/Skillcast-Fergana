@@ -375,6 +375,42 @@ const inlineCopy: Record<string, { uz: string; ru: string }> = {
   ,"Level {level}": { uz: "{level}-daraja", ru: "Уровень {level}" }
   ,"SDG {goal}": { uz: "SDG {goal}", ru: "ЦУР {goal}" }
   ,"Sustainable Development Goal {goal}": { uz: "Barqaror rivojlanish maqsadi {goal}", ru: "Цель в области устойчивого развития {goal}" }
+  ,"SkillCast Fergana home": { uz: "SkillCast Fergana bosh sahifasi", ru: "Главная SkillCast Fergana" }
+  ,"Learning pathways": { uz: "O‘quv yo‘nalishlari", ru: "Учебные траектории" }
+  ,"Learning pathways for future roles": { uz: "Kelajakdagi kasblar uchun o‘quv yo‘llari", ru: "Учебные траектории для будущих профессий" }
+  ,"Your profile is still empty. These are broad starting points; add skills and interests for more relevant learning pathways.": { uz: "Profilingiz hali to‘ldirilmagan. Bular umumiy boshlang‘ich tavsiyalar; mosroq o‘quv yo‘llari uchun ko‘nikma va qiziqishlaringizni kiriting.", ru: "Профиль пока не заполнен. Это общие варианты для старта; добавьте навыки и интересы, чтобы уточнить учебные траектории." }
+  ,"Complete learner profile": { uz: "O‘quvchi profilini to‘ldirish", ru: "Заполнить профиль учащегося" }
+  ,"No valid pathway matches are available yet. Complete your learner profile to get recommendations.": { uz: "Hozircha mos o‘quv yo‘llari topilmadi. Tavsiyalar olish uchun o‘quvchi profilingizni to‘ldiring.", ru: "Пока нет подходящих учебных траекторий. Заполните профиль учащегося, чтобы получить рекомендации." }
+  ,"Skills": { uz: "Ko‘nikmalar", ru: "Навыки" }
+  ,"Interests": { uz: "Qiziqishlar", ru: "Интересы" }
+  ,"Experience": { uz: "Tajriba", ru: "Опыт" }
+  ,"Work preferences": { uz: "Ish afzalliklari", ru: "Рабочие предпочтения" }
+  ,"Required skill coverage: {current} of {total}; readiness {readiness}%.": { uz: "Kerakli ko‘nikmalar: {total} tadan {current} tasi; tayyorgarlik {readiness}%.", ru: "Подтверждено навыков: {current} из {total}; готовность к обучению — {readiness}%." }
+  ,"{years} years recorded": { uz: "{years} yil tajriba qayd etilgan", ru: "Указан опыт: {years} лет" }
+  ,"Interests used: {interests}": { uz: "Hisobga olingan qiziqishlar: {interests}", ru: "Учтённые интересы: {interests}" }
+  ,"No interests selected": { uz: "Qiziqishlar tanlanmagan", ru: "Интересы не выбраны" }
+  ,"Saved preferences are not represented in the role data, so this factor stays neutral.": { uz: "Lavozim ma’lumotlarida saqlangan afzalliklar aks etmagani uchun bu omil neytral qoladi.", ru: "Данные о ролях не отражают сохранённые предпочтения, поэтому этот фактор остаётся нейтральным." }
+  ,"No additional preferences selected; this factor stays neutral.": { uz: "Qo‘shimcha afzalliklar tanlanmagan; bu omil neytral qoladi.", ru: "Дополнительные предпочтения не выбраны; этот фактор остаётся нейтральным." }
+  ,"Work with AI": { uz: "AI bilan ishlash", ru: "Работа с ИИ" }
+  ,"Pivot to another career": { uz: "Boshqa kasbga o‘tish", ru: "Переход в другую профессию" }
+  ,"Emerging opportunities": { uz: "Yangi imkoniyatlar", ru: "Новые возможности" }
+  ,"Lower": { uz: "Past", ru: "Низкий" }
+  ,"Moderate": { uz: "O‘rtacha", ru: "Умеренный" }
+  ,"Higher": { uz: "Yuqori", ru: "Высокий" }
+  ,"View Roadmap": { uz: "Yo‘l xaritasini ko‘rish", ru: "Посмотреть маршрут" }
+  ,"Open learning pathway": { uz: "O‘quv yo‘lini ochish", ru: "Открыть учебную траекторию" }
+  ,"Your learning profile": { uz: "O‘quv profilingiz", ru: "Ваш учебный профиль" }
+  ,"Your future-ready learning plan": { uz: "Kelajak ko‘nikmalari bo‘yicha o‘quv rejangiz", ru: "Ваш учебный план для навыков будущего" }
+  ,"Leading pathway:": { uz: "Asosiy o‘quv yo‘li:", ru: "Основная траектория:" }
+  ,"Learning outlook": { uz: "O‘quv yo‘li istiqboli", ru: "Перспективы учебной траектории" }
+  ,"Student": { uz: "Talaba", ru: "Студент" }
+  ,"Unemployed": { uz: "Ishsiz", ru: "Безработный" }
+  ,"Career changer": { uz: "Kasbini o‘zgartirayotgan", ru: "Меняющий профессию" }
+  ,"Current status and years of experience are required. Other details, CV, and skills can be added to personalize your learning pathways.": { uz: "Joriy holat va ish tajribasi yillari majburiy. Boshqa ma’lumotlar, CV va ko‘nikmalarni o‘quv yo‘llarini shaxsiylashtirish uchun qo‘shishingiz mumkin.", ru: "Укажите текущий статус и стаж. Остальные данные, резюме и навыки можно добавить для персонализации учебных траекторий." }
+  ,"Choose skills and rate your current level. Add skills to personalize your matches; you can continue without them.": { uz: "Ko‘nikmalarni tanlab, hozirgi darajangizni baholang. Mos tavsiyalar uchun ko‘nikmalarni qo‘shing; ularsiz ham davom etish mumkin.", ru: "Выберите навыки и оцените свой уровень. Добавьте навыки для персональных рекомендаций; можно продолжить и без них." }
+  ,"What learning or career outcome would you like to work toward?": { uz: "Qaysi o‘quv yoki kasbiy maqsadga erishmoqchisiz?", ru: "Какой учебной или карьерной цели вы хотите достичь?" }
+  ,"Describe the skills, study goal, or future role you want to work toward…": { uz: "Rivojlantirmoqchi bo‘lgan ko‘nikmalaringiz, o‘quv maqsadingiz yoki kelajakdagi lavozimingizni yozing…", ru: "Опишите навыки, учебную цель или будущую роль, к которой вы стремитесь…" }
+  ,"Current skill readiness": { uz: "Ko‘nikmalarning hozirgi darajasi", ru: "Текущий уровень навыков" }
 };
 
 export default inlineCopy;

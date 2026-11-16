@@ -34,7 +34,7 @@ function useMounted() {
 
 export function Header() {
   const t = useT();
-  const { view, setView, lang, setLang, onboarded, resetDemo } = useSkillCast();
+  const { view, setView, lang, setLang, onboarded, userType, resetDemo } = useSkillCast();
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -42,7 +42,7 @@ export function Header() {
 
   const views: Array<{ id: View; label: string; enabled: boolean }> = [
     { id: 'landing', label: t('nav.home'), enabled: true },
-    { id: 'dashboard', label: t('nav.dashboard'), enabled: onboarded },
+    { id: 'dashboard', label: t('nav.dashboard'), enabled: onboarded && userType === 'individual' },
     { id: 'employer', label: t('nav.employer'), enabled: true },
     { id: 'signals', label: t('nav.signals'), enabled: true },
   ];
@@ -56,11 +56,11 @@ export function Header() {
         <button
           onClick={() => setView('landing')}
           className="flex items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
-          aria-label={t('SkillCast home')}
+          aria-label={t('SkillCast Fergana home')}
         >
           <CloudSun className={`h-5 w-5 ${landing ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'}`} aria-hidden />
           <span className="text-lg">
-            Skill<span className={landing ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'}>Cast</span>
+            Skill<span className={landing ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'}>Cast</span> <span className="text-sm font-medium">Fergana</span>
           </span>
           <span className={`hidden rounded-full border px-2 py-0.5 text-[10px] font-medium sm:inline ${landing ? 'border-white/15 text-blue-100/55' : 'border-border text-muted-foreground'}`}>
             POC

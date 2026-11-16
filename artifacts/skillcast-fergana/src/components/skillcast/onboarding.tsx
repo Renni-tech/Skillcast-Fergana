@@ -344,11 +344,11 @@ function ProfileStep({
             <Input id="field-work" value={details.fieldOfWork ?? ''} onChange={(e) => patchDetails({ fieldOfWork: e.target.value })} placeholder={t('e.g. Healthcare, finance, technology')} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="profession" className="text-slate-800">{t('Profession')} <span className="text-rose-600">*</span></Label>
+            <Label htmlFor="profession" className="text-slate-800">{t('Profession')}</Label>
             <Input id="profession" value={details.profession ?? ''} onChange={(e) => patchDetails({ profession: e.target.value })} placeholder={t('e.g. Operations analyst')} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="specialization" className="text-slate-800">{t('Specialization')} <span className="text-rose-600">*</span></Label>
+            <Label htmlFor="specialization" className="text-slate-800">{t('Specialization')}</Label>
             <Input id="specialization" value={details.specialization ?? ''} onChange={(e) => patchDetails({ specialization: e.target.value })} placeholder={t('e.g. Supply chain planning')} className={LIGHT_INPUT} />
           </div>
           <div>
@@ -356,14 +356,14 @@ function ProfileStep({
             <Input id="experience" type="number" min={0} max={60} step={1} value={profile.years} onChange={(e) => setProfile({ years: e.target.value === '' ? 0 : Number(e.target.value) })} className={LIGHT_INPUT} />
           </div>
           <div>
-            <Label htmlFor="education-level" className="text-slate-800">{t('Education level')} <span className="text-rose-600">*</span></Label>
+            <Label htmlFor="education-level" className="text-slate-800">{t('Education level')}</Label>
             <Select value={details.educationLevel || '__unset__'} onValueChange={(value) => patchDetails({ educationLevel: value === '__unset__' ? '' : value })}>
               <SelectTrigger id="education-level" className={LIGHT_SELECT}><SelectValue placeholder={t('Select highest level')} /></SelectTrigger>
               <SelectContent><SelectItem value="__unset__">{t('Select highest level')}</SelectItem>{EDUCATION_OPTIONS.map((option) => <SelectItem key={option} value={option}>{t(option)}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
-        <p className="text-xs text-slate-500">{t('Fields marked * are required. Experience must be a whole number from 0 to 60.')}</p>
+        <p className="text-xs text-slate-500">{t('Current status and years of experience are required. Other details, CV, and skills can be added to personalize your learning pathways.')}</p>
       </section>
 
       <section className="space-y-4 border-t border-blue-100 dark:border-slate-700 pt-6">
@@ -377,7 +377,7 @@ function ProfileStep({
       <section className="space-y-4 border-t border-blue-100 dark:border-slate-700 pt-6">
         <div>
           <h3 className="font-semibold text-slate-900">{t('Skills Assessment')}</h3>
-          <p className="text-sm text-slate-600">{t('Choose skills and rate your current level. Add at least one skill to continue.')}</p>
+          <p className="text-sm text-slate-600">{t('Choose skills and rate your current level. Add skills to personalize your matches; you can continue without them.')}</p>
         </div>
         <StepSkills />
       </section>
@@ -415,8 +415,8 @@ function InterestsGoalsStep() {
     <div className="space-y-6">
       <StepInterests />
       <section className="border-t border-blue-100 dark:border-slate-700 pt-6">
-        <Label htmlFor="career-goal" className="text-slate-800">{t('What would you like to achieve in your career?')}</Label>
-        <Textarea id="career-goal" value={profile.objective} maxLength={500} onChange={(e) => setProfile({ objective: e.target.value.slice(0, 500) })} placeholder={t('Describe the role, change, or outcome you are working toward…')} rows={4} className="mt-2 border-blue-100 dark:border-slate-700 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
+        <Label htmlFor="career-goal" className="text-slate-800">{t('What learning or career outcome would you like to work toward?')}</Label>
+        <Textarea id="career-goal" value={profile.objective} maxLength={500} onChange={(e) => setProfile({ objective: e.target.value.slice(0, 500) })} placeholder={t('Describe the skills, study goal, or future role you want to work toward…')} rows={4} className="mt-2 border-blue-100 dark:border-slate-700 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
         <p className="mt-1 text-right text-xs text-slate-500">{profile.objective.length} / 500</p>
       </section>
     </div>

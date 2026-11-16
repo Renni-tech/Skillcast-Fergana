@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   RefreshCw,
   Activity,
+  BookOpen,
   Mail,
   RadioTower,
   ScrollText,
@@ -44,6 +45,13 @@ import { DemandTab } from './demand';
 import { FutureRadarStep } from './onboarding';
 import { ProgressDashboard } from './progress-dashboard';
 
+const EMPLOYMENT_STATUS_LABELS = {
+  student: 'Student',
+  working: 'Working professional',
+  unemployed: 'Unemployed',
+  'career-changer': 'Career changer',
+} as const;
+
 export function Dashboard() {
   const t = useT();
   const { scenario, setScenario, profile, chosenRole, dashTab, setDashTab } = useSkillCast();
@@ -65,6 +73,7 @@ export function Dashboard() {
         <TabsList className="flex h-auto w-full flex-wrap gap-1">
           <TabsTrigger value="overview" className="gap-1.5"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
           <TabsTrigger value="matches" className="gap-1.5">{t('tab.matches')}</TabsTrigger>
+          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('Learning pathways')}</TabsTrigger>
           <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
           <TabsTrigger value="harada" className="gap-1.5">{t('Harada Method')}</TabsTrigger>
           <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
@@ -77,6 +86,9 @@ export function Dashboard() {
         </TabsContent>
         <TabsContent value="matches" className="mt-4">
           <MatchesTab matches={matches} />
+        </TabsContent>
+        <TabsContent value="pathway" className="mt-4">
+          <PathwayTab matches={matches} />
         </TabsContent>
         <TabsContent value="radar" className="mt-4">
           <FutureRadarStep details={profile.extended ?? {}} onScenario={setScenario} />
@@ -152,14 +164,14 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
       <Card className="border-blue-100 dark:border-slate-700 bg-gradient-to-r from-white dark:from-slate-900 via-blue-50/70 dark:via-slate-800 to-indigo-50/70 dark:to-slate-900 shadow-sm">
         <CardContent className="grid gap-5 pt-6 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="border-blue-200 bg-white text-blue-700">{t('Your career snapshot')}</Badge>{profileDetails?.employmentStatus && <Badge variant="secondary">{profileDetails.employmentStatus.replace('-', ' ')}</Badge>}</div>
-            <h2 className="mt-2 text-xl font-semibold text-slate-900">{profileDetails?.profession || t('Your future-ready career plan')}</h2>
+            <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="border-blue-200 bg-white text-blue-700">{t('Your learning profile')}</Badge>{profileDetails?.employmentStatus && <Badge variant="secondary">{t(EMPLOYMENT_STATUS_LABELS[profileDetails.employmentStatus as keyof typeof EMPLOYMENT_STATUS_LABELS])}</Badge>}</div>
+            <h2 className="mt-2 text-xl font-semibold text-slate-900">{profileDetails?.profession || t('Your future-ready learning plan')}</h2>
             <p className="mt-1 text-sm text-slate-600">{profileDetails?.specialization ? `${profileDetails.specialization} · ` : ''}{profile.skills ? Object.keys(profile.skills).length : 0} {t('skills in your profile ·')} {profile.budget} {t('learning hours per week')}</p>
-            {leadingRole && <p className="mt-2 text-sm text-slate-700">{t('Leading match:')} <strong>{roleTitle(t, leadingRole.slug)}</strong> · {leadingMatch.score}{t('% fit based on your profile')}</p>}
+            {leadingRole && <p className="mt-2 text-sm text-slate-700">{t('Leading pathway:')} <strong>{roleTitle(t, leadingRole.slug)}</strong> · {leadingMatch.score}{t('% fit based on your profile')}</p>}
             {leadingRole && <p className="mt-1 text-sm text-slate-600">{t('AI task exposure:')} {t(leadingExposure ?? '')} {t('· this describes task change, not a job replacement probability.')}</p>}
-            <p className="mt-1 text-sm text-slate-600">{t('Learning:')} {completedCourses.length} {t('completed course')} · {t('· Next:')} {nextCourse?.title ?? t('review your pathway')}</p>
+            <p className="mt-1 text-sm text-slate-600">{t('Learning:')} {completedCourses.length} {t('completed course')} · {t('· Next:')} {nextCourse ? courseTitle(t, nextCourse.slug) : t('review your pathway')}</p>
           </div>
-          <div className="flex flex-wrap gap-2"><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('harada')}>{t('Open pathway')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('pathway')}>{t('Open learning pathway')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button></div>
         </CardContent>
       </Card>
 
