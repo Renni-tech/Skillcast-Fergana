@@ -71,7 +71,7 @@ describe('safe learner data and deterministic personalization', () => {
     expect(state.completedCourses).toEqual([]);
     expect(state.haradaTaskStatus).toEqual({});
     expect(state.chosenRole).toBeNull();
-    expect(state.lang).toBe('en');
+    expect(state.lang).toBe('uz'); // invalid or legacy locale falls back to the Uzbek default
     expect(state.learnerOnboarded).toBe(true);
   });
 
