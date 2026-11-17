@@ -5,8 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { makeT, SDG_COLORS as SDG_HEX } from '@/lib/i18n';
 import { useSkillCast } from '@/lib/store';
 import type { SignalsPayload } from '@/lib/types';
+import { SKILL_MAP } from '@/data/skills';
+import { cachedFerganaSignals, parseFerganaSignals } from '@/lib/fergana-evidence';
 
-// ─── Signals context: one shared fetch of /api/signals for the whole app ───
+// The original SkillCast keeps /api/signals. Fergana uses only its approved feed.
+const SIGNALS_CACHE_KEY = 'skillcast-fergana-approved-signals-v1';
 
 interface SignalsCtx {
   data: SignalsPayload | null;
@@ -35,14 +38,20 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
   const load = async (method: 'GET' | 'POST') => {
     if (method === 'POST') setRefreshing(true);
     try {
-      const res = await fetch('/api/signals', { method, cache: 'no-store' });
+      const res = await fetch('/api/fergana/signals', { method, cache: 'no-store', signal: AbortSignal.timeout(30000) });
       if (!res.ok) throw new Error(`signals ${res.status}`);
-      const json = (await res.json()) as SignalsPayload;
+      const json = parseFerganaSignals(await res.json());
       setData(json);
       setError(null);
-    } catch (e) {
-      console.error(e);
-      setError('Could not load signals');
+      try { localStorage.setItem(SIGNALS_CACHE_KEY, JSON.stringify(json)); } catch { /* Source caching is optional; learner storage is unchanged. */ }
+    } catch {
+      let saved: SignalsPayload | null = null;
+      try {
+        const raw = localStorage.getItem(SIGNALS_CACHE_KEY);
+        if (raw) saved = cachedFerganaSignals(parseFerganaSignals(JSON.parse(raw)));
+      } catch { /* Corrupt source cache is discarded, never interpreted as live data. */ }
+      setData((previous) => previous ? cachedFerganaSignals(previous) : saved);
+      setError('evidence.error');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -85,8 +94,11 @@ export const roleTitle = (t: Translate, slug: string) => t(`hr.role.${slug}.titl
 export const roleTagline = (t: Translate, slug: string) => t(`hr.role.${slug}.tagline`);
 export const roleSignals = (t: Translate, slug: string) => t(`hr.role.${slug}.signals`);
 export const roleSdgMechanism = (t: Translate, slug: string) => t(`hr.role.${slug}.sdgMechanism`);
-export const skillName = (t: Translate, slug: string) => t(`skill.${slug}`);
-export const skillCategory = (t: Translate, category: string) => t(`skill.category.${category}`);
+// Saved profiles and CV extraction may contain skills outside the curated
+// registry. Keep these user values visible without treating them as UI keys.
+export const skillName = (t: Translate, slug: string) => SKILL_MAP[slug] ? t(`skill.${slug}`) : slug;
+export const skillCategory = (t: Translate, category: string) =>
+  Object.values(SKILL_MAP).some((skill) => skill.category === category) ? t(`skill.category.${category}`) : category;
 export const roleCategory = (t: Translate, category: string) => t(`role.category.${category}`);
 export const courseTitle = (t: Translate, slug: string) => t(`course.${slug}.title`);
 export const courseProvider = (t: Translate, slug: string) => t(`course.${slug}.provider`);

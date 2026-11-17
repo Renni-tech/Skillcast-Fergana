@@ -28,6 +28,7 @@ import type {
   CoachInput,
   CvInput,
   CvResult,
+  FerganaSignals,
   HealthStatus,
   IngestSignals200,
   NarrateCareer200,
@@ -61,6 +62,181 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetFerganaSignalsUrl = () => {
+
+
+
+
+  return `/api/fergana/signals`
+}
+
+/**
+ * @summary Approved Fergana source snapshots, skill signals and provenance
+ */
+export const getFerganaSignals = async ( options?: Parameters<typeof customFetch>[1]): Promise<FerganaSignals> => {
+
+  return customFetch<FerganaSignals>(getGetFerganaSignalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFerganaSignalsQueryKey = () => {
+    return [
+    `/api/fergana/signals`
+    ] as const;
+    }
+
+
+export const getGetFerganaSignalsQueryOptions = <TData = Awaited<ReturnType<typeof getFerganaSignals>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFerganaSignalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFerganaSignals>>> = ({ signal }) => getFerganaSignals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFerganaSignalsQueryResult = NonNullable<Awaited<ReturnType<typeof getFerganaSignals>>>
+export type GetFerganaSignalsQueryError = ErrorType<unknown>
+
+
+export function useGetFerganaSignals<TData = Awaited<ReturnType<typeof getFerganaSignals>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFerganaSignals>>,
+          TError,
+          Awaited<ReturnType<typeof getFerganaSignals>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFerganaSignals<TData = Awaited<ReturnType<typeof getFerganaSignals>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFerganaSignals>>,
+          TError,
+          Awaited<ReturnType<typeof getFerganaSignals>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFerganaSignals<TData = Awaited<ReturnType<typeof getFerganaSignals>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Approved Fergana source snapshots, skill signals and provenance
+ */
+
+export function useGetFerganaSignals<TData = Awaited<ReturnType<typeof getFerganaSignals>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFerganaSignals>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFerganaSignalsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRefreshFerganaSignalsUrl = () => {
+
+
+
+
+  return `/api/fergana/signals`
+}
+
+/**
+ * @summary Check approved sources while respecting each source's refresh interval
+ */
+export const refreshFerganaSignals = async ( options?: Parameters<typeof customFetch>[1]): Promise<FerganaSignals> => {
+
+  return customFetch<FerganaSignals>(getRefreshFerganaSignalsUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRefreshFerganaSignalsMutationKey = () => ['refreshFerganaSignals'] as const;
+
+export const getRefreshFerganaSignalsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshFerganaSignals>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof refreshFerganaSignals>>, TError,void, TContext> => {
+
+const mutationKey = getRefreshFerganaSignalsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshFerganaSignals>>, void> = () => {
+
+
+          return  refreshFerganaSignals(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RefreshFerganaSignalsMutationResult = NonNullable<Awaited<ReturnType<typeof refreshFerganaSignals>>>
+
+    export type RefreshFerganaSignalsMutationError = ErrorType<unknown>
+
+
+    /**
+ * @summary Check approved sources while respecting each source's refresh interval
+ */
+export const useRefreshFerganaSignals = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshFerganaSignals>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof refreshFerganaSignals>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRefreshFerganaSignalsMutationOptions(options), queryClient);
+    }
 
 export const getGetSignalsUrl = () => {
 

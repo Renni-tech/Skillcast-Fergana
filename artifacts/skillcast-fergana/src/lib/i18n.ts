@@ -8,6 +8,7 @@ import { GUIDANCE_COPY } from './guidance-i18n';
 import { HR_DICTIONARIES } from './hr-i18n';
 import inlineCopy from './i18n-inline';
 import uz from './i18n-uz';
+import { LEARNER_FLOW_COPY } from './learner-flow-i18n';
 
 // ─── i18n: English · Uzbek · Russian ───────────────────────────────────────
 // Interface-owned UI and HR registry labels are translated. Real third-party
@@ -2031,6 +2032,10 @@ for (const [source, translations] of Object.entries(inlineCopy)) {
   DICTS.en[source] = source;
   DICTS.uz[source] = translations.uz;
   DICTS.ru[source] = translations.ru;
+}
+
+for (const [key, copy] of Object.entries(LEARNER_FLOW_COPY)) {
+  for (const lang of ['en', 'uz', 'ru'] as const) DICTS[lang][key] = copy[lang];
 }
 
 const referenceKeys = Object.keys(DICTS.en).sort();

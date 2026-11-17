@@ -12,11 +12,11 @@ import { SDG_TITLES } from '@/lib/i18n';
 
 export function Landing() {
   const t = useT();
-  const { setView, setUserType, onboarded, userType } = useSkillCast();
+  const { setView, setUserType, learnerOnboarded } = useSkillCast();
 
   const navigate = (type: 'individual' | 'employer' | 'institution') => {
     setUserType(type);
-    if (type === 'individual' && onboarded && userType === 'individual') setView('dashboard');
+    if (type === 'individual' && learnerOnboarded) setView('dashboard');
     else setView('onboarding');
   };
   const journey = [
@@ -52,7 +52,7 @@ export function Landing() {
               onClick={() => navigate('individual')}
               className="h-12 gap-2 rounded-full border border-indigo-200/25 bg-gradient-to-r from-indigo-500 to-violet-500 px-7 text-white shadow-[0_10px_40px_rgba(91,91,220,.38)] transition-transform hover:-translate-y-0.5 hover:from-indigo-400 hover:to-violet-400"
             >
-              {t('landing.cta')}
+              {t(learnerOnboarded ? 'nav.dashboard' : 'landing.cta')}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </div>

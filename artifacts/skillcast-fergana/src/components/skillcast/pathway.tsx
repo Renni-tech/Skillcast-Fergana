@@ -27,11 +27,11 @@ export interface PathwayNode {
 const AI_SLUGS = new Set(['prompt-engineering', 'ai-agents', 'ai-augmented-ops', 'machine-learning', 'ai-content-ops', 'responsible-ai', 'mlops']);
 const GREEN_SLUGS = new Set(['renewable-energy', 'energy-efficiency', 'ev-mobility', 'climate-data', 'smart-agriculture']);
 
-export function pickCourses(gap: RoleMatch['gap'], inclusion: { dyslexia: boolean; visual: boolean; hearing: boolean }) {
+export function pickCourses(gap: RoleMatch['gap'], inclusion: { dyslexia: boolean; visual: boolean; hearing: boolean }, weeklyBudget = 5) {
   const covered = new Set<string>();
   const picked: PathwayNode[] = [];
   let hours = 0;
-  const budget = Math.max(1, useSkillCast.getState().profile.budget || 5);
+  const budget = Math.max(1, weeklyBudget || 5);
 
   for (const g of gap) {
     if (covered.has(g.skill)) continue;
@@ -73,8 +73,8 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
 
   const nodes = useMemo(
-    () => (match ? pickCourses(match.gap, profile.inclusion) : []),
-    [match, profile.inclusion],
+    () => (match ? pickCourses(match.gap, profile.inclusion, profile.budget) : []),
+    [match, profile.inclusion, profile.budget],
   );
 
   const badges = useMemo(() => {
@@ -120,9 +120,35 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </div>
         <Badge variant="outline" className="gap-1.5">
           <Clock className="h-3.5 w-3.5" aria-hidden />
-          {doneCount}/{nodes.length} · {match.pathwayWeeks} {t('pw.weeks')}
+          {doneCount}/{nodes.length} · {Math.max(0, Math.ceil(nodes.reduce((hours, node) => hours + COURSE_MAP[node.courseSlug].totalHours, 0) / profile.budget))} {t('pw.weeks')}
         </Badge>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('Skills to Build')}</CardTitle>
+          <CardDescription>{t('Skills needed for this learning pathway')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {match.gap.length ? (
+            <ul className="space-y-3">
+              {match.gap.map((gap) => {
+                const mapped = nodes.find((node) => COURSE_MAP[node.courseSlug].skills.includes(gap.skill));
+                return (
+                  <li key={gap.skill} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
+                    <span>{skillName(t, gap.skill)} · {gap.userLevel}/5 {t('harada.current')} → {gap.minLevel}/5 {t('harada.required')}</span>
+                    {mapped ? (
+                      <a className="font-medium text-blue-700 underline dark:text-blue-300" href={`#learning-${mapped.courseSlug}`}>
+                        {courseTitle(t, mapped.courseSlug)} →
+                      </a>
+                    ) : <span className="text-xs text-muted-foreground">{t('flow.noCourse')}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : <p className="text-sm text-muted-foreground">{t('Your current levels meet the mapped requirements for this role.')}</p>}
+        </CardContent>
+      </Card>
 
       {/* Progress + badges */}
       <Card>
@@ -164,7 +190,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
             const locked = !done && !next;
             const state = done ? 'done' : next ? 'next' : 'locked';
             return (
-              <li key={n.courseSlug} className="flex justify-center">
+              <li id={`learning-${n.courseSlug}`} key={n.courseSlug} className="flex scroll-mt-24 justify-center">
                 <Card
                   className={`w-full max-w-md transition-shadow ${
                     state === 'next'

@@ -34,7 +34,7 @@ function useMounted() {
 
 export function Header() {
   const t = useT();
-  const { view, setView, lang, setLang, onboarded, userType, resetDemo } = useSkillCast();
+  const { view, setView, lang, setLang, learnerOnboarded, setUserType, resetDemo } = useSkillCast();
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -42,7 +42,7 @@ export function Header() {
 
   const views: Array<{ id: View; label: string; enabled: boolean }> = [
     { id: 'landing', label: t('nav.home'), enabled: true },
-    { id: 'dashboard', label: t('nav.dashboard'), enabled: onboarded && userType === 'individual' },
+    { id: 'dashboard', label: t('nav.dashboard'), enabled: true },
     { id: 'employer', label: t('nav.employer'), enabled: true },
     { id: 'signals', label: t('nav.signals'), enabled: true },
   ];
@@ -74,7 +74,12 @@ export function Header() {
               variant={view === v.id ? 'secondary' : 'ghost'}
               size="sm"
               disabled={!v.enabled}
-              onClick={() => setView(v.id)}
+              onClick={() => {
+                if (v.id === 'dashboard') {
+                  setUserType('individual');
+                  setView(learnerOnboarded ? 'dashboard' : 'onboarding');
+                } else setView(v.id);
+              }}
               className={`h-8 text-sm ${landing
                 ? view === v.id
                   ? 'bg-white/10 text-white hover:bg-white/15 hover:text-white'

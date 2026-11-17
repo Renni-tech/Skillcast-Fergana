@@ -5,6 +5,64 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type FerganaObservationScope = typeof FerganaObservationScope[keyof typeof FerganaObservationScope];
+
+
+export const FerganaObservationScope = {
+  region: 'region',
+  national: 'national',
+  global: 'global',
+} as const;
+
+export interface FerganaObservation {
+  id: string;
+  scope: FerganaObservationScope;
+  period: string;
+  value: number;
+  unit: string;
+  sourceUrl: string;
+}
+
+export type FerganaSourceStateStatus = typeof FerganaSourceStateStatus[keyof typeof FerganaSourceStateStatus];
+
+
+export const FerganaSourceStateStatus = {
+  periodic: 'periodic',
+  cached: 'cached',
+  unavailable: 'unavailable',
+} as const;
+
+export interface FerganaSourceState {
+  id: string;
+  status: FerganaSourceStateStatus;
+  checkedAt: string;
+  /** @nullable */
+  fetchedAt: string | null;
+  /** @nullable */
+  sourceUpdatedAt: string | null;
+  nextCheckAt: string;
+  /** @nullable */
+  period?: string | null;
+  observations: FerganaObservation[];
+}
+
+export type FerganaEvidenceMode = typeof FerganaEvidenceMode[keyof typeof FerganaEvidenceMode];
+
+
+export const FerganaEvidenceMode = {
+  periodic: 'periodic',
+  cached: 'cached',
+  demo: 'demo',
+} as const;
+
+export interface FerganaEvidence {
+  mode: FerganaEvidenceMode;
+  calculatedAt: string;
+  refreshLimited: boolean;
+  skillSourceIds: string[];
+  sources: FerganaSourceState[];
+}
+
 export type SignalsConfidence = typeof SignalsConfidence[keyof typeof SignalsConfidence];
 
 
@@ -55,6 +113,10 @@ export interface Signals {
   snapshots: SkillSnapshot[];
   changelog: ForecastChange[];
 }
+
+export type FerganaSignals = Signals & {
+  provenance: FerganaEvidence;
+};
 
 export type CoachInputScenario = typeof CoachInputScenario[keyof typeof CoachInputScenario];
 

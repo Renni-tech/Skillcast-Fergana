@@ -11,6 +11,25 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /fergana/signals:
+    get:
+      operationId: getFerganaSignals
+      summary: Approved Fergana source snapshots, skill signals and provenance
+      responses:
+        "200":
+          description: Periodic data, cached observations or an explicit demo baseline
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FerganaSignals" }
+    post:
+      operationId: refreshFerganaSignals
+      summary: Check approved sources while respecting each source's refresh interval
+      responses:
+        "200":
+          description: Sources checked or retained during their cache interval
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FerganaSignals" }
   /signals:
     get:
       operationId: getSignals
@@ -126,6 +145,48 @@ components:
             properties:
               error: { type: string }
   schemas:
+    FerganaObservation:
+      type: object
+      required: [id, scope, period, value, unit, sourceUrl]
+      properties:
+        id: { type: string }
+        scope: { type: string, enum: [region, national, global] }
+        period: { type: string }
+        value: { type: number }
+        unit: { type: string }
+        sourceUrl: { type: string }
+    FerganaSourceState:
+      type: object
+      required: [id, status, checkedAt, fetchedAt, sourceUpdatedAt, nextCheckAt, observations]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [periodic, cached, unavailable] }
+        checkedAt: { type: string }
+        fetchedAt: { type: [string, "null"] }
+        sourceUpdatedAt: { type: [string, "null"] }
+        nextCheckAt: { type: string }
+        period: { type: [string, "null"] }
+        observations:
+          type: array
+          items: { $ref: "#/components/schemas/FerganaObservation" }
+    FerganaEvidence:
+      type: object
+      required: [mode, sources, skillSourceIds, calculatedAt, refreshLimited]
+      properties:
+        mode: { type: string, enum: [periodic, cached, demo] }
+        calculatedAt: { type: string }
+        refreshLimited: { type: boolean }
+        skillSourceIds: { type: array, items: { type: string } }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/FerganaSourceState" }
+    FerganaSignals:
+      allOf:
+        - $ref: "#/components/schemas/Signals"
+        - type: object
+          required: [provenance]
+          properties:
+            provenance: { $ref: "#/components/schemas/FerganaEvidence" }
     Signals:
       type: object
       required: [runId, fetchedAt, live, totalPostings, confidence, sources, snapshots, changelog]

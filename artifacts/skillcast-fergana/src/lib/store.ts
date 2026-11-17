@@ -12,6 +12,7 @@ import type {
   UserType,
 } from '@/lib/types';
 import { EMPTY_PROFILE, normalizeProfile } from '@/lib/profile';
+import { ROLE_MAP } from '@/data/roles';
 export { EMPTY_PROFILE } from '@/lib/profile';
 
 export type View =
@@ -36,6 +37,7 @@ interface SkillCastState {
   completedCourses: string[];
   haradaTaskStatus: Record<string, HaradaTaskStatus>;
   onboarded: boolean;
+  learnerOnboarded: boolean;
   dashTab: string;
 
   setLang: (l: Lang) => void;
@@ -79,7 +81,7 @@ export const EMPTY_INSTITUTION: InstitutionProfile = {
 export const useSkillCast = create<SkillCastState>()(
   persist(
     (set) => ({
-      lang: 'en',
+      lang: 'uz',
       view: 'landing',
       userType: null,
       scenario: 'moderate',
@@ -90,6 +92,7 @@ export const useSkillCast = create<SkillCastState>()(
       completedCourses: [],
       haradaTaskStatus: {},
       onboarded: false,
+      learnerOnboarded: false,
       dashTab: 'overview',
 
       setLang: (l) => set({ lang: l }),
@@ -175,6 +178,7 @@ export const useSkillCast = create<SkillCastState>()(
           completedCourses: [],
           haradaTaskStatus: {},
           onboarded: false,
+          learnerOnboarded: false,
           scenario: 'moderate',
           dashTab: 'overview',
         }),
@@ -193,11 +197,37 @@ export const useSkillCast = create<SkillCastState>()(
         completedCourses: s.completedCourses,
         haradaTaskStatus: s.haradaTaskStatus,
         onboarded: s.onboarded,
+        learnerOnboarded: s.learnerOnboarded,
       }),
+      // Normalize saved data before the first render, not after consumers
+      // have already read nullable arrays or incomplete nested profiles.
+      merge: (persisted, current) => {
+        const saved = persisted && typeof persisted === 'object'
+          ? persisted as Record<string, unknown> : {};
+        const strings = (value: unknown) => Array.isArray(value)
+          ? value.filter((item): item is string => typeof item === 'string') : [];
+        return {
+          ...current,
+          lang: ['en', 'uz', 'ru'].includes(String(saved.lang)) ? saved.lang as Lang : 'uz',
+          scenario: saved.scenario === 'accelerated' ? 'accelerated' : 'moderate',
+          userType: ['individual', 'employer', 'institution'].includes(String(saved.userType))
+            ? saved.userType as UserType : null,
+          profile: normalizeProfile(saved.profile),
+          employer: { ...EMPTY_EMPLOYER, ...(saved.employer && typeof saved.employer === 'object' ? saved.employer : {}) },
+          institution: { ...EMPTY_INSTITUTION, ...(saved.institution && typeof saved.institution === 'object' ? saved.institution : {}) },
+          chosenRole: typeof saved.chosenRole === 'string' && ROLE_MAP[saved.chosenRole] ? saved.chosenRole : null,
+          completedCourses: strings(saved.completedCourses),
+          haradaTaskStatus: saved.haradaTaskStatus && typeof saved.haradaTaskStatus === 'object'
+            ? Object.fromEntries(Object.entries(saved.haradaTaskStatus).filter(([, status]) => ['todo', 'in_progress', 'done'].includes(String(status)))) as Record<string, HaradaTaskStatus> : {},
+          onboarded: saved.onboarded === true,
+          learnerOnboarded: typeof saved.learnerOnboarded === 'boolean'
+            ? saved.learnerOnboarded : saved.userType === 'individual' && saved.onboarded === true,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         if (state) state.setProfile(normalizeProfile(state.profile));
         if (state && !['en', 'uz', 'ru'].includes(String(state.lang))) {
-          state.setLang('en');
+          state.setLang('uz');
         }
         if (state && String(state.employer?.budgetPref) === 'hrd') {
           state.setEmployer({ budgetPref: 'paid' });

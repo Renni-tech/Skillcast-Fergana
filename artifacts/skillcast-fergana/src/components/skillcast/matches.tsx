@@ -14,7 +14,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
-import { useSkillCast } from '@/lib/store';
+import { INTERESTS, useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
 import { normalizeProfile } from '@/lib/profile';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
@@ -100,7 +100,7 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
           : ROLE_MAP[chosenRole ?? '']?.pathType ?? 'work-with-ai';
 
   const [fork, setFork] =
-    useState<(typeof FORKS)[number]['id']>(defaultFork);
+    useState<(typeof FORKS)[number]['id']>(ROLE_MAP[chosenRole ?? '']?.pathType ?? defaultFork);
 
   const forkMatches = useMemo(
     () =>
@@ -206,9 +206,13 @@ function isRenderableMatch(value: unknown): value is RoleMatch {
     typeof match.skillReadiness === 'number' &&
     Number.isFinite(match.skillReadiness) &&
     Array.isArray(match.matchingSkills) &&
+    match.matchingSkills.every((item) => item && typeof item.skill === 'string' && Number.isFinite(item.userLevel) && Number.isFinite(item.requiredLevel)) &&
     Array.isArray(match.missingSkills) &&
+    match.missingSkills.every((item) => item && typeof item.skill === 'string' && Number.isFinite(item.userLevel) && Number.isFinite(item.minLevel)) &&
     Array.isArray(match.gap) &&
+    match.gap.every((item) => item && typeof item.skill === 'string' && Number.isFinite(item.userLevel) && Number.isFinite(item.minLevel) && Number.isFinite(item.momentum)) &&
     Array.isArray(match.factors) &&
+    match.factors.every((item) => item && typeof item.label === 'string' && Number.isFinite(item.value) && Number.isFinite(item.weight)) &&
     typeof demand === 'object' &&
     demand !== null &&
     Number.isFinite(demand.moderate) &&
@@ -255,6 +259,10 @@ function MatchCard({ match }: { match: RoleMatch }) {
   const openRoadmap = () => {
     setChosenRole(match.roleSlug);
     setDashTab('harada');
+  };
+  const openLearning = () => {
+    setChosenRole(match.roleSlug);
+    setDashTab('pathway');
   };
 
   const askCoach = async () => {
@@ -476,6 +484,9 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 {t('Your current levels meet the mapped requirements for this role.')}
               </p>
             )}
+            <Button variant="link" className="mt-2 h-auto p-0" onClick={openLearning}>
+              {t('Open learning pathway')} →
+            </Button>
           </section>
         </div>
 
@@ -574,7 +585,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
                       : factor.label === 'Experience'
                         ? ` · ${t('{years} years recorded', { years: safeProfile.years })}`
                         : factor.label === 'Interests'
-                          ? ` · ${safeProfile.interests.length ? t('Interests used: {interests}', { interests: safeProfile.interests.map((interest) => t(`interest.${interest}`)).join(', ') }) : t('No interests selected')}`
+                           ? ` · ${safeProfile.interests.length ? t('Interests used: {interests}', { interests: safeProfile.interests.map((interest) => (INTERESTS as readonly string[]).includes(interest) ? t(`interest.${interest}`) : interest).join(', ') }) : t('No interests selected')}`
                           : ` · ${
                               safeProfile.extended?.workPreferences?.filter(
                                 (preference) => preference !== 'none',

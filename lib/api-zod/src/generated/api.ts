@@ -9,6 +9,132 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Approved Fergana source snapshots, skill signals and provenance
+ */
+export const GetFerganaSignalsResponse = zod.object({
+  "runId": zod.string(),
+  "fetchedAt": zod.string(),
+  "live": zod.boolean(),
+  "totalPostings": zod.number().int(),
+  "confidence": zod.enum(['low', 'ok']),
+  "note": zod.string().optional(),
+  "sources": zod.array(zod.object({
+  "name": zod.string(),
+  "url": zod.string(),
+  "postings": zod.number().int(),
+  "ok": zod.boolean(),
+  "kind": zod.string()
+})),
+  "snapshots": zod.array(zod.object({
+  "skillSlug": zod.string(),
+  "postings": zod.number().int(),
+  "recentPostings": zod.number().int(),
+  "earlierPostings": zod.number().int(),
+  "frequency": zod.number(),
+  "trend": zod.number(),
+  "momentum": zod.number(),
+  "samples": zod.array(zod.object({
+  "title": zod.string(),
+  "company": zod.string(),
+  "date": zod.string(),
+  "snippet": zod.string(),
+  "url": zod.string().optional(),
+  "sourceDate": zod.string().optional(),
+  "sourceDateKind": zod.string().optional()
+})).optional()
+})),
+  "changelog": zod.array(zod.record(zod.string(), zod.unknown()))
+}).and(zod.object({
+  "provenance": zod.object({
+  "mode": zod.enum(['periodic', 'cached', 'demo']),
+  "calculatedAt": zod.string(),
+  "refreshLimited": zod.boolean(),
+  "skillSourceIds": zod.array(zod.string()),
+  "sources": zod.array(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['periodic', 'cached', 'unavailable']),
+  "checkedAt": zod.string(),
+  "fetchedAt": zod.string().nullable(),
+  "sourceUpdatedAt": zod.string().nullable(),
+  "nextCheckAt": zod.string(),
+  "period": zod.string().nullish(),
+  "observations": zod.array(zod.object({
+  "id": zod.string(),
+  "scope": zod.enum(['region', 'national', 'global']),
+  "period": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "sourceUrl": zod.string()
+}))
+}))
+})
+}))
+
+
+/**
+ * @summary Check approved sources while respecting each source's refresh interval
+ */
+export const RefreshFerganaSignalsResponse = zod.object({
+  "runId": zod.string(),
+  "fetchedAt": zod.string(),
+  "live": zod.boolean(),
+  "totalPostings": zod.number().int(),
+  "confidence": zod.enum(['low', 'ok']),
+  "note": zod.string().optional(),
+  "sources": zod.array(zod.object({
+  "name": zod.string(),
+  "url": zod.string(),
+  "postings": zod.number().int(),
+  "ok": zod.boolean(),
+  "kind": zod.string()
+})),
+  "snapshots": zod.array(zod.object({
+  "skillSlug": zod.string(),
+  "postings": zod.number().int(),
+  "recentPostings": zod.number().int(),
+  "earlierPostings": zod.number().int(),
+  "frequency": zod.number(),
+  "trend": zod.number(),
+  "momentum": zod.number(),
+  "samples": zod.array(zod.object({
+  "title": zod.string(),
+  "company": zod.string(),
+  "date": zod.string(),
+  "snippet": zod.string(),
+  "url": zod.string().optional(),
+  "sourceDate": zod.string().optional(),
+  "sourceDateKind": zod.string().optional()
+})).optional()
+})),
+  "changelog": zod.array(zod.record(zod.string(), zod.unknown()))
+}).and(zod.object({
+  "provenance": zod.object({
+  "mode": zod.enum(['periodic', 'cached', 'demo']),
+  "calculatedAt": zod.string(),
+  "refreshLimited": zod.boolean(),
+  "skillSourceIds": zod.array(zod.string()),
+  "sources": zod.array(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['periodic', 'cached', 'unavailable']),
+  "checkedAt": zod.string(),
+  "fetchedAt": zod.string().nullable(),
+  "sourceUpdatedAt": zod.string().nullable(),
+  "nextCheckAt": zod.string(),
+  "period": zod.string().nullish(),
+  "observations": zod.array(zod.object({
+  "id": zod.string(),
+  "scope": zod.enum(['region', 'national', 'global']),
+  "period": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "sourceUrl": zod.string()
+}))
+}))
+})
+}))
+
+
+/**
  * @summary Latest skill-market forecast and sources
  */
 export const GetSignalsResponse = zod.object({
