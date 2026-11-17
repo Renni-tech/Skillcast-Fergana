@@ -21,6 +21,11 @@ if (Number.isNaN(port) || port <= 0) {
 
 const basePath = process.env.BASE_PATH;
 
+// Local development only: `pnpm dev` sets API_PROXY_TARGET so relative /api
+// requests reach the local API server. Replit routes /api itself and never
+// sets this variable, so its behaviour is unchanged.
+const apiProxyTarget = process.env.API_PROXY_TARGET;
+
 if (!basePath) {
   throw new Error(
     'BASE_PATH environment variable is required but was not provided.',
@@ -72,6 +77,7 @@ export default defineConfig({
     fs: {
       strict: false,
     },
+    ...(apiProxyTarget ? { proxy: { '/api': { target: apiProxyTarget, changeOrigin: true } } } : {}),
   },
   preview: {
     port,

@@ -1,4 +1,5 @@
 import { mkdirSync } from "node:fs";
+import path from "node:path";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -13,5 +14,6 @@ execFileSync(process.execPath, [
   "--schema", fileURLToPath(new URL("./prisma/schema.prisma", import.meta.url)),
 ], {
   stdio: "inherit",
-  env: { ...process.env, SKILLCAST_SQLITE_URL: `file:${directory}/skillcast.db` },
+  // path.join keeps one separator style on Windows (no mixed "\\/").
+  env: { ...process.env, SKILLCAST_SQLITE_URL: `file:${path.join(directory, "skillcast.db")}` },
 });

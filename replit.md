@@ -6,7 +6,7 @@ Career forecasting and reskilling proof of concept imported from Vercel. The ori
 
 - Start the managed `artifacts/skillcast: web` and `artifacts/api-server: API Server` workflows.
 - The existing root app uses `artifacts/skillcast-fergana: web`.
-- Use Node.js 24 and pnpm workspaces. Do not run a root `pnpm dev`.
+- Use Node.js 24 and pnpm workspaces. On Replit, use the workflows above; the root `pnpm dev` is for local machines (see README.md).
 - `pnpm --filter @workspace/skillcast test` runs the 47 imported HR, translation, and market-evidence regression tests using Bun.
 - `pnpm run typecheck:libs` builds shared declarations.
 - `pnpm --filter @workspace/skillcast run typecheck` checks the migrated frontend.

@@ -56,3 +56,8 @@ Thumbs.db
 .local/
 /artifacts/api-server/db/
 /generated-artifacts/
+
+# Local environment (copy .env.example to .env). Never commit real secrets.
+.env
+.env.*
+!.env.example

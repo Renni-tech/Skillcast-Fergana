@@ -1,0 +1,195 @@
+#!/usr/bin/env node
+// ─── Local development: `pnpm dev` ─────────────────────────────────────────
+// Starts the SkillCast Fergana API and frontend together on Windows, macOS and
+// Linux. Every step runs as a plain `node` process (no shell syntax), so it
+// behaves the same in PowerShell, cmd.exe and bash.
+//
+//   1. prisma generate      (Prisma client for the API's SQLite cache)
+//   2. build the API        (artifacts/api-server/build.mjs)
+//   3. prepare the database (artifacts/api-server/prepare-db.mjs, non-destructive)
+//   4. start the API and wait for GET /api/healthz
+//   5. start Vite with BASE_PATH=/ and /api proxied to the API
+//
+// Ctrl+C stops both servers. If either server exits, the other is stopped too.
+// Replit does not use this script; it keeps its own artifact workflows.
+
+import { spawn, spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import net from 'node:net';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const apiDir = path.join(root, 'artifacts', 'api-server');
+const webDir = path.join(root, 'artifacts', 'skillcast-fergana');
+const isWindows = process.platform === 'win32';
+
+const color = (code) => (text) => (process.stdout.isTTY ? `\x1b[${code}m${text}\x1b[0m` : text);
+const cyan = color(36), green = color(32), red = color(31), dim = color(2), bold = color(1);
+const log = (msg) => console.log(`${cyan('[dev]')} ${msg}`);
+const fail = (msg) => { console.error(`${red('[dev]')} ${msg}`); process.exit(1); };
+
+// ── Preconditions ──────────────────────────────────────────────────────────
+const [major, minor] = process.versions.node.split('.').map(Number);
+if (major < 20 || (major === 20 && minor < 12)) {
+  fail(`Node.js 20.12 or newer is required (found ${process.versions.node}). Node 24 LTS is recommended.`);
+}
+if (!existsSync(path.join(root, 'node_modules')) || !existsSync(path.join(webDir, 'node_modules'))) {
+  fail('Dependencies are not installed. Run `pnpm install` once in the project folder, then `pnpm dev`.');
+}
+
+// Optional local overrides from .env (see .env.example). Empty values are ignored.
+const envFile = path.join(root, '.env');
+if (existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+  for (const [key, value] of Object.entries(process.env)) if (value === '') delete process.env[key];
+  log(`Loaded ${dim('.env')}`);
+}
+
+const port = (name, fallback) => {
+  const value = Number(process.env[name] ?? fallback);
+  if (!Number.isInteger(value) || value <= 0 || value > 65535) fail(`${name} must be a port number (got "${process.env[name]}").`);
+  return value;
+};
+const API_PORT = port('API_PORT', 8080);
+const WEB_PORT = port('WEB_PORT', 5173);
+if (API_PORT === WEB_PORT) fail('API_PORT and WEB_PORT must be different.');
+
+const portFree = (p) => new Promise((resolve) => {
+  const server = net.createServer().once('error', () => resolve(false))
+    .once('listening', () => server.close(() => resolve(true)));
+  server.listen(p, '0.0.0.0');
+});
+
+// Resolve CLIs from the packages that depend on them, so no global installs are needed.
+// Uses each package's own "bin" entry, which works even when "exports" hides it.
+const resolveBin = (dir, pkg, bin = pkg) => {
+  try {
+    const require = createRequire(path.join(dir, 'package.json'));
+    const manifestPath = require.resolve(`${pkg}/package.json`);
+    const manifest = require(manifestPath);
+    const rel = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.[bin];
+    if (!rel) throw new Error('no bin');
+    return path.join(path.dirname(manifestPath), rel);
+  } catch {
+    return fail(`Could not find the ${pkg} command-line tool. Run \`pnpm install\` again.`);
+  }
+};
+const prismaCli = resolveBin(apiDir, 'prisma');
+const viteCli = resolveBin(webDir, 'vite');
+
+// ── Process management ─────────────────────────────────────────────────────
+const children = new Set();
+let shuttingDown = false;
+
+function stop(child) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  if (isWindows) {
+    // Kill the whole tree (Vite starts an esbuild helper process).
+    spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+  } else {
+    child.kill('SIGTERM');
+    setTimeout(() => { if (child.exitCode === null) child.kill('SIGKILL'); }, 5000).unref();
+  }
+}
+
+function shutdown(code = 0) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  log('Stopping servers…');
+  for (const child of children) stop(child);
+  const deadline = setTimeout(() => process.exit(code), 6000);
+  deadline.unref();
+  const check = setInterval(() => {
+    if ([...children].every((c) => c.exitCode !== null || c.signalCode !== null)) {
+      clearInterval(check);
+      process.exit(code);
+    }
+  }, 100);
+}
+
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP', ...(isWindows ? ['SIGBREAK'] : [])]) {
+  process.on(signal, () => shutdown(0));
+}
+
+function prefixed(stream, label) {
+  let buffer = '';
+  stream.on('data', (chunk) => {
+    buffer += chunk.toString();
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() ?? '';
+    for (const line of lines) if (line.trim()) console.log(`${label} ${line}`);
+  });
+}
+
+/** Run a one-off setup step and fail with a clear message if it does not succeed. */
+function step(title, args, cwd, env = {}) {
+  log(title);
+  const result = spawnSync(process.execPath, args, { cwd, env: { ...process.env, ...env }, stdio: 'inherit' });
+  if (result.status !== 0) fail(`${title} failed (exit code ${result.status ?? result.signal}). See the output above.`);
+}
+
+/** Start a long-running server; if it exits on its own, stop everything. */
+function serve(label, args, cwd, env) {
+  const child = spawn(process.execPath, args, { cwd, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+  children.add(child);
+  prefixed(child.stdout, label);
+  prefixed(child.stderr, label);
+  child.on('exit', (code, signal) => {
+    if (!shuttingDown) {
+      console.error(`${red('[dev]')} ${label} stopped unexpectedly (${signal ?? `exit code ${code}`}).`);
+      shutdown(1);
+    }
+  });
+  return child;
+}
+
+async function waitFor(url, label, timeoutMs = 60000) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (shuttingDown) return;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+      if (res.ok) return;
+    } catch { /* not up yet */ }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  console.error(`${red('[dev]')} ${label} did not respond at ${url} within ${timeoutMs / 1000}s.`);
+  shutdown(1);
+}
+
+// ── Start ──────────────────────────────────────────────────────────────────
+for (const [name, p] of [['API_PORT', API_PORT], ['WEB_PORT', WEB_PORT]]) {
+  if (!(await portFree(p))) {
+    fail(`Port ${p} is already in use. Stop the program using it, or set ${name} in .env (see .env.example).`);
+  }
+}
+
+step('Generating Prisma client…', [prismaCli, 'generate', '--schema', path.join(apiDir, 'prisma', 'schema.prisma')], apiDir);
+step('Building API…', ['build.mjs'], apiDir, { NODE_ENV: 'development' });
+step('Preparing local SQLite cache…', ['prepare-db.mjs'], apiDir);
+
+log(`Starting API on port ${API_PORT}…`);
+serve(cyan('[api]'), ['--enable-source-maps', path.join('dist', 'index.mjs')], apiDir, {
+  NODE_ENV: 'development', PORT: String(API_PORT),
+});
+await waitFor(`http://127.0.0.1:${API_PORT}/api/healthz`, 'API');
+
+log(`Starting frontend on port ${WEB_PORT}…`);
+serve(green('[web]'), [viteCli, '--config', 'vite.config.ts'], webDir, {
+  NODE_ENV: 'development', PORT: String(WEB_PORT), BASE_PATH: '/',
+  API_PROXY_TARGET: `http://127.0.0.1:${API_PORT}`,
+});
+await waitFor(`http://127.0.0.1:${WEB_PORT}/`, 'Frontend');
+
+if (!shuttingDown) {
+  console.log([
+    '',
+    bold('  SkillCast Fergana is running'),
+    `  ${green('Frontend')}  http://localhost:${WEB_PORT}/`,
+    `  ${cyan('API')}       http://localhost:${API_PORT}/api/healthz`,
+    `  ${dim('The frontend proxies /api to the API. Press Ctrl+C to stop both.')}`,
+    '',
+  ].join('\n'));
+}
