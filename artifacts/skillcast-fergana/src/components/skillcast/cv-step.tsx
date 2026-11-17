@@ -141,7 +141,7 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
       <Button
         onClick={analyse}
         disabled={cvText.trim().length < 40 || extracting}
-        className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500"
+        className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800"
       >
         <ShieldCheck className="h-4 w-4" aria-hidden />
         {extracting ? t('onb.cv.extracting') : t('onb.cv.analyse')}

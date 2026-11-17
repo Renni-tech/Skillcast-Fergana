@@ -153,7 +153,7 @@ export function InstitutionView() {
             <Badge variant="outline">{cohort.length} {t('inst.students')}</Badge>
             {institution.intake && <Badge variant="outline">{t(`onb.inst.intake.${institution.intake}`)}</Badge>}
             {focusBadges.map((b) => (
-              <Badge key={b.key} className="gap-1 bg-teal-700 text-white dark:bg-teal-600">
+              <Badge key={b.key} className="gap-1 bg-teal-700 text-white dark:bg-teal-700">
                 <b.icon className="h-3 w-3" aria-hidden /> {t(b.key)}
               </Badge>
             ))}

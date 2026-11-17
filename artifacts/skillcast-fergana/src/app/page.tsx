@@ -11,6 +11,8 @@ import { Dashboard } from '@/components/skillcast/dashboard';
 import { EmployerView } from '@/components/skillcast/employer';
 import { InstitutionView } from '@/components/skillcast/institution';
 import { SignalsView } from '@/components/skillcast/signalsview';
+import { A11yEffects, A11yPanel } from '@/components/skillcast/a11y';
+import { VoiceAssistant, VoiceLauncher } from '@/components/skillcast/voice-assistant';
 
 // Hydration guard: server snapshot = false, client snapshot = true.
 // Avoids SSR/localStorage mismatch without setState-in-effect.
@@ -38,8 +40,10 @@ function Shell() {
 
   return (
     <div className="skillcast-app flex min-h-screen flex-col">
+      <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
+      <A11yEffects />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 pb-16 focus:outline-none">
         {!mounted ? (
           <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-label={t('hr.loading')}>
             <CloudSun className="h-10 w-10 animate-pulse text-teal-600 dark:text-teal-400" aria-hidden />
@@ -59,6 +63,13 @@ function Shell() {
         )}
       </main>
       <Footer />
+      {mounted && (
+        <>
+          <VoiceLauncher />
+          <VoiceAssistant />
+          <A11yPanel />
+        </>
+      )}
     </div>
   );
 }

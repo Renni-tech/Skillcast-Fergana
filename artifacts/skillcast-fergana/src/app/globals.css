@@ -59,7 +59,7 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.48 0 0); /* ≥4.5:1 on white and muted surfaces (WCAG AA) */
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -368,3 +368,63 @@ body:has(.skillcast-landing) footer {
     @apply bg-background text-foreground;
   }
 }
+
+/* ─── Accessibility settings (see components/skillcast/a11y.tsx) ─────────── */
+
+/* Visible focus for keyboard users everywhere, not only on shadcn controls. */
+:where(a, button, [role="button"], [role="tab"], [role="radio"], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+.dark :where(a, button, [role="button"], [role="tab"], [role="radio"], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline-color: #93c5fd;
+}
+
+/* Text size scales rem-based Tailwind sizes and spacing together. */
+html[data-text-scale="large"] { font-size: 112.5%; }
+html[data-text-scale="larger"] { font-size: 125%; }
+
+/* High contrast: stronger text, borders and muted text in both themes. */
+html.a11y-contrast {
+  --muted-foreground: #1f2937;
+  --border: #1f2937;
+  --input: #1f2937;
+}
+html.a11y-contrast.dark,
+html.a11y-contrast .dark {
+  --muted-foreground: #f8fafc;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+}
+html.a11y-contrast :where(.text-muted-foreground, .text-slate-400, .text-slate-500, .text-slate-600) { color: var(--muted-foreground) !important; }
+html.a11y-contrast :where(.border, [class*="border-"]) { border-color: var(--border); }
+
+/* Reduce motion: stop transitions and decorative animation. */
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.a11y-underline a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Easier reading spacing (WCAG 1.4.12 text-spacing values). */
+html.a11y-spacing body { line-height: 1.6; letter-spacing: 0.02em; word-spacing: 0.08em; }
+html.a11y-spacing p { margin-bottom: 0.5em; }
+
+/* Skip link: hidden until focused. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: #1d4ed8;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+}
+.skip-link:focus { top: 0.75rem; }

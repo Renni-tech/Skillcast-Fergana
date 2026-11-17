@@ -38,7 +38,8 @@ pnpm dev
 
 `pnpm dev` does everything in order and prints the addresses when ready:
 
-1. Generates the Prisma client for the API.
+1. Generates the Prisma client for the API (only when the schema, Prisma
+   version or platform changed; otherwise it prints "Prisma client is up to date").
 2. Builds the API and creates or updates the local SQLite cache
    (`artifacts/api-server/db/skillcast.db`, non-destructive).
 3. Starts the API on port **8080** and waits until `/api/healthz` answers.
@@ -56,6 +57,25 @@ in the background.
 
 The frontend reloads instantly when you edit it. After changing API code, stop
 with Ctrl+C and run `pnpm dev` again (the API is rebuilt on every start).
+
+### Disk space and the first run
+
+The first `pnpm dev` downloads Prisma's engines for your platform (Windows:
+`query_engine-windows.dll.node` and `schema-engine-windows.exe`, about 40 MB
+compressed). This download is expected and happens once: `pnpm install` skips
+Prisma's own install-time download, so the engines are fetched on first use.
+Prisma writes them to three places, so keep roughly **300 MB free** on each
+drive involved:
+
+| Location | Windows | macOS / Linux |
+| --- | --- | --- |
+| Temp folder (download) | `%TEMP%` (usually on `C:`) | `$TMPDIR` or `/tmp` |
+| Prisma engine cache | `node_modules\.cache\prisma` in the project, else `%APPDATA%\Prisma` | `~/.cache/prisma` |
+| Project | `node_modules` | `node_modules` |
+
+Later runs reuse the cached engines and skip `prisma generate` when nothing
+changed. `pnpm dev` warns when a drive has less than 300 MB free, and if a step
+runs out of space it says which locations Prisma uses and how much is free.
 
 ### Open in VS Code
 
@@ -85,10 +105,37 @@ never commit real keys.
 ```powershell
 pnpm run typecheck
 pnpm --filter @workspace/skillcast-fergana test
+pnpm run test:dev
 ```
+
+`test:dev` checks the `pnpm dev` helpers (error classification, Prisma client
+detection) with Node's built-in test runner.
 
 The frontend tests use [Bun](https://bun.sh) (`bun test`). Install Bun to run them;
 `pnpm dev` does not need it.
+
+## Accessibility and the voice assistant
+
+- **Display settings** (header → Accessibility): text size, high contrast,
+  reduced motion, underlined links and reading spacing. Saved in the browser.
+  A skip link, visible keyboard focus and labelled controls are always on.
+- **Voice assistant** (floating button, or header → Accessibility): runs in
+  the browser with no external service. It opens sections, explains skills and
+  the Wind Rose, suggests what to learn next, recommends pathways, reads
+  answers aloud and searches SkillCast's pathways, courses, learning sources
+  and inclusive opportunities. Answers come only from SkillCast data.
+  - Speech input uses the browser's Web Speech API (Chrome and Edge). In other
+    browsers, type instead; everything else works the same.
+  - Reading aloud uses the voices installed on the device. If there is no
+    voice for the selected language (common for Uzbek), the answer is shown
+    as text instead of being read with the wrong voice.
+  - It does not browse the internet or list live vacancies.
+- **Inclusive opportunities** and **learning sources** live in
+  `artifacts/skillcast-fergana/src/data/inclusive.ts` and
+  `src/data/learning-sources.ts`. Every entry carries a verification level
+  (approved list, official publisher, curated, or fictional demo) shown in the
+  UI. Add entries there with a real URL; set `lastChecked` once someone has
+  opened the link.
 
 ## Troubleshooting
 
@@ -98,7 +145,9 @@ The frontend tests use [Bun](https://bun.sh) (`bun test`). Install Bun to run th
 | `Port 8080 is already in use` (or 5173) | Close the other program, or set `API_PORT` / `WEB_PORT` in `.env`. On Windows, find it with `netstat -ano \| findstr :8080`. |
 | `Cannot find module @rollup/rollup-win32-x64-msvc` (or a similar `win32` / `darwin` package) | Delete `node_modules` and run `pnpm install` again. These native packages are platform-specific and must be installed on the machine that runs them. |
 | `Use pnpm instead` during install | Install with `pnpm install`, not `npm install` or `yarn`. |
-| `Generating Prisma client… failed` | Prisma downloads its engine on first use; check your internet connection or proxy, then run `pnpm dev` again. |
+| `Generating Prisma client failed` … `ENOSPC: no space left on device, write` | A drive Prisma writes to is full (see **Disk space and the first run**). Usually it is `C:`, because `%TEMP%` is there even when the project is on another drive. Free space (Settings → System → Storage), or point the temp folder at a drive with space for this terminal: `New-Item -ItemType Directory D:\Temp -Force; $env:TEMP="D:\Temp"; $env:TMP="D:\Temp"`, then run `pnpm dev` again. The message lists each location and its free space. |
+| `Generating Prisma client failed` with a network error | Prisma downloads its engine on first use: check your internet connection or proxy (`HTTPS_PROXY`), then run `pnpm dev` again. |
+| `EPERM` / `EBUSY` while generating | Another process holds the engine file: stop other running copies of the API (or wait for an antivirus scan), then run `pnpm dev` again. |
 | `pnpm` is not recognized | Run `npm install -g pnpm@10` and open a new terminal. |
 | PowerShell blocks `pnpm.ps1` ("running scripts is disabled") | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use the Command Prompt instead of PowerShell. |
 | Signal sources show "Unavailable" | Normal when the official sources cannot be reached from your network. The app falls back to the last cached result or a labelled demo baseline. |

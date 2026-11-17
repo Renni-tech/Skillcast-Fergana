@@ -10,6 +10,7 @@ import inlineCopy from './i18n-inline';
 import uz from './i18n-uz';
 import { LEARNER_FLOW_COPY } from './learner-flow-i18n';
 import { FERGANA_UI_COPY } from './fergana-ui-i18n';
+import { EXPERIENCE_COPY } from './experience-i18n';
 
 // ─── i18n: English · Uzbek · Russian ───────────────────────────────────────
 // Interface-owned UI and HR registry labels are translated. Real third-party
@@ -1066,6 +1067,9 @@ for (const [key, copy] of Object.entries(LEARNER_FLOW_COPY)) {
 
 // Applied last: Fergana Smart Education wording wins in all three languages.
 for (const [key, copy] of Object.entries(FERGANA_UI_COPY)) {
+  for (const lang of ['en', 'uz', 'ru'] as const) DICTS[lang][key] = copy[lang];
+}
+for (const [key, copy] of Object.entries(EXPERIENCE_COPY)) {
   for (const lang of ['en', 'uz', 'ru'] as const) DICTS[lang][key] = copy[lang];
 }
 

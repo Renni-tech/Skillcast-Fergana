@@ -74,39 +74,48 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
       </Card>
 
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">{roleTitle(t, role.slug)} — {t('sdg.why')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base leading-snug sm:text-lg">{t('sdg.whyRole', { role: roleTitle(t, role.slug) })}</CardTitle>
+          <CardDescription>{t('flow.sdgProgress', { courses: courseCount, milestones: milestoneCount })}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">{t('flow.sdgProgress', { courses: courseCount, milestones: milestoneCount })}</p>
+        <CardContent className="space-y-4">
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-            <div className="mb-1 flex items-center gap-1.5">
+            <ul className="mb-2 flex flex-wrap gap-1.5">
               {role.sdgTags.map((g) => (
-                <SdgBadge key={g} goal={g} />
+                <li key={g} className="inline-flex items-center gap-1.5 text-xs font-medium">
+                  <SdgBadge goal={g} />{t(`sdg.name.${g}`)}
+                </li>
               ))}
-            </div>
-            <p className="text-sm">{roleSdgMechanism(t, role.slug)}</p>
+            </ul>
+            <p className="text-sm leading-relaxed">{roleSdgMechanism(t, role.slug)}</p>
           </div>
 
           {ledger.perGoal.size > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-medium text-muted-foreground">{t('sdg.roleskills')}</p>
-              <ul className="space-y-1.5">
+              <h3 className="mb-2 text-sm font-semibold">{t('sdg.linked')}</h3>
+              <ul className="grid gap-3 md:grid-cols-2">
                 {[...ledger.perGoal.entries()].map(([goal, entry]) => (
-                  <li key={goal} className="flex items-start gap-2 text-sm">
-                    <SdgBadge goal={goal} />
-                    <span>
-                      <span className="font-medium">{t(`sdg.name.${goal}`)}</span>
-                      {entry.have.length > 0 && (
-                        <span className="text-muted-foreground"> — ✓ {entry.have.map((slug) => skillName(t, slug)).join(', ')}</span>
-                      )}
-                      {entry.learning.length > 0 && (
-                        <span className="text-muted-foreground/80">
-                          {entry.have.length > 0 ? '; ' : ' — '}
-                          <span className="italic">{t('in your pathway:')}</span> {entry.learning.map((slug) => skillName(t, slug)).join(', ')}
-                        </span>
-                      )}
-                    </span>
+                  <li key={goal} className="rounded-lg border p-3">
+                    <p className="flex items-start gap-2 text-sm font-semibold leading-snug">
+                      <SdgBadge goal={goal} size="md" />
+                      <span className="min-w-0">{t(`sdg.name.${goal}`)}</span>
+                    </p>
+                    {entry.have.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">✓ {t('sdg.have')}</p>
+                        <ul className="mt-1 flex flex-wrap gap-1">
+                          {entry.have.map((slug) => <li key={slug}><Badge variant="secondary">{skillName(t, slug)}</Badge></li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {entry.learning.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-muted-foreground">→ {t('sdg.learning')}</p>
+                        <ul className="mt-1 flex flex-wrap gap-1">
+                          {entry.learning.map((slug) => <li key={slug}><Badge variant="outline">{skillName(t, slug)}</Badge></li>)}
+                        </ul>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

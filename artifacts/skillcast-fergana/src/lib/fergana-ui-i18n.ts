@@ -95,6 +95,7 @@ export const FERGANA_UI_COPY: Record<string, Copy> = {
   ),
 
   // Dashboard tabs and flow hints (education-first naming)
+  'tab.sdg': c('SDG impact', 'BRM ta’siri', 'Вклад в ЦУР'),
   'tab.matches': c('Learning & career pathways', 'O‘quv va kasbiy yo‘nalishlar', 'Учебные и карьерные траектории'),
   'tab.learn': c('What to learn', 'Nimani o‘rganish kerak', 'Что изучать'),
   'tab.harada': c('Harada-inspired roadmap', 'Harada usulidagi yo‘l xaritasi', 'Маршрут по методу Харада'),

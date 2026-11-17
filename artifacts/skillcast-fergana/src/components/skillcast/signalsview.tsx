@@ -101,7 +101,7 @@ export function SignalsView() {
           </h1>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{st('src.page.lede')}</p>
         </div>
-        <Button onClick={() => void refresh()} disabled={refreshing} className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+        <Button onClick={() => void refresh()} disabled={refreshing} className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
           {refreshing ? st('src.refreshing') : st('src.refresh')}
         </Button>
@@ -180,7 +180,7 @@ export function SignalsView() {
 
       {/* Current calculation */}
       <Card className="mt-4">
-        <CardContent className="flex flex-wrap items-center gap-2 pt-6 text-sm">
+        <CardContent className="flex flex-wrap items-center gap-2 text-sm">
           {loading && !data ? (
             <span className="text-muted-foreground">{st('src.refreshing')}</span>
           ) : !provenance ? (

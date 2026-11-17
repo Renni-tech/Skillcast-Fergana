@@ -11,9 +11,10 @@ import { COURSES, COURSE_MAP } from '@/data/courses';
 import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, SourceChip, useSignals, useT } from './shared';
+import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, useSignals, useT } from './shared';
+import { LearningSources } from './learning-sources';
 
-// ─── Pathway tab: Duolingo-style tracked roadmap from the curated registry ──
+// ─── Pathway tab: step-by-step tracked roadmap from the curated registry ───
 // Courses are picked deterministically: gap priority (weight × momentum),
 // then inclusion-aware format preference, then free-first. Nothing invented.
 
@@ -79,14 +80,14 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
 
   const badges = useMemo(() => {
     const done = nodes.filter((n) => completedCourses.includes(n.courseSlug));
-    const b: Array<{ label: string; icon: typeof Flag; earned: boolean }> = [];
-    b.push({ label: t('badge.first'), icon: Flag, earned: done.length >= 1 });
-    b.push({ label: t('badge.halfway'), icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2) });
+    const b: Array<{ label: string; icon: typeof Flag; earned: boolean; desc?: string }> = [];
+    b.push({ label: t('badge.first'), desc: t('badge.first.d'), icon: Flag, earned: done.length >= 1 });
+    b.push({ label: t('badge.halfway'), desc: t('badge.halfway.d'), icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2) });
     const aiDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => AI_SLUGS.has(s)));
-    b.push({ label: t('badge.ai'), icon: Sparkles, earned: aiDone });
+    b.push({ label: t('badge.ai'), desc: t('badge.ai.d'), icon: Sparkles, earned: aiDone });
     const greenDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => GREEN_SLUGS.has(s)));
-    b.push({ label: t('badge.green'), icon: Trophy, earned: greenDone });
-    b.push({ label: t('badge.complete'), icon: Award, earned: nodes.length > 0 && done.length === nodes.length });
+    b.push({ label: t('badge.green'), desc: t('badge.green.d'), icon: Trophy, earned: greenDone });
+    b.push({ label: t('badge.complete'), desc: t('badge.complete.d'), icon: Award, earned: nodes.length > 0 && done.length === nodes.length });
     return b;
   }, [nodes, completedCourses, t]);
 
@@ -95,7 +96,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
       <Card className="text-center">
         <CardContent className="py-12">
           <p className="mb-4 text-muted-foreground">{t('sdg.notchosen')}</p>
-          <Button onClick={() => setDashTab('matches')} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+          <Button onClick={() => setDashTab('matches')} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
             {t('tab.matches')} →
           </Button>
         </CardContent>
@@ -135,13 +136,20 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
               {match.gap.map((gap) => {
                 const mapped = nodes.find((node) => COURSE_MAP[node.courseSlug].skills.includes(gap.skill));
                 return (
-                  <li key={gap.skill} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
-                    <span>{skillName(t, gap.skill)} · {gap.userLevel}/5 {t('harada.current')} → {gap.minLevel}/5 {t('harada.required')}</span>
+                  <li key={gap.skill} className="grid gap-2 rounded-lg border p-3 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
+                    <div className="min-w-0">
+                      <p className="font-medium leading-snug">{skillName(t, gap.skill)}</p>
+                      <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+                        <Badge variant="outline">{t('pw.gap.now', { n: gap.userLevel })}</Badge>
+                        <span aria-hidden>→</span>
+                        <Badge variant="outline" className="border-amber-500/70 text-amber-800 dark:text-amber-300">{t('pw.gap.need', { n: gap.minLevel })}</Badge>
+                      </p>
+                    </div>
                     {mapped ? (
-                      <a className="font-medium text-blue-700 underline dark:text-blue-300" href={`#learning-${mapped.courseSlug}`}>
+                      <a className="min-w-0 break-words font-medium text-blue-700 underline-offset-2 hover:underline dark:text-blue-300 md:text-right" href={`#learning-${mapped.courseSlug}`}>
                         {courseTitle(t, mapped.courseSlug)} →
                       </a>
-                    ) : <span className="text-xs text-muted-foreground">{t('flow.noCourse')}</span>}
+                    ) : <span className="text-xs text-muted-foreground md:text-right">{t('flow.noCourse')}</span>}
                   </li>
                 );
               })}
@@ -152,34 +160,46 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
 
       {/* Progress + badges */}
       <Card>
-        <CardContent className="space-y-3 pt-6">
+        <CardContent className="space-y-3">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">{t('pw.progress')}</span>
             <Progress value={nodes.length ? (doneCount / nodes.length) * 100 : 0} className="h-2 flex-1" aria-label={t('pw.progress')} />
             <span className="text-sm tabular-nums text-muted-foreground">{Math.round(nodes.length ? (doneCount / nodes.length) * 100 : 0)}%</span>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium">{t('pw.badges')}:</span>
-            {badges.map((b) => (
-              <Badge
-                key={b.label}
-                variant={b.earned ? 'default' : 'outline'}
-                className={`gap-1 ${b.earned ? 'bg-teal-700 text-white dark:bg-teal-600' : 'text-muted-foreground'}`}
-              >
-                <b.icon className="h-3 w-3" aria-hidden />
-                {b.label}
-              </Badge>
-            ))}
-          </div>
+          <section aria-labelledby="pw-badges">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 id="pw-badges" className="text-sm font-semibold">{t('pw.badges')}</h3>
+              <span className="text-xs text-muted-foreground">{t('pw.badges.count', { n: badges.filter((b) => b.earned).length, total: badges.length })}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('pw.badges.lede')}</p>
+            <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {badges.map((b) => (
+                <li
+                  key={b.label}
+                  className={`flex min-w-0 flex-col items-center rounded-xl border p-3 text-center ${b.earned ? 'border-teal-500/70 bg-teal-50 dark:bg-teal-950/30' : 'border-dashed'}`}
+                >
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-full ${b.earned ? 'bg-teal-700 text-white dark:bg-teal-700' : 'bg-muted text-muted-foreground'}`}>
+                    <b.icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <span className="mt-2 text-sm font-semibold leading-tight">{b.label}</span>
+                  {b.desc && <span className="mt-1 text-xs leading-snug text-muted-foreground">{b.desc}</span>}
+                  <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-medium ${b.earned ? 'text-teal-800 dark:text-teal-300' : 'text-muted-foreground'}`}>
+                    {b.earned ? <Check className="h-3 w-3" aria-hidden /> : <Lock className="h-3 w-3" aria-hidden />}
+                    {b.earned ? t('badge.earned') : t('badge.locked')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
           {inclusionNeeds.length > 0 && (
-            <p className="rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
+            <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
               {t('pw.access.note', { needs: inclusionNeeds.join(' · ') })}
             </p>
           )}
         </CardContent>
       </Card>
 
-      {/* Duolingo-style path */}
+      {/* Step-by-step learning path */}
       <div className="relative mx-auto max-w-xl">
         <div className="absolute bottom-8 left-1/2 top-8 w-1 -translate-x-1/2 rounded bg-gradient-to-b from-teal-300 via-teal-200 to-emerald-200 dark:from-teal-800 dark:via-teal-900 dark:to-emerald-900" aria-hidden />
         <ol className="relative space-y-4">
@@ -196,18 +216,18 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                     state === 'next'
                       ? 'border-teal-500 shadow-lg shadow-teal-100 dark:shadow-teal-950'
                       : state === 'locked'
-                        ? 'opacity-70'
+                        ? 'border-dashed bg-muted/30'
                         : 'border-emerald-400'
                   }`}
                 >
                   <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <Badge
                         className={
                           state === 'done'
-                            ? 'gap-1 bg-emerald-600 text-white'
+                            ? 'gap-1 bg-emerald-700 text-white'
                             : state === 'next'
-                              ? 'gap-1 bg-teal-600 text-white'
+                              ? 'gap-1 bg-teal-700 text-white'
                               : 'gap-1 text-muted-foreground'
                         }
                         variant={state === 'locked' ? 'outline' : 'default'}
@@ -273,9 +293,9 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
             <li className="flex justify-center">
               <Card className="w-full max-w-md border-dashed">
                 <CardHeader className="pb-2">
-                  <Badge variant="outline" className="w-fit gap-1 border-amber-400 text-amber-700 dark:text-amber-300">
-                    <Flag className="h-3 w-3" aria-hidden /> {t('pw.internship')}
-                  </Badge>
+                  <p className="flex items-start gap-2 rounded-md border border-amber-400/70 bg-amber-50 px-3 py-2 text-sm font-medium leading-snug text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+                    <Flag className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> <span className="min-w-0">{t('pw.internship')}</span>
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -288,12 +308,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </ol>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <SourceChip href="https://www.freecodecamp.org/">freeCodeCamp</SourceChip>
-        <SourceChip href="https://www.coursera.org/">{t('Coursera (audit)')}</SourceChip>
-        <SourceChip href="https://learn.deeplearning.ai/">DeepLearning.AI</SourceChip>
-        <SourceChip href="https://elearning.fao.org/">FAO eLearning</SourceChip>
-      </div>
+      <LearningSources skills={match.gap.map((g) => g.skill)} />
     </div>
   );
 }

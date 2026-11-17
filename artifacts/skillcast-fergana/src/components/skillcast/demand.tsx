@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -43,58 +42,53 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
   }, [role, data, t]);
 
   const chartData = skillRows.slice(0, 6);
+  const noSample = skillRows.every((r) => r.freq === 0);
+  const level = (m: number) => (m >= 60 ? { label: t('Higher'), bar: 'bg-emerald-600', text: 'text-emerald-700 dark:text-emerald-400' }
+    : m >= 45 ? { label: t('Moderate'), bar: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-400' }
+      : { label: t('Lower'), bar: 'bg-rose-600', text: 'text-rose-700 dark:text-rose-400' });
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold">{t('demand.title')}</h2>
           <p className="max-w-2xl text-sm text-muted-foreground">{t('demand.desc')}</p>
         </div>
-        <Select value={roleSlug} onValueChange={setRoleSlug}>
-          <SelectTrigger className="w-64" aria-label={t('Role')}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ROLES.map((r) => (
-              <SelectItem key={r.slug} value={r.slug}>
-                {r.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <label className="grid gap-1 text-xs font-medium text-muted-foreground md:w-80">
+          {t('demand.choose')}
+          <Select value={roleSlug} onValueChange={setRoleSlug}>
+            <SelectTrigger className="h-auto min-h-10 w-full whitespace-normal text-left text-sm text-foreground" aria-label={t('demand.choose')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLES.map((r) => (
+                <SelectItem key={r.slug} value={r.slug}>
+                  {roleTitle(t, r.slug)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
       </div>
 
       {/* Scenario comparison */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border-l-4 border-l-teal-600">
-          <CardHeader className="pb-2">
-            <CardDescription>{t('scenario.moderate')}</CardDescription>
-            <CardTitle className="text-4xl font-bold">
-              {role.demandModerate}
-              <span className="text-base font-normal text-muted-foreground">/100</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-teal-600" style={{ width: `${role.demandModerate}%` }} />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-amber-500">
-          <CardHeader className="pb-2">
-            <CardDescription>{t('scenario.accelerated')}</CardDescription>
-            <CardTitle className="text-4xl font-bold">
-              {role.demandAccelerated}
-              <span className="text-base font-normal text-muted-foreground">/100</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-amber-500" style={{ width: `${role.demandAccelerated}%` }} />
-            </div>
-          </CardContent>
-        </Card>
+        {([['scenario.moderate', role.demandModerate, 'border-l-teal-600', 'bg-teal-600'], ['scenario.accelerated', role.demandAccelerated, 'border-l-amber-500', 'bg-amber-500']] as const).map(([label, value, border, bar]) => (
+          <Card key={label} className={`border-l-4 ${border}`}>
+            <CardHeader className="pb-2">
+              <CardDescription className="leading-snug">{t(label)}</CardDescription>
+              <CardTitle className="text-4xl font-bold tabular-nums">
+                {value}
+                <span className="text-base font-normal text-muted-foreground">/100</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden>
+                <div className={`h-full rounded-full ${bar}`} style={{ width: `${value}%` }} />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -105,67 +99,57 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
       {/* Skill momentum decomposition */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('demand.momentum')} — {roleTitle(t, role.slug)}</CardTitle>
+          <CardTitle className="text-base leading-snug">{t('demand.momentum')} — {roleTitle(t, role.slug)}</CardTitle>
           <CardDescription>{roleSignals(t, role.slug)}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 min-w-0 overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} interval={0} angle={-12} textAnchor="end" height={60} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, borderRadius: 8, backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)', borderColor: 'var(--border)' }}
-                  formatter={(value: number, name: string) => [Math.round(value), name]}
-                />
-                <Bar dataKey="momentum" radius={[6, 6, 0, 0]} name={t('demand.momentum')}>
-                  {chartData.map((row) => (
-                    <Cell key={row.slug} fill={row.momentum >= 60 ? '#059669' : row.momentum >= 45 ? '#d97706' : '#e11d48'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <CardContent className="space-y-4">
+          <ul className="space-y-3">
+            {chartData.map((row) => {
+              const l = level(row.momentum);
+              return (
+                <li key={row.slug}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                    <span className="min-w-0 flex-1 text-sm font-medium leading-snug">{row.name}</span>
+                    <span className={`shrink-0 text-sm font-semibold tabular-nums ${l.text}`}>{row.momentum}/100 · {l.label}</span>
+                  </div>
+                  <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                    <div className={`h-full rounded-full ${l.bar}`} style={{ width: `${Math.max(2, row.momentum)}%` }} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
 
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[520px] text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="pb-2 font-medium">{t('inst.skill')}</th>
-                  <th className="pb-2 font-medium">{t('demand.freq')}</th>
-                  <th className="pb-2 font-medium">{t('demand.trend')}</th>
-                  <th className="pb-2 font-medium">{t('demand.horizon')}</th>
-                  <th className="pb-2 font-medium">{t('demand.momentum')}</th>
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full min-w-[34rem] text-sm">
+              <thead className="bg-muted/50">
+                <tr className="text-left text-xs text-muted-foreground">
+                  <th scope="col" className="px-3 py-2 font-medium">{t('inst.skill')}</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">{t('demand.freq')}</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">{t('demand.trend')}</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">{t('demand.horizon')}</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">{t('demand.momentum')}</th>
                 </tr>
               </thead>
               <tbody>
                 {skillRows.map((r) => (
-                  <tr key={r.slug} className="border-b last:border-0">
-                    <td className="py-2 pr-3 font-medium">{r.name}</td>
-                    <td className="py-2 pr-3 tabular-nums text-muted-foreground">{r.freq}%</td>
-                    <td className="py-2 pr-3 tabular-nums text-muted-foreground">{r.trend}/100</td>
-                    <td className="py-2 pr-3 tabular-nums text-muted-foreground">{r.horizon}/100</td>
-                    <td className="py-2 font-semibold tabular-nums">{r.momentum}</td>
+                  <tr key={r.slug} className="border-t">
+                    <th scope="row" className="px-3 py-2 text-left font-medium">{r.name}</th>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{r.freq}%</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{r.trend}/100</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{r.horizon}/100</td>
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums">{r.momentum}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {noSample && <p className="text-xs text-muted-foreground">{t('demand.zeroNote')}</p>}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {data?.live ? (
-              data.sources.map((s) => (
-                <SourceChip key={s.name} href={s.url}>
-                  {s.name} · {new Date(data.fetchedAt).toLocaleDateString()}
-                </SourceChip>
-              ))
-            ) : (
-              <SourceChip href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/">
-                {t('WEF Future of Jobs 2025 · baseline snapshot')}
-              </SourceChip>
-            )}
-            <SourceChip href="https://hai.stanford.edu/ai-index/2025-ai-index-report">{t('Stanford AI Index 2025')}</SourceChip>
+          <div className="flex flex-wrap gap-2">
+            <SourceChip href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/">
+              {t('WEF Future of Jobs 2025 · baseline snapshot')}
+            </SourceChip>
           </div>
         </CardContent>
       </Card>

@@ -106,14 +106,26 @@ export const courseOutcome = (t: Translate, slug: string) => t(`course.${slug}.o
 
 // ─── Small shared UI atoms ─────────────────────────────────────────────────
 
+// Official SDG colours stay; the number switches to dark text where white
+// text would fall below WCAG AA contrast (e.g. the gold of SDG 12).
+function relativeLuminance(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+export function sdgTextColor(hex: string) {
+  return 1.05 / (relativeLuminance(hex) + 0.05) >= 4.5 ? '#ffffff' : '#111827';
+}
+
 export function SdgBadge({ goal, size = 'sm', label }: { goal: number; size?: 'sm' | 'md'; label?: string }) {
   const t = useT();
+  const bg = SDG_HEX[goal] ?? '#555555';
   return (
     <span
-      className={`inline-flex items-center rounded-md font-semibold text-white ${
+      className={`inline-flex items-center rounded-md font-semibold ${
         size === 'sm' ? 'h-5 w-5 justify-center text-[10px]' : 'h-6 min-w-6 px-1.5 justify-center text-xs'
       }`}
-      style={{ backgroundColor: SDG_HEX[goal] ?? '#555' }}
+      style={{ backgroundColor: bg, color: sdgTextColor(bg) }}
       title={label ?? t('SDG {goal}', { goal })}
       aria-label={label ?? t('Sustainable Development Goal {goal}', { goal })}
     >
@@ -137,7 +149,7 @@ export function MomentumPill({ momentum }: { momentum: number }) {
       }
     >
       {momentum}
-      <span className="ml-0.5 text-[10px] opacity-70">/100</span>
+      <span className="ml-0.5 text-[10px]">/100</span>
     </Badge>
   );
 }
@@ -174,7 +186,7 @@ export function SourceChip({ children, href }: { children: ReactNode; href?: str
 export function LevelDots({ level, max = 5, highlight = 0 }: { level: number; max?: number; highlight?: number }) {
   const t = useT();
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={t('Level {level} of {max}', { level, max })}>
+    <span className="inline-flex items-center gap-0.5" role="img" aria-label={t('Level {level} of {max}', { level, max })}>
       {Array.from({ length: max }).map((_, i) => (
         <span
           key={i}

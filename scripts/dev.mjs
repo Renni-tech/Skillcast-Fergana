@@ -4,7 +4,7 @@
 // Linux. Every step runs as a plain `node` process (no shell syntax), so it
 // behaves the same in PowerShell, cmd.exe and bash.
 //
-//   1. prisma generate      (Prisma client for the API's SQLite cache)
+//   1. prisma generate      (only when the schema, Prisma version or platform changed)
 //   2. build the API        (artifacts/api-server/build.mjs)
 //   3. prepare the database (artifacts/api-server/prepare-db.mjs, non-destructive)
 //   4. start the API and wait for GET /api/healthz
@@ -17,8 +17,10 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import net from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyFailure, failureAdvice, formatMB, freeBytes, prismaClientState } from './dev-lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const apiDir = path.join(root, 'artifacts', 'api-server');
@@ -123,11 +125,27 @@ function prefixed(stream, label) {
   });
 }
 
-/** Run a one-off setup step and fail with a clear message if it does not succeed. */
+/**
+ * Run a one-off setup step, streaming its output. On failure, classify the
+ * output (disk full, file locked, network) and print what to do next.
+ */
 function step(title, args, cwd, env = {}) {
   log(title);
-  const result = spawnSync(process.execPath, args, { cwd, env: { ...process.env, ...env }, stdio: 'inherit' });
-  if (result.status !== 0) fail(`${title} failed (exit code ${result.status ?? result.signal}). See the output above.`);
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, args, { cwd, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+    children.add(child);
+    let tail = '';
+    const keep = (chunk) => { tail = (tail + chunk.toString()).slice(-20000); };
+    child.stdout.on('data', (c) => { process.stdout.write(c); keep(c); });
+    child.stderr.on('data', (c) => { process.stderr.write(c); keep(c); });
+    child.on('exit', (code, signal) => {
+      children.delete(child);
+      if (shuttingDown) return;
+      if (code === 0) return resolve();
+      const advice = failureAdvice(classifyFailure(tail), { projectRoot: root, step: title.replace(/…$/, '') });
+      fail(`${title.replace(/…$/, '')} failed (${signal ?? `exit code ${code}`}).\n${advice}`);
+    });
+  });
 }
 
 /** Start a long-running server; if it exits on its own, stop everything. */
@@ -166,9 +184,24 @@ for (const [name, p] of [['API_PORT', API_PORT], ['WEB_PORT', WEB_PORT]]) {
   }
 }
 
-step('Generating Prisma client…', [prismaCli, 'generate', '--schema', path.join(apiDir, 'prisma', 'schema.prisma')], apiDir);
-step('Building API…', ['build.mjs'], apiDir, { NODE_ENV: 'development' });
-step('Preparing local SQLite cache…', ['prepare-db.mjs'], apiDir);
+// Prisma: generate only when needed. The first run downloads the platform
+// engines (expected); later runs reuse them instead of rewriting the client.
+const schemaPath = path.join(apiDir, 'prisma', 'schema.prisma');
+const client = prismaClientState(apiDir, schemaPath);
+if (client.current) {
+  log(`Prisma client is up to date ${dim(`(${client.engine})`)}`);
+} else {
+  const lowSpace = [root, os.tmpdir()]
+    .map((dir) => ({ dir, free: freeBytes(dir) }))
+    .filter(({ free }) => free !== null && free < 300 * 1024 * 1024);
+  for (const { dir, free } of lowSpace) {
+    log(red(`Low disk space: ${formatMB(free)} free for ${dir}. Prisma needs roughly 300 MB on first run.`));
+  }
+  await step('Generating Prisma client…', [prismaCli, 'generate', '--schema', schemaPath], apiDir);
+  prismaClientState(apiDir, schemaPath).writeStamp();
+}
+await step('Building API…', ['build.mjs'], apiDir, { NODE_ENV: 'development' });
+await step('Preparing local SQLite cache…', ['prepare-db.mjs'], apiDir);
 
 log(`Starting API on port ${API_PORT}…`);
 serve(cyan('[api]'), ['--enable-source-maps', path.join('dist', 'index.mjs')], apiDir, {

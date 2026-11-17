@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LANGS } from '@/lib/i18n';
+import { A11yButton } from './a11y';
 import { useSkillCast, type View } from '@/lib/store';
 import { useT } from './shared';
 import {
@@ -49,7 +50,7 @@ export function Header() {
 
   return (
     <header className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-colors ${landing
-      ? 'border-white/10 bg-[#090b2b]/80 text-white supports-[backdrop-filter]:bg-[#090b2b]/70'
+      ? 'border-white/10 bg-[#090b2b] text-white'
       : 'border-border bg-background/90 text-foreground supports-[backdrop-filter]:bg-background/75'
     }`}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
@@ -92,6 +93,7 @@ export function Header() {
         </nav>
 
         <div className="order-2 ml-auto flex items-center gap-2 sm:order-3">
+          <A11yButton landing={landing} />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -118,7 +120,7 @@ export function Header() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Select value={lang} onValueChange={(v) => setLang(v as typeof lang)}>
-                  <SelectTrigger size="sm" className={`h-8 w-auto gap-1 text-xs ${landing ? 'border-white/15 bg-white/[0.04] text-blue-100/85 hover:bg-white/10' : 'border-dashed'}`}>
+                  <SelectTrigger size="sm" aria-label={t('nav.lang')} className={`h-8 w-auto gap-1 text-xs ${landing ? 'border-white/15 bg-white/[0.04] text-blue-100/85 hover:bg-white/10' : 'border-dashed'}`}>
                     <Languages className="h-3.5 w-3.5" aria-hidden />
                     <SelectValue aria-label={t('nav.lang')} />
                   </SelectTrigger>

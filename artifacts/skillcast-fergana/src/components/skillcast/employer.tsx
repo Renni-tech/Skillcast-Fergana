@@ -169,7 +169,7 @@ export function EmployerView() {
             <Badge variant="secondary" className="gap-1"><Building2 className="h-3 w-3" aria-hidden /> {industryLabel}</Badge>
             <Badge variant="outline">{team.length} {t('emp.hr.profiles')}</Badge>
             {objectiveLabel && (
-              <Badge className="max-w-full gap-1 whitespace-normal text-left bg-teal-700 text-white dark:bg-teal-600"><ListChecks className="h-3 w-3" aria-hidden /> {objectiveLabel}</Badge>
+              <Badge className="max-w-full gap-1 whitespace-normal text-left bg-teal-700 text-white dark:bg-teal-700"><ListChecks className="h-3 w-3" aria-hidden /> {objectiveLabel}</Badge>
             )}
             <Badge variant="outline" className="gap-1"><CalendarClock className="h-3 w-3" aria-hidden /> {t(`onb.emp.months.${months}`)}</Badge>
             {employer.budgetPref && (
@@ -429,7 +429,7 @@ export function EmployerView() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{t('match.title')} — {t('emp.risk')}</CardTitle>
           </CardHeader>
-          <CardContent className="max-h-72 overflow-y-auto">
+          <CardContent className="max-h-72 overflow-y-auto focus-visible:ring-2 focus-visible:ring-ring" tabIndex={0} role="region" aria-label={t('emp.title')}>
             <ul className="space-y-2">
               {memberMatches.slice(0, 14).map(({ member, top }) => (
                 <li key={member.id} className="flex min-w-0 flex-col items-start gap-1.5 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3">

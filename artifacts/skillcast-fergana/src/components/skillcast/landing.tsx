@@ -1,17 +1,19 @@
 'use client';
 
 import {
-  ArrowRight, BadgeCheck, Building2, FileCheck2, GitBranch, GraduationCap, Radar, Scale, ShieldCheck, Sparkles, User,
+  Accessibility, ArrowRight, BadgeCheck, Building2, FileCheck2, GitBranch, GraduationCap, Mic, Radar, Scale, ShieldCheck, Sparkles, User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useSkillCast } from '@/lib/store';
+import { usePanels } from '@/lib/ui-panels';
 import { SdgBadge, useT } from './shared';
 
 export function Landing() {
   const t = useT();
   const { setView, setUserType, learnerOnboarded } = useSkillCast();
+  const { openVoice, setA11yOpen } = usePanels();
 
   const navigate = (type: 'individual' | 'employer' | 'institution') => {
     setUserType(type);
@@ -85,8 +87,8 @@ export function Landing() {
         </ol>
       </section>
 
-      {/* SDG + Responsible AI */}
-      <section className="mx-auto mt-16 grid max-w-6xl gap-4 px-4 sm:px-6 md:grid-cols-2">
+      {/* SDG + Responsible AI + Accessibility */}
+      <section className="mx-auto mt-16 grid max-w-6xl gap-4 px-4 sm:px-6 md:grid-cols-2 xl:grid-cols-3">
         <Card className="border-emerald-300/15 bg-gradient-to-br from-emerald-400/[0.07] to-transparent">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -128,6 +130,19 @@ export function Landing() {
             <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('2 scenarios')}</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">O‘zbek · Русский · English</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('SDG ledger on every role')}</Badge>
+          </CardContent>
+        </Card>
+        <Card className="border-blue-300/30 bg-gradient-to-br from-blue-400/[0.07] to-transparent md:col-span-2 xl:col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Accessibility className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden />
+              {t('landing.a11y.title')}
+            </CardTitle>
+            <CardDescription className="leading-relaxed">{t('landing.a11y.desc')}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openVoice()}><Mic className="h-4 w-4" aria-hidden />{t('va.title')}</Button>
+            <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => setA11yOpen(true)}><Accessibility className="h-4 w-4" aria-hidden />{t('a11y.title')}</Button>
           </CardContent>
         </Card>
       </section>

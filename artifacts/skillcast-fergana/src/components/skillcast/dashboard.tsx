@@ -10,15 +10,6 @@ import {
   Radar as RadarIcon,
   ListChecks,
 } from 'lucide-react';
-import {
-  Radar,
-  RadarChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +37,7 @@ import { SdgTab } from './sdgview';
 import { DemandTab } from './demand';
 import { FutureRadarStep } from './onboarding';
 import { ProgressDashboard } from './progress-dashboard';
+import { WindRose } from './wind-rose';
 
 const EMPLOYMENT_STATUS_LABELS = {
   student: 'Student',
@@ -75,15 +67,15 @@ export function Dashboard() {
       </div>
 
       <Tabs value={dashTab} onValueChange={setDashTab} className="mt-4">
-        <TabsList className="flex h-auto w-full flex-wrap gap-1">
-          <TabsTrigger value="overview" className="gap-1.5"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
-          <TabsTrigger value="matches" className="gap-1.5">{t('tab.matches')}</TabsTrigger>
-          <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
-          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('tab.learn')}</TabsTrigger>
-          <TabsTrigger value="harada" className="gap-1.5">{t('tab.harada')}</TabsTrigger>
-          <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
-          <TabsTrigger value="sdg" className="gap-1.5">{t('tab.sdg')}</TabsTrigger>
-          <TabsTrigger value="demand" className="gap-1.5">{t('tab.demand')}</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-4">
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="overview"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="matches">{t('tab.matches')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="radar"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="pathway"><BookOpen className="h-4 w-4" aria-hidden />{t('tab.learn')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="harada">{t('tab.harada')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="progress"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="sdg">{t('tab.sdg')}</TabsTrigger>
+          <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-1.5 text-center leading-tight" value="demand">{t('tab.demand')}</TabsTrigger>
         </TabsList>
         <p className="mt-3 text-sm text-muted-foreground">{t(`flow.${['overview', 'matches', 'pathway', 'radar', 'harada', 'progress', 'sdg', 'demand'].includes(dashTab) ? dashTab : 'overview'}`)}</p>
 
@@ -96,7 +88,8 @@ export function Dashboard() {
         <TabsContent value="pathway" className="mt-4">
           <PathwayTab matches={matches} />
         </TabsContent>
-        <TabsContent value="radar" className="mt-4">
+        <TabsContent value="radar" className="mt-4 space-y-6">
+          <WindRose />
           <FutureRadarStep details={profile.extended ?? {}} onScenario={setScenario} />
         </TabsContent>
         <TabsContent value="harada" className="mt-4">
@@ -126,25 +119,12 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   const mode = data?.provenance?.mode;
   const [emailOpen, setEmailOpen] = useState(false);
 
-  const radarData = useMemo(() => {
-    const userSlugs = Object.keys(profile.skills);
-    const marketTop = Object.entries(momentumMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([s]) => s);
-    const slugs = [...new Set([...userSlugs.slice(0, 8), ...marketTop])].slice(0, 12);
-    return slugs.map((slug) => ({
-      skill: skillName(t, slug).split(' ').slice(0, 2).join(' '),
-      you: Math.round((profile.skills[slug] ?? 0) * 20),
-      market: momentumMap[slug] ?? 0,
-    }));
-  }, [profile.skills, momentumMap, t]);
 
   const movers = data?.changelog?.[0]?.details?.movers ?? [];
 
   const strongest = useMemo(() => {
     return Object.keys(profile.skills)
-      .map((s) => ({ slug: s, m: momentumMap[s] ?? 0 }))
+      .map((s) => ({ slug: s, m: momentumMap[s] ?? SKILL_MAP[s]?.seedMomentum ?? 50 }))
       .sort((a, b) => b.m - a.m);
   }, [profile.skills, momentumMap]);
 
@@ -170,7 +150,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   return (
     <div className="space-y-4">
       <Card className="border-blue-100 dark:border-slate-700 bg-gradient-to-r from-white dark:from-slate-900 via-blue-50/70 dark:via-slate-800 to-indigo-50/70 dark:to-slate-900 shadow-sm">
-        <CardContent className="space-y-4 pt-6">
+        <CardContent className="space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -211,9 +191,12 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
         </CardContent>
       </Card>
 
+      {/* Wind Rose: the career direction map is the centre of the overview */}
+      <WindRose />
+
       {/* Forecast status: real mode and posting count, never labelled live */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 pt-6">
+        <CardContent className="flex flex-wrap items-center gap-3">
           <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
           <span className="text-sm text-muted-foreground">
             {postingLine(st, mode, data?.totalPostings ?? 0)}
@@ -245,29 +228,8 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-5">
-        {/* Radar */}
-        <Card className="lg:col-span-3">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-base">{t('ov.radar.title')}</CardTitle>
-            <CardDescription>{t('ov.radar.desc')}</CardDescription>
-          </CardHeader>
-          <CardContent className="h-80 min-w-0 overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData} outerRadius="72%">
-                <PolarGrid stroke="var(--border)" />
-                <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
-                <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-                <Radar name={t('radar.you')} dataKey="you" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.35} />
-                <Radar name={t('radar.market')} dataKey="market" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.2} />
-                <Legend wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2">
 
-        {/* Movers + strengths */}
-        <div className="space-y-4 lg:col-span-2">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">{t('ov.movers.title')}</CardTitle>
@@ -308,7 +270,6 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               </ul>
             </CardContent>
           </Card>
-        </div>
       </div>
 
       {/* Forecast changelog: source → refresh time → data → effect on skills */}
@@ -339,7 +300,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
             <p className="mb-3 text-muted-foreground">
               {nextCourse ? `${courseTitle(t, nextCourse.slug)} (${courseProvider(t, nextCourse.slug)})` : '—'}
             </p>
-            <Button size="sm" onClick={() => { setEmailOpen(false); setDashTab(nextCourse ? 'pathway' : 'matches'); }} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+            <Button size="sm" onClick={() => { setEmailOpen(false); setDashTab(nextCourse ? 'pathway' : 'matches'); }} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
               {t('ov.email.cta')}
             </Button>
           </div>

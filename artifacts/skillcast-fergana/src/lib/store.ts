@@ -25,6 +25,30 @@ export type View =
 
 type HaradaTaskStatus = 'todo' | 'in_progress' | 'done';
 
+/** Personal display preferences. Kept when the demo data is reset. */
+export interface A11ySettings {
+  textScale: 'normal' | 'large' | 'larger';
+  highContrast: boolean;
+  reduceMotion: boolean;
+  underlineLinks: boolean;
+  readingSpacing: boolean;
+}
+
+export const DEFAULT_A11Y: A11ySettings = {
+  textScale: 'normal', highContrast: false, reduceMotion: false, underlineLinks: false, readingSpacing: false,
+};
+
+export function normalizeA11y(value: unknown): A11ySettings {
+  const v = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  return {
+    textScale: v.textScale === 'large' || v.textScale === 'larger' ? v.textScale : 'normal',
+    highContrast: v.highContrast === true,
+    reduceMotion: v.reduceMotion === true,
+    underlineLinks: v.underlineLinks === true,
+    readingSpacing: v.readingSpacing === true,
+  };
+}
+
 interface SkillCastState {
   lang: Lang;
   view: View;
@@ -39,7 +63,9 @@ interface SkillCastState {
   onboarded: boolean;
   learnerOnboarded: boolean;
   dashTab: string;
+  a11y: A11ySettings;
 
+  setA11y: (patch: Partial<A11ySettings>) => void;
   setLang: (l: Lang) => void;
   setView: (v: View) => void;
   setUserType: (u: UserType | null) => void;
@@ -94,6 +120,8 @@ export const useSkillCast = create<SkillCastState>()(
       onboarded: false,
       learnerOnboarded: false,
       dashTab: 'overview',
+      a11y: DEFAULT_A11Y,
+      setA11y: (patch) => set((state) => ({ a11y: normalizeA11y({ ...state.a11y, ...patch }) })),
 
       setLang: (l) => set({ lang: l }),
 
@@ -198,6 +226,7 @@ export const useSkillCast = create<SkillCastState>()(
         haradaTaskStatus: s.haradaTaskStatus,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
+        a11y: s.a11y,
       }),
       // Normalize saved data before the first render, not after consumers
       // have already read nullable arrays or incomplete nested profiles.
@@ -213,6 +242,7 @@ export const useSkillCast = create<SkillCastState>()(
           userType: ['individual', 'employer', 'institution'].includes(String(saved.userType))
             ? saved.userType as UserType : null,
           profile: normalizeProfile(saved.profile),
+          a11y: normalizeA11y(saved.a11y),
           employer: { ...EMPTY_EMPLOYER, ...(saved.employer && typeof saved.employer === 'object' ? saved.employer : {}) },
           institution: { ...EMPTY_INSTITUTION, ...(saved.institution && typeof saved.institution === 'object' ? saved.institution : {}) },
           chosenRole: typeof saved.chosenRole === 'string' && ROLE_MAP[saved.chosenRole] ? saved.chosenRole : null,

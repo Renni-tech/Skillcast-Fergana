@@ -18,6 +18,7 @@ import { INTERESTS, useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
 import { normalizeProfile } from '@/lib/profile';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
+import { InclusiveOpportunities } from './inclusive';
 
 const FORKS = [
   {
@@ -190,6 +191,7 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
           )}
         </>
       )}
+      <InclusiveOpportunities matches={matches} />
     </div>
   );
 }
@@ -440,13 +442,15 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 {currentSkills.map((item) => (
                   <li
                     key={item.skill}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-blue-50/70 px-3 py-2 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg bg-blue-50/70 px-3 py-2 text-sm"
                   >
-                    <span className="font-medium text-slate-800">
+                    <span className="min-w-0 font-medium text-slate-800">
                       {skillName(t, item.skill)}
                     </span>
-                    <span className="shrink-0 text-xs text-slate-600">
-                      {item.userLevel}/5 {t('harada.current')} · {item.requiredLevel} {t('harada.required')}
+                    <span className="flex flex-wrap items-center gap-1 text-xs text-slate-700">
+                      <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-slate-800 dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100">{t('pw.gap.now', { n: item.userLevel })}</span>
+                      <span aria-hidden>→</span>
+                      <span className="rounded border border-amber-400 bg-white px-1.5 py-0.5 text-amber-900 dark:border-amber-500 dark:bg-slate-900 dark:text-amber-200">{t('pw.gap.need', { n: item.requiredLevel })}</span>
                     </span>
                   </li>
                 ))}
@@ -468,13 +472,15 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 {match.missingSkills.slice(0, 5).map((gap) => (
                   <li
                     key={gap.skill}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-indigo-50/60 px-3 py-2 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg bg-indigo-50/60 px-3 py-2 text-sm"
                   >
-                    <span className="font-medium text-slate-800">
+                    <span className="min-w-0 font-medium text-slate-800">
                       {skillName(t, gap.skill)}
                     </span>
-                    <span className="shrink-0 text-xs text-slate-600">
-                      {gap.userLevel}/5 {t('harada.current')} · {gap.minLevel} {t('harada.required')}
+                    <span className="flex flex-wrap items-center gap-1 text-xs text-slate-700">
+                      <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-slate-800 dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100">{t('pw.gap.now', { n: gap.userLevel })}</span>
+                      <span aria-hidden>→</span>
+                      <span className="rounded border border-amber-400 bg-white px-1.5 py-0.5 text-amber-900 dark:border-amber-500 dark:bg-slate-900 dark:text-amber-200">{t('pw.gap.need', { n: gap.minLevel })}</span>
                     </span>
                   </li>
                 ))}
@@ -484,7 +490,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 {t('Your current levels meet the mapped requirements for this role.')}
               </p>
             )}
-            <Button variant="link" className="mt-2 h-auto p-0" onClick={openLearning}>
+            <Button variant="link" className="mt-2 h-auto p-0 dark:text-blue-300" onClick={openLearning}>
               {t('Open learning pathway')} →
             </Button>
           </section>
@@ -633,7 +639,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
           <Button
             size="sm"
-            className="shrink-0 bg-green-600 text-white hover:bg-green-700"
+            className="shrink-0 bg-green-700 text-white hover:bg-green-800"
             onClick={openRoadmap}
           >
             {isChosen ? t('View Roadmap') : t('Explore Roadmap')}

@@ -31,6 +31,7 @@ import { matchAll } from '@/lib/matching';
 import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualProfileDetails } from '@/lib/types';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
+import { useReducedMotion } from './a11y';
 
 // ─── Onboarding router: three tracks ────────────────────────────────────────
 
@@ -179,12 +180,12 @@ function OnboardingShell({
             <Button
               onClick={onNext}
               disabled={nextDisabled}
-              className={`gap-1 ${light ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500'}`}
+              className={`gap-1 ${light ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}
             >
               {t(nextLabel)} <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
-            <Button onClick={finish} className={`gap-2 ${light ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500'}`}>
+            <Button onClick={finish} className={`gap-2 ${light ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}>
               <Rocket className="h-4 w-4" aria-hidden /> {t('onb.finish')}
             </Button>
           )}
@@ -429,6 +430,7 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
   const { profile, scenario } = useSkillCast();
   const { loading, data, momentumMap } = useSignals();
   const t = useT();
+  const reduceMotion = useReducedMotion();
   const matches = useMemo(() => matchAll(profile, momentumMap), [profile, momentumMap]);
   const topRoles = matches.slice(0, 5).map((match) => ({ match, role: ROLE_MAP[match.roleSlug] })).filter((item) => item.role);
   const demandKey = scenario === 'moderate' ? 'demandModerate' : 'demandAccelerated';
@@ -492,16 +494,16 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 rounded-2xl border border-blue-100 dark:border-slate-700 bg-gradient-to-r from-blue-50 dark:from-slate-800 to-indigo-50 dark:to-slate-900 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-slate-900 dark:text-slate-100">{t('Your Future Skills Radar')}</h3>
             <Badge className="border border-blue-200 bg-white dark:bg-slate-900 text-blue-700 dark:text-slate-200">{t('Illustrative demo')}</Badge>
           </div>
           <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">{t('Personalized from your profile, interests, skills, SkillCast pathways, and current signals.')}</p>
         </div>
-        <div className="flex w-full rounded-xl border border-blue-100 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 sm:w-auto" role="group" aria-label={t('AI adoption scenario')}>
+        <div className="grid w-full shrink-0 grid-cols-2 gap-1 rounded-xl border border-blue-100 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 sm:w-80" role="group" aria-label={t('AI adoption scenario')}>
           {(['moderate', 'accelerated'] as const).map((option) => (
-            <button key={option} type="button" aria-pressed={scenario === option} onClick={() => onScenario(option)} className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors sm:flex-none ${scenario === option ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-700'}`}>
+            <button key={option} type="button" aria-pressed={scenario === option} onClick={() => onScenario(option)} className={`flex min-h-11 items-center justify-center rounded-lg px-3 py-2 text-center text-sm font-semibold leading-tight transition-colors ${scenario === option ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800'}`}>
               {option === 'moderate' ? t('Moderate adoption') : t('Fast adoption')}
             </button>
           ))}
@@ -520,17 +522,23 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
             <CardDescription>{t('Scenario demand index for your highest-matching career pathways (0–100).')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {marketDemand.length ? <div className="h-64 min-w-0 overflow-hidden" role="img" aria-label={t('Illustrative {scenario} demand index for top matching career pathways', { scenario: t(scenario === 'moderate' ? 'Moderate adoption' : 'Fast adoption') })}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={marketDemand} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" width={150} tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}/100`, 'Illustrative index']} />
-                  <Bar dataKey="demand" fill="#2563EB" radius={[0, 6, 6, 0]} maxBarSize={24} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div> : <p className="py-12 text-center text-sm text-slate-500">{t('Complete your profile to see pathway demand estimates.')}</p>}
+            {marketDemand.length ? <>
+              <ul className="space-y-3" aria-label={t('Illustrative {scenario} demand index for top matching career pathways', { scenario: t(scenario === 'moderate' ? 'Moderate adoption' : 'Fast adoption') })}>
+                {marketDemand.map((item) => (
+                  <li key={item.name}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                      <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-slate-900 dark:text-slate-100">{item.name}</span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-blue-700 dark:text-blue-300">{item.demand}<span className="text-xs font-normal text-slate-500 dark:text-slate-400">/100</span></span>
+                    </div>
+                    <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-blue-100 dark:bg-slate-700" aria-hidden>
+                      <div className="h-full rounded-full bg-blue-600 dark:bg-blue-500" style={{ width: `${Math.max(2, Math.min(100, item.demand))}%` }} />
+                    </div>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t('md.index')}: {item.demand}/100 · {t('md.fit', { n: item.score })}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{t('md.what')}</p>
+            </> : <p className="py-12 text-center text-sm text-slate-500">{t('Complete your profile to see pathway demand estimates.')}</p>}
           </CardContent>
         </Card>
 
@@ -546,8 +554,8 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="horizon" tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} interval={0} />
                   <YAxis domain={[0, 100]} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}/100`, 'Demo outlook index']} />
-                  <Bar dataKey="outlook" fill="#2563EB" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}/100`, t('chart.outlook')]} />
+                  <Bar dataKey="outlook" fill="#2563EB" radius={[6, 6, 0, 0]} maxBarSize={48} isAnimationActive={!reduceMotion} />
                 </BarChart>
               </ResponsiveContainer>
             </div> : <p className="py-12 text-center text-sm text-slate-500">{t('Outlook will appear when matching pathways are available.')}</p>}
