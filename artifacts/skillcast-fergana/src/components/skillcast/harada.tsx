@@ -91,6 +91,7 @@ const TASKS = [
 ] as const;
 
 type TaskStatus = 'not-started' | 'in-progress' | 'completed';
+export const HARADA_TASK_COUNT = TASKS.length;
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
   'not-started': 'Not Started',

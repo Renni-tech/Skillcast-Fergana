@@ -10,13 +10,18 @@ import { SDG_TITLES } from '@/lib/i18n';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { roleSdgMechanism, roleTitle, SdgBadge, SourceChip, useT } from './shared';
+import { pickCourses } from './pathway';
 
 // ─── SDG tab: the ledger. Mechanisms, not decoration. ──────────────────────
 
 export function SdgTab({ matches }: { matches: RoleMatch[] }) {
   const t = useT();
-  const { chosenRole, profile } = useSkillCast();
+  const { chosenRole, profile, completedCourses } = useSkillCast();
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
+  const match = matches.find((item) => item.roleSlug === chosenRole);
+  const courseCount = match
+    ? pickCourses(match.gap, profile.inclusion, profile.budget).filter((node) => completedCourses.includes(node.courseSlug)).length : 0;
+  const milestoneCount = (profile.completedRoadmapTasks ?? []).filter((key) => key.startsWith(`${chosenRole}:`)).length;
 
   const ledger = useMemo(() => {
     if (!role) return null;
@@ -69,6 +74,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
           <CardTitle className="text-base">{roleTitle(t, role.slug)} — {t('sdg.why')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">{t('flow.sdgProgress', { courses: courseCount, milestones: milestoneCount })}</p>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
             <div className="mb-1 flex items-center gap-1.5">
               {role.sdgTags.map((g) => (

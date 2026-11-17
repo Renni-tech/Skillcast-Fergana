@@ -1,3 +1,4 @@
+import type { FerganaEvidence, FerganaSourceState } from '@workspace/api-client-react';
 // ─── SkillCast shared types ────────────────────────────────────────────────
 
 export type Lang = 'en' | 'uz' | 'ru';
@@ -168,6 +169,7 @@ export interface SkillSnapshot {
 }
 
 export interface SignalsPayload {
+  provenance?: FerganaEvidence;
   runId: string;
   fetchedAt: string;
   live: boolean;
@@ -185,6 +187,8 @@ export interface SignalsPayload {
     details: {
       movers: Array<{ skill: string; delta: number; momentum: number }>;
       postings: number;
+      sources?: FerganaSourceState[];
+      mode?: 'periodic' | 'cached' | 'demo';
     };
   }>;
 }

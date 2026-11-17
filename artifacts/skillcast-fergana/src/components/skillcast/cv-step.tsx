@@ -51,9 +51,10 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
       });
       const data = (await res.json()) as { ok?: boolean; skills?: Record<string, number>; years?: number };
       if (data.ok && data.skills && Object.keys(data.skills).length > 0) {
+        const latestProfile = useSkillCast.getState().profile;
         setProfile({
-          skills: preserveProfile ? { ...profile.skills, ...data.skills } : data.skills,
-          years: preserveProfile ? profile.years : data.years && data.years > 0 ? data.years : profile.years,
+          skills: preserveProfile ? { ...latestProfile.skills, ...data.skills } : data.skills,
+          years: preserveProfile ? latestProfile.years : data.years && data.years > 0 ? data.years : latestProfile.years,
           ...scrubMeta,
         });
         setExtractedSkills(
@@ -74,7 +75,7 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
       setExtracting(false);
     }
     const skills = skillsFromCV(scrubbed.scrubbedText);
-    setProfile({ skills: preserveProfile ? { ...profile.skills, ...skills } : skills, ...scrubMeta });
+    setProfile({ skills: preserveProfile ? { ...useSkillCast.getState().profile.skills, ...skills } : skills, ...scrubMeta });
     setExtractedSkills(extractSkills(scrubbed.scrubbedText).slice(0, 10));
     setExtractMode('deterministic');
   };

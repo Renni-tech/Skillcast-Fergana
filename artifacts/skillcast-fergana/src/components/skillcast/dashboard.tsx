@@ -38,7 +38,7 @@ import { useSkillCast } from '@/lib/store';
 import { matchAll } from '@/lib/matching';
 import { courseProvider, courseTitle, MomentumPill, roleTitle, skillName, SourceChip, TrendArrow, useSignals, useT } from './shared';
 import { MatchesTab } from './matches';
-import { PathwayTab } from './pathway';
+import { PathwayTab, pickCourses } from './pathway';
 import { HaradaTab } from './harada';
 import { SdgTab } from './sdgview';
 import { DemandTab } from './demand';
@@ -54,7 +54,7 @@ const EMPLOYMENT_STATUS_LABELS = {
 
 export function Dashboard() {
   const t = useT();
-  const { scenario, setScenario, profile, chosenRole, dashTab, setDashTab } = useSkillCast();
+  const { setScenario, profile, dashTab, setDashTab, setUserType, setView } = useSkillCast();
   const { momentumMap } = useSignals();
 
   const matches = useMemo(() => matchAll(profile, momentumMap), [profile, momentumMap]);
@@ -67,19 +67,23 @@ export function Dashboard() {
           <h1 className="text-2xl font-bold tracking-tight">{t('dash.hello')}</h1>
           <p className="text-sm text-muted-foreground">{t('scenario.note')}</p>
         </div>
+        <Button variant="outline" onClick={() => { setUserType('individual'); setView('onboarding'); }}>
+          {t('flow.edit')}
+        </Button>
       </div>
 
       <Tabs value={dashTab} onValueChange={setDashTab} className="mt-4">
         <TabsList className="flex h-auto w-full flex-wrap gap-1">
           <TabsTrigger value="overview" className="gap-1.5"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
           <TabsTrigger value="matches" className="gap-1.5">{t('tab.matches')}</TabsTrigger>
-          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('Learning pathways')}</TabsTrigger>
           <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
+          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('Learning pathways')}</TabsTrigger>
           <TabsTrigger value="harada" className="gap-1.5">{t('Harada Method')}</TabsTrigger>
           <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
           <TabsTrigger value="sdg" className="gap-1.5">{t('tab.sdg')}</TabsTrigger>
           <TabsTrigger value="demand" className="gap-1.5">{t('tab.demand')}</TabsTrigger>
         </TabsList>
+        <p className="mt-3 text-sm text-muted-foreground">{t(`flow.${['overview', 'matches', 'pathway', 'radar', 'harada', 'progress', 'sdg', 'demand'].includes(dashTab) ? dashTab : 'overview'}`)}</p>
 
         <TabsContent value="overview" className="mt-4">
           <OverviewTab matches={matches} />
@@ -144,13 +148,13 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
     const role = chosenRole ? ROLE_MAP[chosenRole] : null;
     if (!role) return null;
     const m = matches.find((x) => x.roleSlug === role.slug);
-    const firstGap = m?.gap?.[0];
-    if (!firstGap) return null;
-    const c = Object.values(COURSE_MAP).find((x) => x.skills.includes(firstGap.skill));
-    return c ?? null;
-  }, [chosenRole, matches]);
+    if (!m) return null;
+    const node = pickCourses(m.gap, profile.inclusion, profile.budget)
+      .find((item) => !completedCourses.includes(item.courseSlug));
+    return node ? COURSE_MAP[node.courseSlug] : null;
+  }, [chosenRole, matches, profile.inclusion, profile.budget, completedCourses]);
 
-  const leadingMatch = matches[0];
+  const leadingMatch = matches.find((match) => match.roleSlug === chosenRole) ?? matches[0];
   const leadingRole = leadingMatch ? ROLE_MAP[leadingMatch.roleSlug] : null;
   const leadingExposure = leadingRole ? (leadingRole.automationExposure < 0.3 ? 'Lower' : leadingRole.automationExposure < 0.6 ? 'Moderate' : 'Higher') : null;
   const profileDetails = profile.extended;
@@ -396,7 +400,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
             <p className="mb-3 text-muted-foreground">
               {nextCourse ? `${courseTitle(t, nextCourse.slug)} (${courseProvider(t, nextCourse.slug)})` : '—'}
             </p>
-            <Button size="sm" className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+            <Button size="sm" onClick={() => { setEmailOpen(false); setDashTab(nextCourse ? 'pathway' : 'matches'); }} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
               {t('ov.email.cta')}
             </Button>
           </div>

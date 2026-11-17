@@ -13,6 +13,7 @@ import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { pickCourses } from './pathway';
+import { HARADA_TASK_COUNT } from './harada';
 import { courseProvider, courseTitle, roleTitle, skillName, useT } from './shared';
 
 export function ProgressDashboard({ matches }: { matches: RoleMatch[] }) {
@@ -20,12 +21,21 @@ export function ProgressDashboard({ matches }: { matches: RoleMatch[] }) {
   const { profile, chosenRole, completedCourses, setProfile, setDashTab } = useSkillCast();
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
   const match = matches.find((item) => item.roleSlug === chosenRole) ?? null;
-  const roadmap = useMemo(() => match ? pickCourses(match.gap, profile.inclusion) : [], [match, profile.inclusion]);
+  const roadmap = useMemo(() => match ? pickCourses(match.gap, profile.inclusion, profile.budget) : [], [match, profile.inclusion, profile.budget]);
   const completedRoadmap = roadmap.filter((item) => completedCourses.includes(item.courseSlug));
   const completedHours = completedRoadmap.reduce((sum, item) => sum + (COURSE_MAP[item.courseSlug]?.totalHours ?? 0), 0);
-  const weeklyHours = Math.min(25, Math.max(0, Number(profile.weeklyHoursCompleted ?? 0)));
   const tasks = profile.completedRoadmapTasks ?? [];
-  const toggleTask = (id: string) => setProfile({ completedRoadmapTasks: tasks.includes(id) ? tasks.filter((item) => item !== id) : [...tasks, id] });
+  const toggleTask = (id: string) => {
+    const done = tasks.includes(id);
+    const statuses = { ...profile.haradaTaskStatuses };
+    for (let index = 0; index < HARADA_TASK_COUNT; index++) {
+      statuses[`${id}:${index}`] = done ? 'not-started' : 'completed';
+    }
+    setProfile({
+      completedRoadmapTasks: done ? tasks.filter((item) => item !== id) : [...tasks, id],
+      haradaTaskStatuses: statuses,
+    });
+  };
   const gaps = (match?.gap ?? []).slice(0, 5);
   const completedMilestones = gaps.filter((gap) => tasks.includes(`${chosenRole}:${gap.skill}`)).length;
   const haradaEntries = Object.entries(profile.haradaTaskStatuses ?? {}).filter(([key]) => key.startsWith(`${chosenRole}:`));

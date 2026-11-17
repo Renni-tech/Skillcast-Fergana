@@ -1,1 +1,3 @@
 - [Migration runtime requirements](migration-runtime.md) — Node 20 failed shared API generation; keep the workspace on Node 24.
+- [Fergana product scope](fergana-product-scope.md) — Smart Education learner platform; Fergana City → Uzbekistan → Global, with existing workforce features secondary.
+- [Learner test snapshots](learner-test-snapshots.md) — server-rendered Zustand tests need the current fixture snapshot or language/profile coverage can silently exercise defaults.

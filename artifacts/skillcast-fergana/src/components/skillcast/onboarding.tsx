@@ -135,7 +135,7 @@ function OnboardingShell({
                       <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${complete ? 'bg-blue-600 text-white' : active ? 'bg-blue-100 dark:bg-slate-700 text-blue-700' : 'bg-slate-100 text-slate-400'}`}>
                         {complete ? <Check className="h-4 w-4" aria-label={t('Completed')} /> : number}
                       </span>
-                      <span>{label}{[2, 3, 5].includes(index) ? ' (optional)' : ''}</span>
+                      <span>{t(label)}{[2, 3, 5].includes(index) ? ` (${t('flow.optional')})` : ''}</span>
                     </li>
                   );
                 })}
@@ -143,7 +143,7 @@ function OnboardingShell({
             </aside>
             <div className="mb-4 lg:hidden">
               <StepProgress step={step} total={total} />
-              <p className="mt-2 text-center text-xs font-medium text-slate-600">{individualStepTitles[step - 1]}</p>
+              <p className="mt-2 text-center text-xs font-medium text-slate-600">{t(individualStepTitles[step - 1])}</p>
             </div>
           </>
         ) : (
@@ -180,7 +180,7 @@ function OnboardingShell({
               disabled={nextDisabled}
               className={`gap-1 ${light ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500'}`}
             >
-              {nextLabel} <ArrowRight className="h-4 w-4" aria-hidden />
+              {t(nextLabel)} <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
             <Button onClick={finish} className={`gap-2 ${light ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500'}`}>
@@ -231,6 +231,7 @@ const STATUS_OPTIONS: Array<{ value: EmploymentStatus; label: string }> = [
 function IndividualOnboarding() {
   const t = useT();
   const { profile, setProfile, setUserType, setScenario } = useSkillCast();
+  const { momentumMap } = useSignals();
   const [step, setStep] = useState(2);
   const details = profile.extended ?? EMPTY_DETAILS;
   const patchDetails = (patch: Partial<IndividualProfileDetails>) => {
@@ -256,8 +257,8 @@ function IndividualOnboarding() {
     const current = useSkillCast.getState();
     const targetRole = details.strategyRole && ROLE_MAP[details.strategyRole]
       ? details.strategyRole
-      : matchAll(current.profile)[0]?.roleSlug ?? null;
-    useSkillCast.setState({ onboarded: true, view: 'dashboard', dashTab: 'matches', chosenRole: targetRole });
+      : matchAll(current.profile, momentumMap)[0]?.roleSlug ?? null;
+    useSkillCast.setState({ onboarded: true, learnerOnboarded: true, view: 'dashboard', dashTab: 'overview', chosenRole: targetRole });
   };
   const back = step === 2 ? () => setUserType(null) : () => setStep((s) => Math.max(2, s - 1));
 
@@ -274,7 +275,7 @@ function IndividualOnboarding() {
     <OnboardingShell
       step={step}
       total={INDIVIDUAL_STEPS}
-      title={titles[step - 1]}
+      title={t(titles[step - 1])}
       desc={step === 2 ? t('A few details help tailor your learning pathways and career outlook.') : undefined}
       icon={step === 2 ? User : step === 3 ? Target : step === 4 ? Radar : step === 5 ? Briefcase : SlidersHorizontal}
       onBack={back}
@@ -340,7 +341,7 @@ function ProfileStep({
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="field-work" className="text-slate-800">{t('Field of work')}</Label>
+            <Label htmlFor="field-work" className="text-slate-800">{t('flow.field')}</Label>
             <Input id="field-work" value={details.fieldOfWork ?? ''} onChange={(e) => patchDetails({ fieldOfWork: e.target.value })} placeholder={t('e.g. Healthcare, finance, technology')} className={LIGHT_INPUT} />
           </div>
           <div>
