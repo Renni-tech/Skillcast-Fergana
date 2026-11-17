@@ -80,15 +80,15 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const badges = useMemo(() => {
     const done = nodes.filter((n) => completedCourses.includes(n.courseSlug));
     const b: Array<{ label: string; icon: typeof Flag; earned: boolean }> = [];
-    b.push({ label: 'First step', icon: Flag, earned: done.length >= 1 });
-    b.push({ label: 'Halfway', icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2) });
+    b.push({ label: t('badge.first'), icon: Flag, earned: done.length >= 1 });
+    b.push({ label: t('badge.halfway'), icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2) });
     const aiDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => AI_SLUGS.has(s)));
-    b.push({ label: 'AI Explorer', icon: Sparkles, earned: aiDone });
+    b.push({ label: t('badge.ai'), icon: Sparkles, earned: aiDone });
     const greenDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => GREEN_SLUGS.has(s)));
-    b.push({ label: 'Green Skill', icon: Trophy, earned: greenDone });
-    b.push({ label: 'Path complete', icon: Award, earned: nodes.length > 0 && done.length === nodes.length });
+    b.push({ label: t('badge.green'), icon: Trophy, earned: greenDone });
+    b.push({ label: t('badge.complete'), icon: Award, earned: nodes.length > 0 && done.length === nodes.length });
     return b;
-  }, [nodes, completedCourses]);
+  }, [nodes, completedCourses, t]);
 
   if (!role || !match) {
     return (

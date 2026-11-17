@@ -221,7 +221,78 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'src.history.noMovers': c('No skill momentum changed.', 'Ko‘nikma dinamikasi o‘zgarmadi.', 'Динамика навыков не изменилась.'),
   'src.history.sources': c('Sources used', 'Ishlatilgan manbalar', 'Использованные источники'),
   'src.history.legacy': c('Source details were not recorded for this older entry.', 'Ushbu eski yozuv uchun manba tafsilotlari saqlanmagan.', 'Для этой старой записи детали источников не сохранены.'),
-  'evidence.history.summary': c('{n} global remote postings analysed', '{n} ta global masofaviy e’lon tahlil qilindi', 'Проанализировано глобальных удалённых вакансий: {n}'),
+  'evidence.history.summary': c(
+    'Signals refreshed — {n} global remote postings analysed',
+    'Signallar yangilandi — {n} ta global masofaviy e’lon tahlil qilindi',
+    'Сигналы обновлены — проанализировано глобальных удалённых вакансий: {n}',
+  ),
+  'src.history.skill': c('Skill', 'Ko‘nikma', 'Навык'),
+  'src.history.previous': c('Previous', 'Oldingi', 'Было'),
+  'src.history.current': c('Current', 'Joriy', 'Сейчас'),
+  'src.history.change': c('Change', 'O‘zgarish', 'Изменение'),
+  'src.history.version': c('Calculation', 'Hisob-kitob', 'Расчёт'),
+  'src.history.cta': c('Open Signal sources', 'Signal manbalarini ochish', 'Открыть источники сигналов'),
+  'src.honesty': c(
+    'Forecasts in SkillCast are indicative, deterministic calculations for learning guidance. They are not scientifically validated predictions of jobs or wages.',
+    'SkillCast’dagi prognozlar o‘qishni yo‘naltirish uchun taxminiy, deterministik hisob-kitoblardir. Ular ish o‘rinlari yoki maoshlarning ilmiy tasdiqlangan bashorati emas.',
+    'Прогнозы SkillCast — ориентировочные детерминированные расчёты для выбора обучения. Это не научно подтверждённые предсказания рабочих мест или зарплат.',
+  ),
+  'src.postings.demo': c(
+    'Demo baseline · 0 postings counted',
+    'Demo bazaviy qiymat · 0 ta e’lon hisoblangan',
+    'Демо-база · учтено 0 вакансий',
+  ),
+  'src.postings.counted': c(
+    '{n} global remote postings counted · not live',
+    '{n} ta global masofaviy e’lon hisoblandi · jonli emas',
+    'Учтено глобальных удалённых вакансий: {n} · не в реальном времени',
+  ),
+  'src.postings.cached': c(
+    'Cached result · {n} postings at the last good check',
+    'Keshdagi natija · oxirgi muvaffaqiyatli tekshiruvda {n} ta e’lon',
+    'Кешированный результат · {n} вакансий при последней удачной проверке',
+  ),
+
+  // Education connection: signals → skills → gaps → learning → roadmap
+  'src.chain.title': c('How signals guide your learning', 'Signallar o‘qishingizni qanday yo‘naltiradi', 'Как сигналы направляют ваше обучение'),
+  'src.chain.desc': c(
+    'Signal sources are not a job board. They feed one chain that ends in what you learn next.',
+    'Signal manbalari ish e’lonlari taxtasi emas. Ular keyingi nima o‘rganishingiz bilan yakunlanadigan bitta zanjirni ta’minlaydi.',
+    'Источники сигналов — это не доска вакансий. Они питают одну цепочку, которая заканчивается тем, что вы изучите дальше.',
+  ),
+  'src.chain.1': c('Labour-market and technology signals', 'Mehnat bozori va texnologiya signallari', 'Сигналы рынка труда и технологий'),
+  'src.chain.1.d': c(
+    'Official statistics, global reports and skill keywords in remote postings.',
+    'Rasmiy statistika, global hisobotlar va masofaviy e’lonlardagi ko‘nikma kalit so‘zlari.',
+    'Официальная статистика, глобальные отчёты и ключевые слова навыков в удалённых вакансиях.',
+  ),
+  'src.chain.2': c('Future skills', 'Kelajak ko‘nikmalari', 'Навыки будущего'),
+  'src.chain.2.d': c(
+    'Skills whose demand is rising, shown on the Future Skills Radar.',
+    'Talabi o‘sib borayotgan ko‘nikmalar — Kelajak ko‘nikmalari radarida ko‘rsatiladi.',
+    'Навыки с растущим спросом — на радаре навыков будущего.',
+  ),
+  'src.chain.3': c('Your skill gaps', 'Ko‘nikmalardagi bo‘shliqlaringiz', 'Ваши пробелы в навыках'),
+  'src.chain.3.d': c(
+    'Your profile is compared with the skills each pathway needs.',
+    'Profilingiz har bir yo‘nalish talab qiladigan ko‘nikmalar bilan solishtiriladi.',
+    'Ваш профиль сравнивается с навыками, которые нужны для каждой траектории.',
+  ),
+  'src.chain.4': c('Learning recommendations', 'O‘quv tavsiyalari', 'Рекомендации по обучению'),
+  'src.chain.4.d': c(
+    'Hand-curated courses that close the most important gaps first.',
+    'Eng muhim bo‘shliqlarni birinchi navbatda yopadigan qo‘lda tanlangan kurslar.',
+    'Подобранные вручную курсы, которые закрывают самые важные пробелы в первую очередь.',
+  ),
+  'src.chain.5': c('Learning roadmap', 'O‘quv yo‘l xaritasi', 'Учебный маршрут'),
+  'src.chain.5.d': c(
+    'A Harada-inspired plan that turns the goal into tasks you can track.',
+    'Maqsadni kuzatib boriladigan vazifalarga aylantiruvchi Harada usuliga asoslangan reja.',
+    'План по мотивам метода Харада, превращающий цель в отслеживаемые задачи.',
+  ),
+  'src.chain.open': c('Open', 'Ochish', 'Открыть'),
+  'src.integrated.title': c('Sources SkillCast retrieves', 'SkillCast oladigan manbalar', 'Источники, которые получает SkillCast'),
+  'src.integrated.data': c('Data retrieved', 'Olingan ma’lumotlar', 'Полученные данные'),
 
   // Skill counts
   'src.skills.title': c('Skill keyword counts from Remotive', 'Remotive’dagi ko‘nikma kalit so‘zlari soni', 'Счётчики навыков по Remotive'),
@@ -252,6 +323,13 @@ export function useSourceT() {
     if (!iso) return null;
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return null;
+    // Browser ICU data for uz-Latn is sparse (e.g. "2026 M11 17"): use the
+    // dd.mm.yyyy form common in Uzbekistan instead.
+    if (lang === 'uz') {
+      const p = (n: number) => String(n).padStart(2, '0');
+      const date = `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`;
+      return withTime ? `${date}, ${p(d.getHours())}:${p(d.getMinutes())}` : date;
+    }
     try {
       return d.toLocaleString(LOCALE[lang], withTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' });
     } catch {

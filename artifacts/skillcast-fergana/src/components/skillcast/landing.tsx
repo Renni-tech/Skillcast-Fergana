@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useSkillCast } from '@/lib/store';
 import { SdgBadge, useT } from './shared';
-import { SDG_TITLES } from '@/lib/i18n';
 
 export function Landing() {
   const t = useT();
@@ -46,6 +45,7 @@ export function Landing() {
             {t('landing.title')}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-blue-100/70 sm:text-lg sm:leading-8">{t('landing.subtitle')}</p>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-blue-100/55">{t('landing.kicker')}</p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
               size="lg"
@@ -96,15 +96,21 @@ export function Landing() {
             <CardDescription className="leading-relaxed">{t('landing.sdg.desc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((g) => (
-                <SdgBadge key={g} goal={g} />
+            <p className="text-sm font-medium">{t('sdg.list.title')}</p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {[4, 5, 8, 9, 10].map((g) => (
+                <li
+                  key={g}
+                  className={`flex items-center gap-2 rounded-lg border p-2 text-sm ${g === 4 ? 'border-[#C5192D]/50 bg-[#C5192D]/10 font-semibold sm:col-span-2' : 'border-border'}`}
+                >
+                  <SdgBadge goal={g} size="md" label={`${t('SDG {goal}', { goal: g })} · ${t(`sdg.name.${g}`)}`} />
+                  <span className="min-w-0">
+                    {t(`sdg.name.${g}`)} <span className="text-xs font-normal text-muted-foreground">({t('SDG {goal}', { goal: g })})</span>
+                  </span>
+                </li>
               ))}
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              {SDG_TITLES[4]} · {SDG_TITLES[5]} · {SDG_TITLES[8]} · {SDG_TITLES[9]} · {SDG_TITLES[10]} —
-              {t('— Aiversecity Future-Ready Workforce domain')}
-            </p>
+            </ul>
+            <p className="mt-3 text-xs text-muted-foreground">{t('sdg.core4')}</p>
           </CardContent>
         </Card>
         <Card className="border-slate-200 dark:border-slate-800">
@@ -120,7 +126,7 @@ export function Landing() {
               <Scale className="h-3 w-3" aria-hidden /> {t('common.estimates')}
             </Badge>
             <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('2 scenarios')}</Badge>
-            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">English · Uzbek · Русский</Badge>
+            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">O‘zbek · Русский · English</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{t('SDG ledger on every role')}</Badge>
           </CardContent>
         </Card>

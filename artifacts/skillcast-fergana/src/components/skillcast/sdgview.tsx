@@ -6,10 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROLE_MAP } from '@/data/roles';
 import { SKILL_MAP } from '@/data/skills';
-import { SDG_TITLES } from '@/lib/i18n';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { roleSdgMechanism, roleTitle, SdgBadge, SourceChip, useT } from './shared';
+import { roleSdgMechanism, roleTitle, SdgBadge, skillName, SourceChip, useT } from './shared';
 import { pickCourses } from './pathway';
 
 // ─── SDG tab: the ledger. Mechanisms, not decoration. ──────────────────────
@@ -33,11 +32,12 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
       const has = lvl >= req.minLevel;
       for (const g of def?.sdgTags ?? []) {
         const entry = map.get(g) ?? { goals: g, have: [], learning: [] };
-        (has ? entry.have : entry.learning).push(def.name);
+        (has ? entry.have : entry.learning).push(req.skill);
         map.set(g, entry);
       }
     }
-    const goalSet = new Set<number>(role.sdgTags);
+    // SDG 4 (Quality Education) is always part of a learning pathway.
+    const goalSet = new Set<number>([4, ...role.sdgTags]);
     for (const g of map.keys()) goalSet.add(g);
     return { perGoal: map, all: [...goalSet].sort((a, b) => a - b) };
   }, [role, profile.skills]);
@@ -61,11 +61,15 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
           <CardDescription>{t('sdg.desc', { n: ledger.all.length })}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-1.5">
+          <p className="mb-2 rounded-md border border-[#C5192D]/40 bg-[#C5192D]/10 px-3 py-2 text-sm font-medium">{t('sdg.core4')}</p>
+          <ul className="flex flex-wrap gap-1.5">
             {ledger.all.map((g) => (
-              <SdgBadge key={g} goal={g} size="md" />
+              <li key={g} className={`inline-flex items-center gap-1.5 rounded-md border px-1.5 py-1 text-xs ${g === 4 ? 'border-[#C5192D]/50 font-semibold' : 'border-border'}`}>
+                <SdgBadge goal={g} size="md" />
+                {t(`sdg.name.${g}`)}
+              </li>
             ))}
-          </div>
+          </ul>
         </CardContent>
       </Card>
 
@@ -92,14 +96,14 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
                   <li key={goal} className="flex items-start gap-2 text-sm">
                     <SdgBadge goal={goal} />
                     <span>
-                      <span className="font-medium">{SDG_TITLES[goal]}</span>
+                      <span className="font-medium">{t(`sdg.name.${goal}`)}</span>
                       {entry.have.length > 0 && (
-                        <span className="text-muted-foreground"> — ✓ {entry.have.join(', ')}</span>
+                        <span className="text-muted-foreground"> — ✓ {entry.have.map((slug) => skillName(t, slug)).join(', ')}</span>
                       )}
                       {entry.learning.length > 0 && (
                         <span className="text-muted-foreground/80">
                           {entry.have.length > 0 ? '; ' : ' — '}
-                          <span className="italic">{t('in your pathway:')}</span> {entry.learning.join(', ')}
+                          <span className="italic">{t('in your pathway:')}</span> {entry.learning.map((slug) => skillName(t, slug)).join(', ')}
                         </span>
                       )}
                     </span>

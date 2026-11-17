@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { ADJACENCY_MAP, SKILLS, SKILL_MAP } from '@/data/skills';
 import { ROLES, ROLE_MAP } from '@/data/roles';
+import { COURSES, COURSE_MAP } from '@/data/courses';
 import { DEPT_TEMPLATES, INDUSTRIES } from '@/data/team';
 import { FIELDS_OF_STUDY } from '@/data/institution';
 import { INTERESTS, PERSONAS, useSkillCast } from '@/lib/store';
@@ -442,9 +443,9 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
   // The existing data contains scenario indices, not employment-by-year data.
   // This transparent demo interpolation turns the selected scenario index into a time-horizon illustration.
   const employmentOutlook = [
-    { horizon: 'Now · demo baseline', outlook: 50 },
-    { horizon: '3–5 years', outlook: Math.round((50 + averageDemand) / 2) },
-    { horizon: '5–10 years', outlook: averageDemand },
+    { horizon: t('horizon.now'), outlook: 50 },
+    { horizon: t('horizon.3to5'), outlook: Math.round((50 + averageDemand) / 2) },
+    { horizon: t('horizon.5to10'), outlook: averageDemand },
   ];
 
   const exposureBase = topRoles.length
@@ -472,13 +473,14 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
       const matchedTerm = profileTerms.find((term) => text.includes(term));
       const gap = skillGaps.get(skill.slug);
       const relevance = (gap?.priority ?? 0) * 3 + (matchedTerm ? 1.5 : 0) + momentum / 200 - currentLevel * 0.12;
+      const field = details.profession || details.fieldOfWork;
       const reason = gap
-        ? `A skill gap for ${gap.role}, one of your strongest pathway matches.`
+        ? t('reason.gap', { role: gap.role })
         : matchedTerm
-          ? `Related to your ${details.profession || details.fieldOfWork || 'profile'} and selected interests.`
+          ? (field ? t('reason.related', { field }) : t('reason.related.generic'))
           : currentLevel > 0
-            ? `Builds on your current ${currentLevel}/5 proficiency.`
-            : `A useful capability to explore in ${skill.category.toLowerCase()}.`;
+            ? t('reason.builds', { n: currentLevel })
+            : t('reason.explore', { category: skillCategory(t, skill.category) });
       return { skill, currentLevel, momentum, relevance, reason };
     })
     .filter((item) => item.currentLevel < 4)
@@ -1483,14 +1485,35 @@ function StepInterests() {
 
 function StepSkills() {
   const t = useT();
-  const { profile, setSkillLevel } = useSkillCast();
+  const { profile, setSkillLevel, completedCourses } = useSkillCast();
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
   const entries = Object.entries(profile.skills).sort((a, b) => b[1] - a[1]);
   const selected = new Set(entries.map(([slug]) => slug));
   const normalizedQuery = query.trim().toLowerCase();
-  const results = SKILLS.filter((skill) => !selected.has(skill.slug) && (
-    !normalizedQuery || skill.name.toLowerCase().includes(normalizedQuery) || skill.category.toLowerCase().includes(normalizedQuery)
-  )).slice(0, 12);
+  const categories = useMemo(() => [...new Set(SKILLS.map((skill) => skill.category))], []);
+  const courseCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const course of COURSES) for (const slug of course.skills) counts[slug] = (counts[slug] ?? 0) + 1;
+    return counts;
+  }, []);
+  // Search the translated name and category too, so Uzbek and Russian queries work.
+  const matchesQuery = (skill: (typeof SKILLS)[number]) => !normalizedQuery || [
+    skill.name, skillName(t, skill.slug), skill.category, skillCategory(t, skill.category), ...skill.aliases,
+  ].some((text) => text.toLowerCase().includes(normalizedQuery));
+  const filtered = SKILLS.filter((skill) => !selected.has(skill.slug)
+    && (category === 'all' || skill.category === category) && matchesQuery(skill));
+  const limit = category === 'all' && !normalizedQuery ? 12 : filtered.length;
+  const results = filtered.slice(0, limit);
+
+  // Suggestions from the learner's background (field, profession, interests) and completed courses.
+  const details = profile.extended ?? {};
+  const backgroundTerms = [details.fieldOfWork, details.profession, details.specialization, ...(profile.interests ?? [])]
+    .filter(Boolean).flatMap((term) => String(term).toLowerCase().split(/[^\p{L}\p{N}]+/u)).filter((term) => term.length > 2);
+  const fromCourses = new Set(completedCourses.flatMap((slug) => COURSE_MAP[slug]?.skills ?? []));
+  const suggested = SKILLS.filter((skill) => !selected.has(skill.slug) && (fromCourses.has(skill.slug) || backgroundTerms.some((term) =>
+    skill.aliases.some((alias) => alias.includes(term)) || skill.name.toLowerCase().includes(term) || skill.category.toLowerCase().includes(term))))
+    .slice(0, 8);
 
   return (
     <div className="space-y-7">
@@ -1536,6 +1559,27 @@ function StepSkills() {
           <h3 id="find-skills-heading" className="text-base font-semibold text-slate-900">{t('Find Skills to Add')}</h3>
           <p className="mt-1 text-sm text-slate-500">{t('Search the existing SkillCast skill taxonomy by name or category.')}</p>
         </div>
+        <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+          <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t('skills.suggested')}</p>
+          {suggested.length ? (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {suggested.map((skill) => (
+                <li key={skill.slug}>
+                  <button type="button" onClick={() => setSkillLevel(skill.slug, 1)} aria-label={t('skills.add', { skill: skillName(t, skill.slug) })} className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-2.5 py-1 text-xs text-blue-800 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                    <Plus className="h-3 w-3" aria-hidden />{skillName(t, skill.slug)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="mt-1 text-xs text-slate-500">{t('skills.suggested.none')}</p>}
+        </div>
+        <div role="group" aria-label={t('skills.browse')} className="flex flex-wrap gap-1.5">
+          {['all', ...categories].map((cat) => (
+            <button key={cat} type="button" aria-pressed={category === cat} onClick={() => setCategory(cat)} className={`rounded-full border px-3 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${category === cat ? 'border-blue-600 bg-blue-600 text-white' : 'border-blue-100 bg-white text-slate-700 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}>
+              {cat === 'all' ? t('skills.all') : skillCategory(t, cat)}
+            </button>
+          ))}
+        </div>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
           <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('Search skills or categories')} aria-label={t('Search skills or categories')} className="h-11 rounded-xl border-blue-100 dark:border-slate-700 bg-white pl-10 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-200" />
@@ -1545,7 +1589,7 @@ function StepSkills() {
             {results.map((skill) => (
               <li key={skill.slug}>
                 <button type="button" onClick={() => setSkillLevel(skill.slug, 1)} className="group flex min-h-[76px] w-full items-center justify-between gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                  <span className="min-w-0"><span className="block truncate text-sm font-medium text-slate-900">{skillName(t, skill.slug)}</span><span className="mt-1 block text-xs text-slate-500">{skillCategory(t, skill.category)}</span></span>
+                  <span className="min-w-0"><span className="block truncate text-sm font-medium text-slate-900">{skillName(t, skill.slug)}</span><span className="mt-1 block text-xs text-slate-500">{skillCategory(t, skill.category)}{courseCount[skill.slug] ? ` · ${t('skills.taughtIn', { n: courseCount[skill.slug] })}` : ''}</span></span>
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 transition group-hover:bg-blue-600 group-hover:text-white"><Plus className="h-4 w-4" aria-hidden /></span>
                 </button>
               </li>
@@ -1554,7 +1598,7 @@ function StepSkills() {
         ) : (
           <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">{normalizedQuery ? t('No skills match your search. Try another skill name or category.') : t('All available skills have been added.')}</p>
         )}
-        {results.length === 12 && <p className="text-xs text-slate-500">{t('Showing up to 12 matches. Refine your search to find more.')}</p>}
+        {results.length < filtered.length && <p className="text-xs text-slate-500">{t('Showing up to 12 matches. Refine your search to find more.')}</p>}
       </section>
     </div>
   );

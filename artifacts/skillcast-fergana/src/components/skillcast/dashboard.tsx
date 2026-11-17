@@ -7,7 +7,6 @@ import {
   BookOpen,
   Mail,
   RadioTower,
-  ScrollText,
   Radar as RadarIcon,
   ListChecks,
 } from 'lucide-react';
@@ -36,7 +35,10 @@ import { ROLE_MAP } from '@/data/roles';
 import { COURSE_MAP } from '@/data/courses';
 import { useSkillCast } from '@/lib/store';
 import { matchAll } from '@/lib/matching';
-import { courseProvider, courseTitle, MomentumPill, roleTitle, skillName, SourceChip, TrendArrow, useSignals, useT } from './shared';
+import { courseProvider, courseTitle, MomentumPill, roleTitle, skillName, TrendArrow, useSignals, useT } from './shared';
+import { ChangelogCard, postingLine, StatusBadge } from './signalsview';
+import { sourceByIntegratedId } from '@/data/approved-sources';
+import { useSourceT } from '@/lib/signal-source-i18n';
 import { MatchesTab } from './matches';
 import { PathwayTab, pickCourses } from './pathway';
 import { HaradaTab } from './harada';
@@ -77,8 +79,8 @@ export function Dashboard() {
           <TabsTrigger value="overview" className="gap-1.5"><Activity className="h-4 w-4" aria-hidden />{t('tab.overview')}</TabsTrigger>
           <TabsTrigger value="matches" className="gap-1.5">{t('tab.matches')}</TabsTrigger>
           <TabsTrigger value="radar" className="gap-1.5"><RadarIcon className="h-4 w-4" aria-hidden />{t('ov.radar.title')}</TabsTrigger>
-          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('Learning pathways')}</TabsTrigger>
-          <TabsTrigger value="harada" className="gap-1.5">{t('Harada Method')}</TabsTrigger>
+          <TabsTrigger value="pathway" className="gap-1.5"><BookOpen className="h-4 w-4" aria-hidden />{t('tab.learn')}</TabsTrigger>
+          <TabsTrigger value="harada" className="gap-1.5">{t('tab.harada')}</TabsTrigger>
           <TabsTrigger value="progress" className="gap-1.5"><ListChecks className="h-4 w-4" aria-hidden />{t('Progress')}</TabsTrigger>
           <TabsTrigger value="sdg" className="gap-1.5">{t('tab.sdg')}</TabsTrigger>
           <TabsTrigger value="demand" className="gap-1.5">{t('tab.demand')}</TabsTrigger>
@@ -118,8 +120,10 @@ export function Dashboard() {
 
 function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   const t = useT();
-  const { profile, chosenRole, completedCourses, setDashTab } = useSkillCast();
+  const { profile, chosenRole, completedCourses, setDashTab, setView } = useSkillCast();
   const { data, loading, refreshing, refresh, momentumMap } = useSignals();
+  const { st, fmt } = useSourceT();
+  const mode = data?.provenance?.mode;
   const [emailOpen, setEmailOpen] = useState(false);
 
   const radarData = useMemo(() => {
@@ -166,35 +170,54 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
   return (
     <div className="space-y-4">
       <Card className="border-blue-100 dark:border-slate-700 bg-gradient-to-r from-white dark:from-slate-900 via-blue-50/70 dark:via-slate-800 to-indigo-50/70 dark:to-slate-900 shadow-sm">
-        <CardContent className="grid gap-5 pt-6 md:grid-cols-[1fr_auto] md:items-center">
-          <div>
-            <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="border-blue-200 bg-white text-blue-700">{t('Your learning profile')}</Badge>{profileDetails?.employmentStatus && <Badge variant="secondary">{t(EMPLOYMENT_STATUS_LABELS[profileDetails.employmentStatus as keyof typeof EMPLOYMENT_STATUS_LABELS])}</Badge>}</div>
-            <h2 className="mt-2 text-xl font-semibold text-slate-900">{profileDetails?.profession || t('Your future-ready learning plan')}</h2>
-            <p className="mt-1 text-sm text-slate-600">{profileDetails?.specialization ? `${profileDetails.specialization} · ` : ''}{profile.skills ? Object.keys(profile.skills).length : 0} {t('skills in your profile ·')} {profile.budget} {t('learning hours per week')}</p>
-            {leadingRole && <p className="mt-2 text-sm text-slate-700">{t('Leading pathway:')} <strong>{roleTitle(t, leadingRole.slug)}</strong> · {leadingMatch.score}{t('% fit based on your profile')}</p>}
-            {leadingRole && <p className="mt-1 text-sm text-slate-600">{t('AI task exposure:')} {t(leadingExposure ?? '')} {t('· this describes task change, not a job replacement probability.')}</p>}
-            <p className="mt-1 text-sm text-slate-600">{t('Learning:')} {completedCourses.length} {t('completed course')} · {t('· Next:')} {nextCourse ? courseTitle(t, nextCourse.slug) : t('review your pathway')}</p>
+        <CardContent className="space-y-4 pt-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="border-blue-200 bg-white text-blue-700 dark:bg-slate-900 dark:text-slate-200">{t('snap.title')}</Badge>
+                {profileDetails?.employmentStatus && <Badge variant="secondary">{t(EMPLOYMENT_STATUS_LABELS[profileDetails.employmentStatus as keyof typeof EMPLOYMENT_STATUS_LABELS])}</Badge>}
+              </div>
+              <h2 className="mt-2 break-words text-xl font-semibold text-slate-900 dark:text-slate-100">{profileDetails?.profession || t('snap.fallback')}</h2>
+              {profileDetails?.specialization && <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-300">{profileDetails.specialization}</p>}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2"><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('pathway')}>{t('Open learning pathway')}</Button><Button variant="outline" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button></div>
+          {/* Fixed label/value grid: identical structure in every language */}
+          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              { label: t('snap.skills'), value: String(Object.keys(profile.skills ?? {}).length) },
+              { label: t('snap.hours'), value: String(profile.budget) },
+              { label: t('snap.completed'), value: String(completedCourses.length) },
+              { label: t('snap.pathway'), value: leadingRole ? roleTitle(t, leadingRole.slug) : t('snap.none'), sub: leadingRole ? t('snap.fit', { n: leadingMatch.score }) : undefined, wide: true },
+              { label: t('snap.exposure'), value: leadingExposure ? t(leadingExposure) : t('snap.none'), sub: leadingExposure ? t('snap.exposure.note') : undefined },
+            ].map((item) => (
+              <div key={item.label} className={`flex min-h-[5.5rem] min-w-0 flex-col rounded-xl border border-blue-100 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/60 ${item.wide ? 'col-span-2' : ''}`}>
+                <dt className="text-[11px] font-medium uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">{item.label}</dt>
+                <dd className="mt-1 break-words text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">{item.value}</dd>
+                {item.sub && <dd className="mt-auto pt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">{item.sub}</dd>}
+              </div>
+            ))}
+          </dl>
+          <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/60 md:flex-row md:items-center md:justify-between">
+            <p className="min-w-0 text-sm text-slate-700 dark:text-slate-200">
+              <span className="font-medium text-slate-500 dark:text-slate-400">{t('snap.next')}: </span>
+              {nextCourse ? courseTitle(t, nextCourse.slug) : t('snap.next.none')}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button>
+              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('pathway')}>{t('Open learning pathway')}</Button>
+              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Forecast status */}
+      {/* Forecast status: real mode and posting count, never labelled live */}
       <Card>
         <CardContent className="flex flex-wrap items-center gap-3 pt-6">
-          <Badge
-            className={
-              data?.live
-                ? 'gap-1.5 bg-emerald-600 dark:bg-emerald-500 text-white'
-                : 'gap-1.5 bg-amber-600 dark:bg-amber-500 text-white'
-            }
-          >
-            <RadioTower className="h-3 w-3" aria-hidden />
-            {data?.live ? t('ov.live') : t('ov.cached')}
-          </Badge>
+          <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
           <span className="text-sm text-muted-foreground">
-            {t('ov.runinfo', { n: data?.totalPostings ?? 0 })} ·{' '}
-            {data ? new Date(data.fetchedAt).toLocaleString() : ''}
+            {postingLine(st, mode, data?.totalPostings ?? 0)}
+            {data?.provenance?.calculatedAt ? ` · ${st('src.f.calculated')}: ${fmt(data.provenance.calculatedAt)}` : ''}
           </span>
           <div className="ml-auto flex flex-wrap gap-2">
             <Button onClick={() => void refresh()} disabled={refreshing} variant="outline" className="gap-2">
@@ -205,11 +228,20 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <Mail className="h-4 w-4" aria-hidden /> {t('ov.email.btn')}
             </Button>
           </div>
-          {data?.sources?.map((s) => (
-            <SourceChip key={s.name} href={s.url}>
-              {s.name} · {s.postings || '—'}
-            </SourceChip>
-          ))}
+          <ul className="flex w-full flex-wrap gap-2" aria-label={st('src.history.sources')}>
+            {(data?.provenance?.sources ?? []).map((s) => {
+              const def = sourceByIntegratedId(s.id);
+              return (
+                <li key={s.id}>
+                  <a href={def?.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground">
+                    <RadioTower className="h-3 w-3" aria-hidden />
+                    {def?.name ?? s.id} · {st(`src.status.${s.status}`)}
+                    <span className="sr-only"> ({st('src.newTab')})</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
         </CardContent>
       </Card>
 
@@ -226,8 +258,8 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
                 <PolarGrid stroke="var(--border)" />
                 <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
                 <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-                <Radar name="You" dataKey="you" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.35} />
-                <Radar name="Market" dataKey="market" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.2} />
+                <Radar name={t('radar.you')} dataKey="you" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.35} />
+                <Radar name={t('radar.market')} dataKey="market" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.2} />
                 <Legend wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }} />
               </RadarChart>
             </ResponsiveContainer>
@@ -279,101 +311,8 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
         </div>
       </div>
 
-      {/* Changelog */}
-      
-
-{/* Forecast Changelog */}
-<Card>
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <ScrollText className="h-5 w-5" />
-      {t('Forecast Changelog')}
-    </CardTitle>
-    <CardDescription>
-      {t('Historical changes in market skill demand based on recorded signal updates.')}
-    </CardDescription>
-  </CardHeader>
-
-  <CardContent>
-    {(!data?.changelog || data.changelog.length === 0) ? (
-      <p className="text-sm text-muted-foreground">
-        {t('No market updates recorded yet.')}
-      </p>
-    ) : (
-      <div className="space-y-6">
-        {data.changelog.map((entry) => (
-          <div key={entry.id} className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold">
-                  {entry.summary}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(entry.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <Badge variant={entry.live ? 'default' : 'secondary'}>
-                {entry.live ? t('sig.live') : t('Cached')}
-              </Badge>
-            </div>
-
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left">{t('inst.skill')}</th>
-                    <th className="px-4 py-3 text-center">{t('Previous')}</th>
-                    <th className="px-4 py-3 text-center">{t('harada.current')}</th>
-                    <th className="px-4 py-3 text-center">{t('Change')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {entry.details.movers.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="px-4 py-5 text-center text-muted-foreground"
-                      >
-                        {t('No comparable momentum changes recorded for this update.')}
-                      </td>
-                    </tr>
-                  ) : (
-                    entry.details.movers.map((m) => (
-                      <tr key={m.skill} className="border-t">
-                        <td className="px-4 py-3 font-medium">
-                          {skillName(t, m.skill)}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {m.momentum - m.delta}
-                        </td>
-                        <td className="px-4 py-3 text-center font-semibold">
-                          {m.momentum}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={
-                            m.delta > 0
-                              ? 'text-emerald-500'
-                              : m.delta < 0
-                                ? 'text-rose-500'
-                                : 'text-muted-foreground'
-                          }>
-                            {m.delta > 0 ? `↑ +${m.delta}` :
-                             m.delta < 0 ? `↓ ${m.delta}` : '→ 0'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-  </CardContent>
-</Card>
-
+      {/* Forecast changelog: source → refresh time → data → effect on skills */}
+      <ChangelogCard st={st} fmt={fmt} compact onOpenSources={() => setView('signals')} />
 
       {/* Monthly email preview (simulated) */}
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>

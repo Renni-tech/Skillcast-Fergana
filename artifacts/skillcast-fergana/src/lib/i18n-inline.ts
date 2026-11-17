@@ -73,7 +73,6 @@ const inlineCopy: Record<string, { uz: string; ru: string }> = {
   "Future-ready": { uz: "Kelajakka tayyor", ru: "Готов к будущему" },
   "Illustrative demo": { uz: "Namoyish uchun demo", ru: "Иллюстративная демо-версия" },
   "Discover your strengths · Adapt to change · Achieve your next step": { uz: "Kuchli tomonlaringizni kashf eting · O'zgarishlarga moslashing · Keyingi qadamingizga erishing", ru: "Откройте свои сильные стороны · Адаптируйтесь к изменениям · Достигайте новых высот" },
-  "— Aiversecity Future-Ready Workforce domain": { uz: "— Aiversecity Kelajakka tayyor ishchi kuchi sohasi", ru: "— Домен Aiversecity Future-Ready Workforce" },
   "2 scenarios": { uz: "2 ta stsenariy", ru: "2 сценария" },
   "English · Uzbek · Русский": { uz: "Ingliz tili · O'zbek tili · Rus tili", ru: "Английский · Узбекский · Русский" },
   "SDG ledger on every role": { uz: "Har bir lavozim bo'yicha SDG daftari", ru: "Реестр ЦУР для каждой роли" },

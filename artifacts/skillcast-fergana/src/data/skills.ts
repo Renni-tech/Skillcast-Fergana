@@ -1,10 +1,11 @@
 import type { SkillDef } from '@/lib/types';
 
 // ─── Skills taxonomy (v1) ──────────────────────────────────────────────────
-// Sources: skill names aligned with ESCO/O*NET skill concepts; momentum
-// parameters blend curated research (WEF Future of Jobs 2025, Stanford AI
-// Index 2025 — see src/data/curated.ts) with live job-posting signals
-// (Remotive + Arbeitnow, fetched via /api/signals).
+// Sources: skill names aligned with ESCO/O*NET skill concepts (EU/US
+// vocabularies, not Uzbek data). researchHorizon and seedMomentum are
+// designer-set, research-inspired weights (WEF Future of Jobs 2025); the
+// periodic Remotive keyword counts come from /api/fergana/signals. See
+// src/data/approved-sources.ts for every source and its status.
 // Levels: 0 none · 1 aware · 2 basic · 3 competent · 4 strong · 5 expert
 
 export const SKILLS: SkillDef[] = [
@@ -263,6 +264,71 @@ export const SKILLS: SkillDef[] = [
     sdgTags: [8], automationExposure: 0.5, augmentationPotential: 0.8,
     researchHorizon: 62, seedMomentum: 42,
   },
+
+  // ── Background skills (profile options, not AI-specific) ─────────────────
+  // Common study and work backgrounds in Fergana and Uzbekistan. These are
+  // selectable profile skills: researchHorizon and seedMomentum are a neutral
+  // 50 (not research-derived) and exposure values are designer estimates.
+  {
+    slug: 'english-for-work', name: 'English for Work & Study', category: 'Foundations & Languages',
+    aliases: ['english', 'ielts', 'toefl', 'business english', 'english language', 'translation', 'interpreting'],
+    sdgTags: [4, 8], automationExposure: 0.3, augmentationPotential: 0.6,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'digital-literacy', name: 'Digital Literacy & Office Tools', category: 'Foundations & Languages',
+    aliases: ['digital literacy', 'microsoft office', 'ms office', 'excel', 'word', 'google workspace', 'computer literacy', 'email etiquette'],
+    sdgTags: [4, 5, 10], automationExposure: 0.4, augmentationPotential: 0.7,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'accounting-finance', name: 'Accounting & Financial Literacy', category: 'Business & Operations',
+    aliases: ['accounting', 'bookkeeping', 'financial literacy', 'budgeting', 'tax', '1c', 'financial reporting', 'payroll'],
+    sdgTags: [8], automationExposure: 0.55, augmentationPotential: 0.6,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'entrepreneurship', name: 'Entrepreneurship & Small Business', category: 'Business & Operations',
+    aliases: ['entrepreneurship', 'small business', 'startup', 'business plan', 'family business', 'self-employed', 'freelance'],
+    sdgTags: [8, 9], automationExposure: 0.15, augmentationPotential: 0.7,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'sales-negotiation', name: 'Sales & Negotiation', category: 'Business & Operations',
+    aliases: ['sales', 'negotiation', 'retail', 'trade', 'merchandising', 'account management'],
+    sdgTags: [8], automationExposure: 0.3, augmentationPotential: 0.6,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'tourism-hospitality', name: 'Tourism & Hospitality Services', category: 'Business & Operations',
+    aliases: ['tourism', 'hospitality', 'hotel', 'tour guide', 'travel', 'restaurant', 'guest services'],
+    sdgTags: [8, 11], automationExposure: 0.25, augmentationPotential: 0.5,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'graphic-design', name: 'Graphic & Visual Design', category: 'Marketing & Content',
+    aliases: ['graphic design', 'visual design', 'photoshop', 'illustrator', 'figma', 'canva', 'branding', 'ui design'],
+    sdgTags: [8, 9], automationExposure: 0.45, augmentationPotential: 0.7,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'textile-production', name: 'Textile & Garment Production', category: 'Manufacturing & Trades',
+    aliases: ['textile', 'garment', 'sewing', 'cotton', 'fabric', 'apparel', 'tailoring', 'quality control'],
+    sdgTags: [8, 9, 12], automationExposure: 0.5, augmentationPotential: 0.4,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'electrical-maintenance', name: 'Electrical Installation & Maintenance', category: 'Manufacturing & Trades',
+    aliases: ['electrician', 'electrical installation', 'electrical maintenance', 'wiring', 'plc', 'equipment maintenance', 'technician'],
+    sdgTags: [7, 9], automationExposure: 0.2, augmentationPotential: 0.5,
+    researchHorizon: 50, seedMomentum: 50,
+  },
+  {
+    slug: 'food-processing', name: 'Food Processing & Safety', category: 'Manufacturing & Trades',
+    aliases: ['food processing', 'food safety', 'haccp', 'food technology', 'dried fruit', 'packaging', 'cold storage'],
+    sdgTags: [2, 9, 12], automationExposure: 0.45, augmentationPotential: 0.45,
+    researchHorizon: 50, seedMomentum: 50,
+  },
 ];
 
 export const SKILL_MAP: Record<string, SkillDef> = Object.fromEntries(
@@ -323,6 +389,16 @@ export const ADJACENCY: Array<[string, string, number]> = [
   ['eldercare', 'communication', 0.35],
   ['mental-health', 'communication', 0.4],
   ['mental-health', 'eldercare', 0.3],
+  ['english-for-work', 'communication', 0.5],
+  ['digital-literacy', 'data-analysis', 0.4],
+  ['accounting-finance', 'data-analysis', 0.4],
+  ['entrepreneurship', 'product-management', 0.4],
+  ['sales-negotiation', 'customer-experience', 0.5],
+  ['tourism-hospitality', 'customer-experience', 0.5],
+  ['graphic-design', 'digital-marketing', 0.45],
+  ['textile-production', 'supply-chain', 0.4],
+  ['electrical-maintenance', 'iot', 0.4],
+  ['food-processing', 'smart-agriculture', 0.45],
 ];
 
 export const ADJACENCY_MAP: Record<string, Record<string, number>> = (() => {

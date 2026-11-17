@@ -1,223 +1,433 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, ChevronRight, Database, ExternalLink, FileWarning, RadioTower, RefreshCw, ScrollText, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import {
+  ArrowRight, BookOpen, Database, ExternalLink, FileWarning, GitBranch, GraduationCap, Info, Map as MapIcon,
+  RadioTower, Radar as RadarIcon, RefreshCw, ScrollText,
+} from 'lucide-react';
+import type { FerganaSourceState } from '@workspace/api-client-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CURATED_SIGNALS } from '@/data/curated';
-import { SKILL_MAP } from '@/data/skills';
-import { skillName, useSignals, SourceChip, useT } from './shared';
+import {
+  APPROVED_SOURCES, SOURCE_GROUPS, sourceByIntegratedId, type ApprovedSource, type SourceGroup,
+} from '@/data/approved-sources';
+import { useSourceT, type SourceT } from '@/lib/signal-source-i18n';
+import { useSkillCast } from '@/lib/store';
+import { skillName, useSignals, useT } from './shared';
 
-// ─── Signals view: every source with its date — the transparency page ──────
+// ─── Signal sources: provenance for every number SkillCast shows ───────────
+// Only the approved catalogue is rendered. Three sources are retrieved on a
+// schedule by the API; nothing is labelled live, because nothing is real-time.
+
+type Mode = 'periodic' | 'cached' | 'demo';
+
+const STATUS_STYLE: Record<string, string> = {
+  periodic: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
+  cached: 'border-amber-500/50 bg-amber-500/10 text-amber-800 dark:text-amber-300',
+  unavailable: 'border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-300',
+  demo: 'border-amber-500/50 bg-amber-500/10 text-amber-800 dark:text-amber-300',
+  reference: 'border-sky-500/40 bg-sky-500/10 text-sky-800 dark:text-sky-300',
+  planned: 'border-slate-400/50 bg-slate-500/10 text-slate-700 dark:text-slate-300',
+  keyRequired: 'border-slate-400/50 bg-slate-500/10 text-slate-700 dark:text-slate-300',
+};
+
+export function StatusBadge({ status, label }: { status: string; label: string }) {
+  return <Badge variant="outline" className={`text-[10px] font-semibold ${STATUS_STYLE[status] ?? ''}`}>{label}</Badge>;
+}
+
+/** Posting line used by the Forecast changelog and this page; never says "live". */
+export function postingLine(st: SourceT, mode: Mode | undefined, n: number) {
+  if (mode === 'demo' || (!mode && n === 0)) return st('src.postings.demo');
+  if (mode === 'cached') return st('src.postings.cached', { n });
+  return st('src.postings.counted', { n });
+}
+
+function ExtLink({ href, label, st }: { href: string; label: string; st: SourceT }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 rounded-md text-xs font-medium text-teal-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
+    >
+      <ExternalLink className="h-3 w-3" aria-hidden />
+      {label}
+      <span className="sr-only"> ({st('src.newTab')})</span>
+    </a>
+  );
+}
 
 export function SignalsView() {
+  const { st, fmt } = useSourceT();
   const t = useT();
+  const { setView, setDashTab, learnerOnboarded } = useSkillCast();
   const { data, loading, refreshing, refresh, error } = useSignals();
-  const [showSample, setShowSample] = useState(false);
-  const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
+  const [group, setGroup] = useState<SourceGroup | 'all'>('all');
+
+  const provenance = data?.provenance;
+  const mode: Mode | undefined = provenance?.mode;
+  const states = provenance?.sources ?? [];
+  const stateFor = (id?: string) => states.find((s) => s.id === id);
+
+  const openTab = (tab: string) => {
+    if (!learnerOnboarded) { setView('onboarding'); return; }
+    setDashTab(tab);
+    setView('dashboard');
+  };
+
+  const chain = [
+    { icon: RadioTower, title: st('src.chain.1'), desc: st('src.chain.1.d') },
+    { icon: RadarIcon, title: st('src.chain.2'), desc: st('src.chain.2.d'), tab: 'radar' },
+    { icon: GitBranch, title: st('src.chain.3'), desc: st('src.chain.3.d'), tab: 'matches' },
+    { icon: BookOpen, title: st('src.chain.4'), desc: st('src.chain.4.d'), tab: 'pathway' },
+    { icon: MapIcon, title: st('src.chain.5'), desc: st('src.chain.5.d'), tab: 'harada' },
+  ];
+
+  const skillCounts = useMemo(
+    () => (data?.snapshots ?? []).filter((s) => s.postings > 0).sort((a, b) => b.postings - a.postings).slice(0, 12),
+    [data],
+  );
+  const catalogue = APPROVED_SOURCES.filter((s) => !s.integratedId && (group === 'all' || s.group === group));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-8">
+    <div className="mx-auto max-w-6xl px-4 pb-10">
+      {/* Header */}
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            <RadioTower className="h-6 w-6 text-teal-700 dark:text-teal-400" aria-hidden />
-            {t('sig.title')}
+            <RadioTower className="h-6 w-6 shrink-0 text-teal-700 dark:text-teal-400" aria-hidden />
+            {st('src.page.title')}
           </h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t('sig.method')}</p>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t('sig.note')}</p>
+          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{st('src.page.lede')}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {data?.confidence === 'low' && data.live && (
-            <Badge variant="outline" className="border-amber-400 bg-amber-50/50 text-amber-700 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-300">
-              {t('sig.lowConfidence', { n: data.totalPostings })}
-            </Badge>
-          )}
-          <Button onClick={() => void refresh()} disabled={refreshing} className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
-            {refreshing ? t('ov.refreshing') : t('sig.refresh')}
-          </Button>
-        </div>
+        <Button onClick={() => void refresh()} disabled={refreshing} className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
+          {refreshing ? st('src.refreshing') : st('src.refresh')}
+        </Button>
       </div>
+      <p className="mt-2 text-xs text-muted-foreground">{st('src.refreshLimited')}</p>
 
-      {/* Error state */}
+      {/* API failure: page keeps working from the static catalogue and last good cache */}
       {error && (
-        <div className="mt-4 rounded-lg border border-red-500 bg-red-50/30 p-4">
-          <p className="flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-400">
-            <FileWarning className="h-5 w-5" aria-hidden />
-            {t('hr.signals.error')}
+        <div role="alert" className="mt-4 rounded-lg border border-red-500/60 bg-red-500/10 p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-300">
+            <FileWarning className="h-5 w-5 shrink-0" aria-hidden />
+            {st('src.error.title')}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{error}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {st('src.error.body')}{data ? ` ${st('src.unavailable.generic')}` : ''}
+          </p>
           <Button variant="outline" size="sm" onClick={() => void refresh()} className="mt-2 gap-2">
             <RefreshCw className="h-4 w-4" aria-hidden />
-            {t('hr.signals.retry')}
+            {st('src.retry')}
           </Button>
         </div>
       )}
 
-      {/* Demo banner when not live */}
-      {data && !data.live && !error && (
-        <div className="mt-4 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 dark:border-amber-600/50 dark:bg-amber-600/15">
-          <p className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
-            <Database className="h-5 w-5" aria-hidden />
-            {t('sig.demoBanner', { date: new Date(data.fetchedAt).toLocaleString() })}
-          </p>
-        </div>
-      )}
-
-      {/* Data note */}
-      {data?.note && !error && (
-        <div className="mt-4 rounded-lg border border-amber-400 bg-amber-50/20 p-3 text-sm text-amber-800 dark:text-amber-300">
-          {data.note}
-        </div>
-      )}
-
-      {/* Current run */}
+      {/* Signals → future skills → gaps → learning → roadmap */}
       <Card className="mt-4">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('ov.changelog.title')}</CardTitle>
-          <CardDescription>
-            {data && (
-              <>
-                {t('sig.fetched')}: {new Date(data.fetchedAt).toLocaleString()} ·{' '}
-                {data.totalPostings} {t('sig.postings')} ·{' '}
-                <Badge variant={data.live ? 'default' : 'secondary'} className="h-4 px-1 text-[10px]">
-                  {data.live ? t('ov.live') : t('ov.cached')}
-                </Badge>
-              </>
-            )}
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <GraduationCap className="h-5 w-5 text-teal-700 dark:text-teal-400" aria-hidden />
+            {st('src.chain.title')}
+          </CardTitle>
+          <CardDescription>{st('src.chain.desc')}</CardDescription>
         </CardHeader>
-        <CardContent className="max-h-64 overflow-y-auto">
-          {loading ? (
-            <p className="text-sm text-muted-foreground">…</p>
+        <CardContent>
+          <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            {chain.map((step, i) => (
+              <li key={step.title} className="flex flex-col rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-teal-100 text-xs font-bold text-teal-800 dark:bg-teal-400/15 dark:text-teal-200">{i + 1}</span>
+                  <step.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                </div>
+                <p className="mt-2 text-sm font-semibold leading-snug">{step.title}</p>
+                <p className="mt-1 flex-1 text-xs text-muted-foreground">{step.desc}</p>
+                {step.tab && (
+                  <Button variant="ghost" size="sm" className="mt-2 h-8 justify-start gap-1 px-2 text-xs" onClick={() => openTab(step.tab!)}>
+                    {st('src.chain.open')} <ArrowRight className="h-3 w-3" aria-hidden />
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ol>
+        </CardContent>
+      </Card>
+
+      {/* Provenance chain: source → period → signal → forecast */}
+      <Card className="mt-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{st('src.method.title')}</CardTitle>
+          <CardDescription>{st('src.honesty')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((n) => (
+              <li key={n} className="rounded-lg border bg-muted/30 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{n}. {st(`src.method.step${n}`)}</p>
+                <p className="mt-1 text-sm">{st(`src.method.step${n}.d`)}</p>
+              </li>
+            ))}
+          </ol>
+          <ul className="space-y-1 text-xs text-muted-foreground">
+            <li className="flex gap-1.5"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{st('src.method.heuristic')}</li>
+            <li className="flex gap-1.5"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{st('src.method.context')}</li>
+            <li className="flex gap-1.5"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{st('src.method.noCityVacancy')}</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* Current calculation */}
+      <Card className="mt-4">
+        <CardContent className="flex flex-wrap items-center gap-2 pt-6 text-sm">
+          {loading && !data ? (
+            <span className="text-muted-foreground">{st('src.refreshing')}</span>
+          ) : !provenance ? (
+            <span className="text-muted-foreground">{st('src.provenance.waiting')}</span>
           ) : (
-            <ol className="space-y-2">
-              {data?.changelog?.map((c) => (
-                <li key={c.id} className="rounded-lg border px-3 py-2 text-sm">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">{c.version}</Badge>
-                    <span className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleTimeString()}</span>
-                  </div>
-                  <p className="mt-0.5">{c.summary}</p>
-                </li>
-              ))}
-            </ol>
+            <>
+              <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
+              <span>{postingLine(st, mode, data?.totalPostings ?? 0)}</span>
+              <span className="text-muted-foreground">· {st('src.f.calculated')}: {fmt(provenance.calculatedAt) ?? st('src.unknown')}</span>
+              <p className="w-full text-xs text-muted-foreground">
+                {mode === 'demo' ? st('src.mode.demo.note') : st('src.mode.actual.note', { n: data?.totalPostings ?? 0 })}
+              </p>
+            </>
           )}
         </CardContent>
       </Card>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        {/* Live sources */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t('sig.live')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data?.sources?.map((s) => (
-              <div key={s.name} className="rounded-lg border p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-semibold">{s.name}</span>
-                  <Badge variant={s.ok ? 'default' : 'destructive'} className="text-[10px]">
-                    {s.ok ? 'OK' : 'FAIL'}
-                  </Badge>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {s.postings > 0 ? `${s.postings} ${t('sig.postings')}` : t('sig.live')}
-                </p>
-                <SourceChip href={s.ok ? s.url : undefined}>{s.url}</SourceChip>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowSample((v) => !v)}>
-              <Database className="mr-2 h-4 w-4" aria-hidden />
-              {t('sig.sample')}
-            </Button>
-            {showSample && (
-              <div className="rounded-lg border bg-muted/40 p-3">
-                <p className="text-xs text-muted-foreground">
-                  {t('Momentum pipeline: postings → alias matching against the taxonomy (word boundaries) → frequency / trend → blend with cited research horizon. Sample skills in the corpus:')}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {(data?.snapshots ?? [])
-                    .sort((a, b) => b.momentum - a.momentum)
-                    .slice(0, 10)
-                    .map((s) => (
-                      <button
-                        key={s.skillSlug}
-                        type="button"
-                        onClick={() => setExpandedSkill(expandedSkill === s.skillSlug ? null : s.skillSlug)}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
-                      >
-                        {expandedSkill === s.skillSlug ? (
-                          <ChevronDown className="h-3 w-3" aria-hidden />
-                        ) : (
-                          <ChevronRight className="h-3 w-3" aria-hidden />
-                        )}
-                        {skillName(t, s.skillSlug)}: {s.momentum}
-                        <span className="text-[10px] opacity-70">({s.postings} {t('sig.postings').split(' ')[0]})</span>
-                      </button>
-                    ))}
-                </div>
-                {expandedSkill && data && (
-                  <div className="mt-3 space-y-2">
-                    {(() => {
-                      const snap = data.snapshots.find((s) => s.skillSlug === expandedSkill);
-                      if (!snap || !snap.samples || snap.samples.length === 0) {
-                        return <p className="text-xs text-muted-foreground">{t('sig.noEvidence')}</p>;
-                      }
-                      return snap.samples.map((sample, i) => (
-                        <div key={i} className="rounded-lg border p-2 text-xs">
-                          <p className="font-medium text-sm">{sample.title}</p>
-                          <p className="text-muted-foreground">{sample.company}</p>
-                          <p className="text-muted-foreground">{new Date(sample.date).toLocaleDateString()}</p>
-                          {sample.url ? (
-                            <a href={sample.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-teal-700 dark:text-teal-400">
-                              <ExternalLink className="h-3 w-3" aria-hidden /> {t('View posting')}
-                            </a>
-                          ) : null}
-                          <p className="mt-1 italic text-muted-foreground/70">{sample.snippet}</p>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Curated, cited */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ScrollText className="h-5 w-5" aria-hidden />
-              {t('sig.curated')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="max-h-96 space-y-3 overflow-y-auto">
-            {CURATED_SIGNALS.map((c) => (
-              <div key={c.id} className="rounded-lg border p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-semibold">{c.title}</span>
-                  <Badge variant="outline" className="text-[10px]">{c.date}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">{c.publisher}</p>
-                <ul className="mt-2 space-y-0.5">
-                  {c.keyStats.map((s) => (
-                    <li key={s.label} className="text-xs">
-                      <span className="font-medium">{s.value}</span>{' '}
-                      <span className="text-muted-foreground">{s.label}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-[11px] italic text-muted-foreground">{c.usedFor}</p>
-                <SourceChip href={c.url}>{c.url}</SourceChip>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+      {/* Retrieved sources with their real status */}
+      <h2 className="mt-6 text-lg font-semibold">{st('src.integrated.title')}</h2>
+      <p className="text-sm text-muted-foreground">{st('src.group.integrated.d')}</p>
+      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+        {(['siat', 'worldbank', 'remotive'] as const).map((id) => (
+          <IntegratedCard key={id} source={sourceByIntegratedId(id)!} state={stateFor(id)} st={st} fmt={fmt} postings={id === 'remotive' ? data?.totalPostings ?? 0 : null} />
+        ))}
       </div>
+      <p className="mt-2 text-xs text-muted-foreground">{st('src.metric.notComparable')} {st('src.scope.noCity')}</p>
+
+      {/* Forecast changelog */}
+      <ChangelogCard st={st} fmt={fmt} />
+
+      {/* Skill keyword counts */}
+      <Card className="mt-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{st('src.skills.title')}</CardTitle>
+          <CardDescription>{st('src.skills.desc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {skillCounts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{st('src.skills.empty')}</p>
+          ) : (
+            <ul className="flex flex-wrap gap-1.5">
+              {skillCounts.map((s) => (
+                <li key={s.skillSlug} className="rounded-full border bg-muted px-2.5 py-0.5 text-xs">
+                  {skillName(t, s.skillSlug)} · <span className="font-semibold">{s.postings}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Approved catalogue */}
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <ScrollText className="h-5 w-5" aria-hidden />
+            {st('src.catalogue.title')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{st('src.catalogue.count', { n: APPROVED_SOURCES.length })}</p>
+        </div>
+        <div role="group" aria-label={st('src.filter.label')} className="flex flex-wrap gap-1">
+          {(['all', ...SOURCE_GROUPS.filter((g) => g !== 'integrated')] as const).map((g) => (
+            <Button key={g} size="sm" variant={group === g ? 'default' : 'outline'} aria-pressed={group === g} className="h-8 text-xs" onClick={() => setGroup(g)}>
+              {g === 'all' ? st('src.filter.all') : st(`src.group.${g}`)}
+            </Button>
+          ))}
+        </div>
+      </div>
+      {SOURCE_GROUPS.filter((g) => g !== 'integrated' && (group === 'all' || group === g)).map((g) => (
+        <section key={g} className="mt-4" aria-labelledby={`grp-${g}`}>
+          <h3 id={`grp-${g}`} className="text-sm font-semibold">{st(`src.group.${g}`)}</h3>
+          <p className="text-xs text-muted-foreground">{st(`src.group.${g}.d`)}</p>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {catalogue.filter((s) => s.group === g).map((s) => <CatalogueCard key={s.id} source={s} st={st} />)}
+          </div>
+        </section>
+      ))}
+      <p className="mt-6 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">{st('src.excluded')}</p>
     </div>
+  );
+}
+
+function SourceMeta({ source, st }: { source: ApprovedSource; st: SourceT }) {
+  return (
+    <>
+      <div className="mt-2 flex flex-wrap gap-1">
+        {source.scopes.map((sc) => <Badge key={sc} variant="secondary" className="text-[10px]">{st(`src.scope.${sc}`)}</Badge>)}
+        <Badge variant="outline" className="text-[10px]">{st(`src.type.${source.type}`)}</Badge>
+      </div>
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+        <dt className="text-muted-foreground">{st('src.f.tier')}</dt><dd>{st(`src.tier.${source.tier}`)}</dd>
+        <dt className="text-muted-foreground">{st('src.f.frequency')}</dt><dd>{source.updateFrequency ? st(source.updateFrequency) : st('src.notVerified')}</dd>
+        <dt className="text-muted-foreground">{st('src.f.lastUpdated')}</dt><dd>{source.lastUpdated ?? st('src.notVerified')}</dd>
+        <dt className="text-muted-foreground">{st('src.f.licence')}</dt><dd>{st(`src.licence.${source.licence}`)}</dd>
+      </dl>
+      <div className="mt-2 flex flex-wrap gap-3">
+        <ExtLink href={source.url} label={st('src.link.official')} st={st} />
+        {source.docsUrl && <ExtLink href={source.docsUrl} label={st('src.link.docs')} st={st} />}
+      </div>
+    </>
+  );
+}
+
+function CatalogueCard({ source, st }: { source: ApprovedSource; st: SourceT }) {
+  return (
+    <article className="flex flex-col rounded-lg border p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h4 className="min-w-0 text-sm font-semibold leading-snug">{source.name}</h4>
+        <StatusBadge status={source.status} label={st(`src.status.${source.status}`)} />
+      </div>
+      <p className="text-[11px] text-muted-foreground">{source.publisher}</p>
+      <p className="mt-1.5 text-xs">{st(`src.desc.${source.id}`)}</p>
+      <SourceMeta source={source} st={st} />
+    </article>
+  );
+}
+
+function IntegratedCard({ source, state, st, fmt, postings }: {
+  source: ApprovedSource; state?: FerganaSourceState; st: SourceT;
+  fmt: (iso: string | null | undefined, withTime?: boolean) => string | null; postings: number | null;
+}) {
+  const status = state?.status ?? 'unavailable';
+  return (
+    <article className="flex flex-col rounded-lg border p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h3 className="min-w-0 text-sm font-semibold leading-snug">{source.name}</h3>
+        <div className="flex flex-wrap gap-1">
+          <StatusBadge status={status} label={st(`src.status.${status}`)} />
+          <Badge variant="outline" className="text-[10px]">{st('src.notRealtime')}</Badge>
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground">{source.publisher}</p>
+      <p className="mt-1.5 text-xs">{st(`src.desc.${source.id}`)}</p>
+      {status === 'unavailable' && <p className="mt-1.5 text-xs text-red-700 dark:text-red-300">{st('src.unavailable.generic')}</p>}
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+        <dt className="text-muted-foreground">{st('src.f.checked')}</dt><dd>{fmt(state?.checkedAt) ?? st('src.unknown')}</dd>
+        <dt className="text-muted-foreground">{st('src.f.fetched')}</dt><dd>{fmt(state?.fetchedAt) ?? st('src.unknown')}</dd>
+        <dt className="text-muted-foreground">{st('src.f.sourceUpdated')}</dt><dd>{fmt(state?.sourceUpdatedAt, false) ?? st('src.notVerified')}</dd>
+        <dt className="text-muted-foreground">{st('src.f.nextCheck')}</dt><dd>{fmt(state?.nextCheckAt) ?? st('src.unknown')}</dd>
+        {postings !== null && (<><dt className="text-muted-foreground">{st('src.f.postings')}</dt><dd>{postings}</dd></>)}
+      </dl>
+      <div className="mt-2">
+        <p className="text-[11px] font-semibold text-muted-foreground">{st('src.integrated.data')}</p>
+        {state?.observations?.length ? (
+          <ul className="mt-1 space-y-1">
+            {state.observations.map((o) => (
+              <li key={o.id} className="text-xs">
+                <span className="font-semibold">{o.value}{o.unit}</span>{' '}
+                <span className="text-muted-foreground">{st(`src.metric.${o.id}`)} · {o.period}</span>
+                {source.id === 'siat' && o.period.startsWith('2025') && (
+                  <Badge variant="outline" className="ml-1 h-4 px-1 text-[9px]" title={st('src.metric.preliminary')}>{st('src.metric.prelimTag')}</Badge>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-xs text-muted-foreground">{source.id === 'remotive' ? st('src.skills.desc') : st('src.metric.none')}</p>
+        )}
+      </div>
+      <SourceMeta source={source} st={st} />
+    </article>
+  );
+}
+
+/** Forecast changelog shared by Signal sources and My Forecast → Overview. */
+export function ChangelogCard({ st, fmt, compact = false, onOpenSources }: {
+  st: SourceT; fmt: (iso: string | null | undefined, withTime?: boolean) => string | null;
+  compact?: boolean; onOpenSources?: () => void;
+}) {
+  const t = useT();
+  const { data } = useSignals();
+  const entries = (data?.changelog ?? []).slice(0, compact ? 3 : 10);
+  return (
+    <Card className="mt-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ScrollText className="h-5 w-5" aria-hidden />
+          {st('src.history.title')}
+        </CardTitle>
+        <CardDescription>{st('src.history.desc')} {st('src.honesty')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {entries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{st('src.history.empty')}</p>
+        ) : entries.map((entry) => {
+          const n = entry.details?.postings ?? 0;
+          const mode = entry.details?.mode;
+          const sources = entry.details?.sources ?? [];
+          const movers = entry.details?.movers ?? [];
+          return (
+            <div key={entry.id} className="rounded-lg border p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold">{mode === 'demo' ? st('src.postings.demo') : st('evidence.history.summary', { n })}</p>
+                <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
+              </div>
+              <p className="text-xs text-muted-foreground">{st('src.history.version')} {entry.version} · {fmt(entry.createdAt) ?? st('src.unknown')}</p>
+              <div className="mt-2 text-xs">
+                <span className="text-muted-foreground">{st('src.history.sources')}: </span>
+                {sources.length === 0 ? st('src.history.legacy') : sources.map((s) => {
+                  const def = sourceByIntegratedId(s.id);
+                  return (
+                    <span key={s.id} className="mr-2 inline-flex items-center gap-1">
+                      {def?.name ?? s.id}
+                      <StatusBadge status={s.status} label={st(`src.status.${s.status}`)} />
+                      {s.period ? <span className="text-muted-foreground">({st('src.f.period')}: {s.period})</span> : null}
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs font-semibold">{st('src.history.movers')}</p>
+              {movers.length === 0 ? (
+                <p className="text-xs text-muted-foreground">{st('src.history.noMovers')}</p>
+              ) : (
+                <div className="mt-1 overflow-x-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th scope="col" className="px-3 py-2 text-left">{st('src.history.skill')}</th>
+                        <th scope="col" className="px-3 py-2 text-center">{st('src.history.previous')}</th>
+                        <th scope="col" className="px-3 py-2 text-center">{st('src.history.current')}</th>
+                        <th scope="col" className="px-3 py-2 text-center">{st('src.history.change')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {movers.slice(0, compact ? 5 : 10).map((m) => (
+                        <tr key={m.skill} className="border-t">
+                          <td className="px-3 py-2">{skillName(t, m.skill)}</td>
+                          <td className="px-3 py-2 text-center">{Math.round(m.momentum - m.delta)}</td>
+                          <td className="px-3 py-2 text-center font-semibold">{m.momentum}</td>
+                          <td className={`px-3 py-2 text-center ${m.delta > 0 ? 'text-emerald-600 dark:text-emerald-400' : m.delta < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}>
+                            {m.delta > 0 ? `↑ +${m.delta}` : m.delta < 0 ? `↓ ${m.delta}` : '→ 0'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {onOpenSources && (
+          <Button variant="outline" size="sm" className="gap-2" onClick={onOpenSources}>
+            <Database className="h-4 w-4" aria-hidden /> {st('src.history.cta')}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }

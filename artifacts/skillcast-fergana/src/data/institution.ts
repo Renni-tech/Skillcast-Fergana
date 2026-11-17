@@ -50,31 +50,31 @@ export const FIELD_ROLE_CATEGORIES: Record<StudyField, string[]> = {
 
 // Synthetic cohort — 12 students across the three fields (4 each)
 export const STUDENT_COHORT: StudentDef[] = [
-  { id: 'st-amir', name: 'Amir (synthetic)', year: '3', field: 'cs', interests: ['technology', 'ai'],
+  { id: 'st-amir', name: 'Husan (synthetic)', year: '3', field: 'cs', interests: ['technology', 'ai'],
     skills: { 'software-engineering': 3, python: 3, 'data-analysis': 2, 'machine-learning': 1 } },
-  { id: 'st-kavya', name: 'Kavya (synthetic)', year: '2', field: 'cs', interests: ['technology'],
+  { id: 'st-kavya', name: 'Ravshan (synthetic)', year: '2', field: 'cs', interests: ['technology'],
     skills: { 'software-engineering': 2, python: 3, cloud: 1 } },
-  { id: 'st-zack', name: 'Zack (synthetic)', year: '4', field: 'cs', interests: ['technology', 'ai'],
+  { id: 'st-zack', name: 'Oybek (synthetic)', year: '4', field: 'cs', interests: ['technology', 'ai'],
     skills: { 'software-engineering': 3, python: 2, 'machine-learning': 2, 'prompt-engineering': 2 } },
-  { id: 'st-huiyin', name: 'Hui Yin (synthetic)', year: '1', field: 'cs', interests: ['technology'],
+  { id: 'st-huiyin', name: 'Rustam (synthetic)', year: '1', field: 'cs', interests: ['technology'],
     skills: { 'software-engineering': 1, python: 2 } },
 
-  { id: 'st-danial', name: 'Danial (synthetic)', year: '3', field: 'mecheng', interests: ['green', 'technology'],
+  { id: 'st-danial', name: 'Dildora (synthetic)', year: '3', field: 'mecheng', interests: ['green', 'technology'],
     skills: { iot: 2, robotics: 2, 'renewable-energy': 1 } },
-  { id: 'st-shalini', name: 'Shalini (synthetic)', year: '2', field: 'mecheng', interests: ['technology'],
+  { id: 'st-shalini', name: 'Gulnora (synthetic)', year: '2', field: 'mecheng', interests: ['technology'],
     skills: { robotics: 2, 'project-management': 1, 'critical-thinking': 2 } },
-  { id: 'st-aiman', name: 'Aiman (synthetic)', year: '4', field: 'mecheng', interests: ['green', 'sustainability'],
+  { id: 'st-aiman', name: 'Charos (synthetic)', year: '4', field: 'mecheng', interests: ['green', 'sustainability'],
     skills: { iot: 3, 'energy-efficiency': 2, 'ev-mobility': 1 } },
-  { id: 'st-bengchong', name: 'Beng Chong (synthetic)', year: '1', field: 'mecheng', interests: ['green'],
+  { id: 'st-bengchong', name: 'Malika (synthetic)', year: '1', field: 'mecheng', interests: ['green'],
     skills: { iot: 1, robotics: 1 } },
 
-  { id: 'st-syafika', name: 'Nur Syafika (synthetic)', year: '3', field: 'business', interests: ['creative', 'business'],
+  { id: 'st-syafika', name: 'Aziz (synthetic)', year: '3', field: 'business', interests: ['creative', 'business'],
     skills: { 'business-analysis': 2, 'digital-marketing': 3, communication: 3 } },
-  { id: 'st-jiahaur', name: 'Jia Haur (synthetic)', year: '2', field: 'business', interests: ['business', 'people'],
+  { id: 'st-jiahaur', name: 'Otabek (synthetic)', year: '2', field: 'business', interests: ['business', 'people'],
     skills: { communication: 3, 'project-management': 2 } },
-  { id: 'st-thivya', name: 'Thivya (synthetic)', year: '4', field: 'business', interests: ['business', 'technology'],
+  { id: 'st-thivya', name: 'Mohira (synthetic)', year: '4', field: 'business', interests: ['business', 'technology'],
     skills: { 'business-analysis': 3, 'data-analysis': 2, 'ai-augmented-ops': 1 } },
-  { id: 'st-aqil', name: 'Aqil (synthetic)', year: '1', field: 'business', interests: ['creative'],
+  { id: 'st-aqil', name: 'Botir (synthetic)', year: '1', field: 'business', interests: ['creative'],
     skills: { communication: 2, 'digital-marketing': 2 } },
 ];
 

@@ -39,6 +39,16 @@ export const SKILL_COPY: Record<string, { uz: string; ru: string }> = {
   'privacy-compliance': { uz: 'Ma’lumotlar maxfiyligi va muvofiqligi', ru: 'Конфиденциальность данных и соответствие требованиям' },
   'digital-marketing': { uz: 'Raqamli marketing', ru: 'Цифровой маркетинг' },
   'ai-content-ops': { uz: 'AI yordamida kontent boshqaruvi', ru: 'Управление контентом с помощью ИИ' },
+  'english-for-work': { uz: 'Ish va o‘qish uchun ingliz tili', ru: 'Английский для работы и учёбы' },
+  'digital-literacy': { uz: 'Raqamli savodxonlik va ofis dasturlari', ru: 'Цифровая грамотность и офисные программы' },
+  'accounting-finance': { uz: 'Buxgalteriya va moliyaviy savodxonlik', ru: 'Бухгалтерия и финансовая грамотность' },
+  'entrepreneurship': { uz: 'Tadbirkorlik va kichik biznes', ru: 'Предпринимательство и малый бизнес' },
+  'sales-negotiation': { uz: 'Savdo va muzokaralar', ru: 'Продажи и переговоры' },
+  'tourism-hospitality': { uz: 'Turizm va mehmondo‘stlik xizmatlari', ru: 'Туризм и гостеприимство' },
+  'graphic-design': { uz: 'Grafik va vizual dizayn', ru: 'Графический и визуальный дизайн' },
+  'textile-production': { uz: 'To‘qimachilik va tikuvchilik ishlab chiqarishi', ru: 'Текстильное и швейное производство' },
+  'electrical-maintenance': { uz: 'Elektr montaji va texnik xizmat', ru: 'Электромонтаж и обслуживание' },
+  'food-processing': { uz: 'Oziq-ovqat mahsulotlarini qayta ishlash va xavfsizligi', ru: 'Пищевая переработка и безопасность' },
 };
 
 export const SKILL_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {
@@ -50,6 +60,8 @@ export const SKILL_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {
   'Human & Creative': { uz: 'Insoniy va ijodiy ko‘nikmalar', ru: 'Человеческие и творческие навыки' },
   'Security & Trust': { uz: 'Xavfsizlik va ishonch', ru: 'Безопасность и доверие' },
   'Marketing & Content': { uz: 'Marketing va kontent', ru: 'Маркетинг и контент' },
+  'Foundations & Languages': { uz: 'Asosiy ko‘nikmalar va tillar', ru: 'Базовые навыки и языки' },
+  'Manufacturing & Trades': { uz: 'Ishlab chiqarish va kasb-hunar', ru: 'Производство и рабочие профессии' },
 };
 
 export const ROLE_CATEGORY_COPY: Record<string, { uz: string; ru: string }> = {

@@ -164,6 +164,7 @@ export function EmployerView() {
             <Users className="h-6 w-6 text-teal-700 dark:text-teal-400" aria-hidden />
             {orgName}
           </h1>
+          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t('emp.bridge')}</p>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <Badge variant="secondary" className="gap-1"><Building2 className="h-3 w-3" aria-hidden /> {industryLabel}</Badge>
             <Badge variant="outline">{team.length} {t('emp.hr.profiles')}</Badge>
