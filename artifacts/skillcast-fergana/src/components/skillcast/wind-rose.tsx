@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Compass, Mic, Table2, TrendingUp, Trophy } from 'lucide-react';
+import { ArrowRight, Compass, Lightbulb, Mic, Table2, TrendingUp, Trophy, X } from 'lucide-react';
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
   const openVoice = usePanels((s) => s.openVoice);
   const reduceMotion = useReducedMotion();
   const [showTable, setShowTable] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
   const { ref, width } = useWidth<HTMLDivElement>();
   const narrow = width < 560;
 
@@ -91,9 +92,16 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
   };
 
   const goLearn = () => { setDashTab('pathway'); setView('dashboard'); };
+  // Interpretation, from the same deterministic points as the chart.
+  const directions = [...rose.points].sort((a, b) => b.market - a.market).slice(0, 3);
+  const aligned = rose.points.filter((p) => p.you >= p.market).length;
+  const focus = rose.priorities[0];
+  const picked = data.find((p) => p.slug === selected) ?? null;
+  const marketWord = (m: number) => t(m >= 60 ? 'wr.detail.strong' : m >= 45 ? 'wr.detail.steady' : 'wr.detail.softer');
 
   return (
-    <Card className="overflow-hidden border-blue-200 shadow-sm dark:border-blue-900/60">
+    <Card className="relative overflow-hidden border-blue-300 shadow-md ring-1 ring-blue-500/10 dark:border-blue-800">
+      <div aria-hidden className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-violet-600 to-amber-500" />
       <CardHeader className="gap-1 pb-2">
         <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
           <div className="min-w-0">
@@ -102,6 +110,14 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             </p>
             <CardTitle className="mt-1 text-lg leading-snug sm:text-xl">{t('wr.title')}</CardTitle>
             <CardDescription className="mt-1">{t('wr.lede')}</CardDescription>
+            <ol className="mt-3 grid gap-1.5 text-xs sm:grid-cols-3" aria-label={t('wr.read.title')}>
+              {(['wr.read.1', 'wr.read.2', 'wr.read.3'] as const).map((key, i) => (
+                <li key={key} className="flex items-start gap-2 rounded-lg bg-muted/50 px-2.5 py-1.5">
+                  <span className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${['bg-blue-600', 'bg-violet-600', 'bg-amber-600'][i]}`}>{i + 1}</span>
+                  <span className="min-w-0 leading-snug">{t(key)}</span>
+                </li>
+              ))}
+            </ol>
           </div>
           <Button variant="outline" size="sm" className="h-auto min-h-9 w-full gap-1.5 whitespace-normal text-left sm:w-auto sm:max-w-56" onClick={() => openVoice(t('va.ex.radar'))}>
             <Mic className="h-4 w-4 shrink-0" aria-hidden /> {t('wr.ask')}
@@ -113,7 +129,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
           <div className="min-w-0">
             <div
               ref={ref}
-              className="h-[19rem] min-w-0 sm:h-[24rem]"
+              className="h-[21rem] min-w-0 sm:h-[26rem]"
               role="img"
               aria-label={t('wr.aria', { n: data.length })}
             >
@@ -135,20 +151,61 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
               <li className="flex items-start gap-2"><span aria-hidden className="mt-1.5 h-0 w-5 shrink-0 border-t-2" style={{ borderColor: COLORS.market }} />{t('wr.legend.market')}</li>
               {hasTarget && <li className="flex items-start gap-2"><span aria-hidden className="mt-1.5 h-0 w-5 shrink-0 border-t-2 border-dashed" style={{ borderColor: COLORS.target }} />{t('wr.legend.target')}</li>}
             </ul>
-            {narrow && (
-              <ol className="mt-3 grid gap-1 text-xs sm:grid-cols-2">
-                {data.map((p) => (
-                  <li key={p.slug} className="flex items-start gap-2">
-                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${p.gap >= 20 ? 'bg-amber-600 text-white' : 'bg-muted'}`}>{p.n}</span>
+            <p className="mt-3 text-xs font-medium text-muted-foreground">{t('wr.select.hint')}</p>
+            <ol className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
+              {data.map((p) => (
+                <li key={p.slug}>
+                  <button type="button" aria-pressed={selected === p.slug} onClick={() => setSelected(selected === p.slug ? null : p.slug)}
+                    className={`flex min-h-8 items-center gap-1.5 rounded-full border px-2 py-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selected === p.slug ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'}`}>
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${selected === p.slug ? 'bg-white/20' : p.gap >= 20 ? 'bg-amber-600 text-white' : 'bg-muted'}`}>{p.n}</span>
                     <span className="min-w-0">{p.label}</span>
-                  </li>
-                ))}
-              </ol>
+                  </button>
+                </li>
+              ))}
+            </ol>
+            {picked && (
+              <section aria-live="polite" aria-label={t('wr.detail.title')} className="mt-3 rounded-xl border border-blue-300 bg-blue-50/60 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-sm font-semibold leading-snug">{picked.label}</h3>
+                  <button type="button" onClick={() => setSelected(null)} aria-label={t('wr.detail.dismiss')} className="rounded p-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    <X className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
+                <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
+                  {([['wr.you', picked.you, COLORS.you], ['wr.market', picked.market, COLORS.market], ['wr.target', picked.target, COLORS.target]] as const).map(([key, value, color]) => (
+                    <div key={key} className="rounded-lg bg-background p-2">
+                      <dt className="text-[11px] leading-tight text-muted-foreground">{t(key)}</dt>
+                      <dd className="text-xl font-bold tabular-nums" style={{ color }}>{value ?? '—'}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-2 text-xs text-muted-foreground">{marketWord(picked.market)}{!picked.tracked && ` · ${t('wr.baseline')}`}</p>
+                <p className="mt-1 text-sm font-medium">
+                  {picked.gap >= 20 ? t('wr.detail.gap', { n: picked.gap }) : picked.you >= 60 ? t('wr.detail.strength') : t('wr.detail.close')}
+                </p>
+              </section>
             )}
           </div>
 
           {/* What to do with it */}
           <div className="space-y-3">
+            <section aria-labelledby="wr-meaning" className="rounded-xl border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900 dark:bg-blue-950/20">
+              <h3 id="wr-meaning" className="flex items-center gap-2 text-sm font-semibold"><Lightbulb className="h-4 w-4 shrink-0 text-blue-700 dark:text-blue-300" aria-hidden />{t('wr.q.meaning')}</h3>
+              <p className="mt-1.5 text-sm">{t('wr.meaning.aligned', { n: aligned, total: rose.points.length })}</p>
+              {focus && <p className="mt-1 text-sm font-semibold">{t('wr.meaning.focus', { skill: skillName(t, focus.slug), n: focus.gap })}</p>}
+            </section>
+            <section aria-labelledby="wr-dir" className="rounded-xl border p-3">
+              <h3 id="wr-dir" className="flex items-center gap-2 text-sm font-semibold"><Compass className="h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400" aria-hidden />{t('wr.q.directions')}</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t('wr.q.directions.d')}</p>
+              <ol className="mt-2 space-y-1.5">
+                {directions.map((p) => (
+                  <li key={p.slug} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 leading-snug">{skillName(t, p.slug)}</span>
+                    <span className="shrink-0 rounded-full bg-violet-600/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-800 dark:text-violet-300">{p.market}/100</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
             <section aria-labelledby="wr-prio" className="rounded-xl border border-amber-300/70 bg-amber-50/60 p-3 dark:border-amber-700/60 dark:bg-amber-950/20">
               <h3 id="wr-prio" className="flex items-center gap-2 text-sm font-semibold"><TrendingUp className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" aria-hidden />{t('wr.priorities')}</h3>
               {rose.priorities.length ? (
@@ -181,7 +238,10 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
           </div>
         </div>
 
-        <Explainer>{t('wr.how')}</Explainer>
+        <div className="grid gap-2 md:grid-cols-2">
+          <Explainer>{t('wr.how')}</Explainer>
+          <Explainer label={t('wr.q.why')}>{t('wr.why.body')}</Explainer>
+        </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">{t('wr.disclaimer')}</p>

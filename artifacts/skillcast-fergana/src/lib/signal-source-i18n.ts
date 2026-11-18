@@ -9,6 +9,38 @@ type Copy = { en: string; uz: string; ru: string };
 const c = (en: string, uz: string, ru: string): Copy => ({ en, uz, ru });
 
 export const SOURCE_COPY: Record<string, Copy> = {
+  // Source audit: what SkillCast confirmed on the publisher's own page
+  'src.f.check': c('SkillCast check', 'SkillCast tekshiruvi', 'Проверка SkillCast'),
+  'src.check.on': c('Checked {date} on the publisher’s page', '{date} da nashriyot sahifasida tekshirilgan', 'Проверено {date} на странице издателя'),
+  'src.check.none': c('Not checked yet. Open the official link to confirm details.', 'Hali tekshirilmagan. Tafsilotlarni rasmiy havola orqali tekshiring.', 'Ещё не проверено. Уточните детали по официальной ссылке.'),
+  'src.check.evidence': c('Evidence', 'Dalil', 'Подтверждение'),
+  'src.check.siat': c('Official “Employment rate” dataset: percent, annual; the latest year (2025) is marked preliminary; CC BY 4.0.', 'Rasmiy “Bandlik darajasi” to‘plami: foizda, yillik; oxirgi yil (2025) dastlabki deb belgilangan; CC BY 4.0.', 'Официальный набор «Уровень занятости»: проценты, ежегодно; последний год (2025) отмечен как предварительный; CC BY 4.0.'),
+  'src.check.worldbank': c('No API key needed (API docs). Data under CC BY 4.0 with attribution (World Bank terms).', 'API kaliti kerak emas (API hujjatlari). Ma’lumotlar CC BY 4.0 asosida, manba ko‘rsatilishi shart (Jahon banki shartlari).', 'Ключ API не нужен (документация). Данные по CC BY 4.0 с указанием источника (условия Всемирного банка).'),
+  'src.check.remotive': c('Listings are delayed 24 hours; link back to Remotive and name it as the source.', 'E’lonlar 24 soat kechikadi; Remotive’ga havola bering va uni manba sifatida ko‘rsating.', 'Вакансии публикуются с задержкой 24 часа; нужна ссылка на Remotive и указание источника.'),
+  'src.check.ilostat': c('Bulk download updated daily at 12:00 (Paris time). Earlier “weekly” note corrected.', 'Yig‘ma yuklab olish har kuni 12:00 da (Parij vaqti) yangilanadi. Avvalgi “haftalik” yozuvi tuzatildi.', 'Массовая выгрузка обновляется ежедневно в 12:00 (Париж). Прежняя отметка «еженедельно» исправлена.'),
+  'src.check.uis': c('UIS Data Browser shows a November 2026 data release.', 'UIS Data Browser 2026-yil noyabr ma’lumotlar relizini ko‘rsatadi.', 'UIS Data Browser показывает выпуск данных за ноябрь 2026 г.'),
+  'src.check.sdg': c('The old database address now redirects to the UN SDG Data Portal; link updated.', 'Eski manzil endi BMT BRM ma’lumotlar portaliga yo‘naltiradi; havola yangilandi.', 'Старый адрес теперь ведёт на портал данных ЦУР ООН; ссылка обновлена.'),
+  'src.check.onet': c('Registration required to use the web services; content under CC BY 4.0.', 'Veb-xizmatlardan foydalanish uchun ro‘yxatdan o‘tish kerak; kontent CC BY 4.0 asosida.', 'Для веб-сервисов нужна регистрация; контент по CC BY 4.0.'),
+  'src.check.adzuna': c('An API key is required. Uzbekistan coverage is not stated.', 'API kaliti talab qilinadi. O‘zbekiston qamrovi ko‘rsatilmagan.', 'Нужен ключ API. Охват Узбекистана не указан.'),
+  'src.check.mehnat': c('Official site of the Ministry of Employment and Poverty Reduction.', 'Kambag‘allikni qisqartirish va bandlik vazirligining rasmiy sayti.', 'Официальный сайт Министерства занятости и сокращения бедности.'),
+  'src.check.ishmehnat': c('The Ministry states that employment centres publish vacancies from all regions monthly. The portal itself blocks automated checks.', 'Vazirlik ma’lumotiga ko‘ra, bandlik markazlari barcha hududlar vakansiyalarini har oy e’lon qiladi. Portalning o‘zi avtomatik tekshiruvni cheklaydi.', 'По данным министерства, центры занятости ежемесячно публикуют вакансии всех регионов. Сам портал блокирует автоматическую проверку.'),
+  'src.check.civilservice': c('Official unified open portal of civil-service vacancies.', 'Davlat fuqarolik xizmati vakant lavozimlarining rasmiy yagona ochiq portali.', 'Официальный единый открытый портал вакансий госслужбы.'),
+  'src.check.itpark': c('Homepage reachable; training programmes are not listed on it, so details are not confirmed here.', 'Bosh sahifa ochiladi; unda o‘quv dasturlari ko‘rsatilmagan, shuning uchun tafsilotlar bu yerda tasdiqlanmagan.', 'Главная страница доступна; учебные программы на ней не указаны, поэтому детали здесь не подтверждены.'),
+  'src.check.esco': c('Free of charge; API licensed under EUPL 1.2; available in 28 languages.', 'Bepul; API EUPL 1.2 litsenziyasi asosida; 28 tilda mavjud.', 'Бесплатно; API по лицензии EUPL 1.2; доступно на 28 языках.'),
+  'src.check.wef': c('Published 7 January 2025.', '2025-yil 7-yanvarda nashr etilgan.', 'Опубликован 7 января 2025 г.'),
+  'src.check.unescoiite': c('UNESCO IITE insight report with recommendations, 2025.', 'UNESCO IITE tavsiyalar bilan tahliliy hisoboti, 2025.', 'Аналитический доклад UNESCO IITE с рекомендациями, 2025.'),
+  'src.check.undphdr': c('2025 Human Development Report: “A Matter of Choice: People and Possibilities in the Age of AI”.', '2025-yilgi Inson taraqqiyoti hisoboti: sun’iy intellekt davridagi tanlov va imkoniyatlar.', 'Доклад о человеческом развитии 2025: выбор и возможности людей в эпоху ИИ.'),
+  'src.check.elementsofai': c('Free online courses by MinnaLearn and the University of Helsinki.', 'MinnaLearn va Xelsinki universitetining bepul onlayn kurslari.', 'Бесплатные онлайн-курсы MinnaLearn и Хельсинкского университета.'),
+
+  // How to read statuses
+  'src.legend.title': c('What you can rely on', 'Nimaga tayanish mumkin', 'На что можно опираться'),
+  'src.legend.periodic': c('SkillCast retrieves it on a schedule. Not real time.', 'SkillCast uni jadval bo‘yicha oladi. Real vaqtda emas.', 'SkillCast получает данные по расписанию. Не в реальном времени.'),
+  'src.legend.cached': c('The last successful copy, shown while the source cannot be reached.', 'Oxirgi muvaffaqiyatli nusxa; manbaga ulanib bo‘lmaganda ko‘rsatiladi.', 'Последняя успешная копия; показывается, пока источник недоступен.'),
+  'src.legend.unavailable': c('Not reachable at the last check. No numbers are invented in its place.', 'Oxirgi tekshiruvda ochilmadi. Uning o‘rniga raqam o‘ylab topilmaydi.', 'Недоступен при последней проверке. Цифры вместо него не придумываются.'),
+  'src.legend.demo': c('A labelled baseline used when no retrieved data exists. Indicative only.', 'Olingan ma’lumot bo‘lmaganda ishlatiladigan belgilangan bazaviy qiymat. Faqat taxminiy.', 'Помеченная базовая оценка, когда полученных данных нет. Только ориентир.'),
+  'src.legend.reference': c('A trusted link for you to open. SkillCast does not pull its data.', 'Siz ochishingiz mumkin bo‘lgan ishonchli havola. SkillCast undan ma’lumot olmaydi.', 'Надёжная ссылка для вас. SkillCast не загружает из неё данные.'),
+  'src.legend.checked': c('“Checked” means we read the publisher’s own page on that date. It is not a guarantee.', '“Tekshirilgan” — biz o‘sha sanada nashriyotning o‘z sahifasini o‘qiganimizni bildiradi. Bu kafolat emas.', '«Проверено» значит, что мы прочитали страницу издателя в эту дату. Это не гарантия.'),
+
   // Page
   'src.page.title': c('Signal sources', 'Signal manbalari', 'Источники сигналов'),
   'src.page.lede': c(
@@ -73,8 +105,10 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'src.f.calculated': c('Calculated', 'Hisoblangan', 'Рассчитано'),
   'src.f.postings': c('Postings counted', 'Hisoblangan e’lonlar', 'Учтено вакансий'),
   'src.unknown': c('Unknown', 'Noma’lum', 'Неизвестно'),
-  'src.notVerified': c('Not verified', 'Tasdiqlanmagan', 'Не подтверждено'),
-  'src.licence.unverified': c('Unverified · check publisher terms', 'Tasdiqlanmagan · nashriyot shartlarini tekshiring', 'Не подтверждена · см. условия издателя'),
+  'src.notVerified': c('Not confirmed yet', 'Hali tasdiqlanmagan', 'Пока не подтверждено'),
+  'src.licence.unverified': c('Not stated on the checked page · see publisher terms', 'Tekshirilgan sahifada ko‘rsatilmagan · nashriyot shartlariga qarang', 'На проверенной странице не указана · см. условия издателя'),
+  'src.licence.ccby': c('CC BY 4.0 · credit the publisher', 'CC BY 4.0 · nashriyotni ko‘rsating', 'CC BY 4.0 · указывайте издателя'),
+  'src.licence.free': c('Free of charge (publisher states)', 'Bepul (nashriyot ma’lumoti)', 'Бесплатно (по данным издателя)'),
   'src.licence.attribution': c('Attribution required by publisher terms', 'Nashriyot shartlariga ko‘ra manba ko‘rsatilishi shart', 'По условиям издателя нужна ссылка на источник'),
   'src.link.official': c('Official source', 'Rasmiy manba', 'Официальный источник'),
   'src.link.docs': c('Documentation', 'Hujjatlar', 'Документация'),
@@ -110,6 +144,9 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'src.tier.2': c('Tier 2 · international organisation', '2-daraja · xalqaro tashkilot', 'Уровень 2 · международная организация'),
   'src.tier.3': c('Tier 3 · academic', '3-daraja · akademik', 'Уровень 3 · академический'),
   'src.tier.4': c('Tier 4 · secondary', '4-daraja · ikkilamchi', 'Уровень 4 · вторичный'),
+  'src.freq.annual': c('Annual (dataset metadata)', 'Yillik (ma’lumotlar to‘plami metama’lumoti)', 'Ежегодно (метаданные набора)'),
+  'src.freq.daily': c('Bulk files updated daily, 12:00 Paris time', 'Yig‘ma fayllar har kuni, Parij vaqti bilan 12:00 da yangilanadi', 'Массовые файлы обновляются ежедневно в 12:00 по Парижу'),
+  'src.freq.monthlyVacancies': c('Employment centres publish regional vacancies monthly', 'Bandlik markazlari hududiy vakansiyalarni har oy e’lon qiladi', 'Центры занятости публикуют вакансии регионов ежемесячно'),
   'src.freq.weekly': c('Bulk files weekly (Sundays)', 'Yig‘ma fayllar har hafta (yakshanba)', 'Массовые файлы еженедельно (воскресенье)'),
   'src.freq.remotive': c('Listings delayed 24 hours; checked at most 4 times a day', 'E’lonlar 24 soat kechikadi; kuniga ko‘pi bilan 4 marta tekshiriladi', 'Задержка 24 часа; проверка не чаще 4 раз в день'),
 
@@ -144,7 +181,7 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'src.desc.civilservice': c('Public-sector vacancies. No API. Linked for learners only.', 'Davlat sektori vakansiyalari. API yo‘q. Faqat o‘quvchilar uchun havola.', 'Вакансии госсектора. API нет. Ссылка для учащихся.'),
   'src.desc.itpark': c('Digital inclusion project news, including regional training. Secondary context.', 'Raqamli inklyuziya loyihasi yangiliklari, jumladan hududiy treninglar. Ikkilamchi kontekst.', 'Новости проекта цифровой инклюзии, включая региональное обучение. Вторичный контекст.'),
   'src.desc.undpvalley': c('Evaluation of vocational and digital skills training across the Ferghana Valley, not Fergana City.', 'Farg‘ona vodiysi bo‘ylab kasbiy va raqamli ko‘nikmalar treningi baholanishi, Farg‘ona shahri emas.', 'Оценка профессионального и цифрового обучения в Ферганской долине, не в городе Фергана.'),
-  'src.desc.ilostat': c('Labour statistics with SDMX API and weekly bulk files. Uzbek series not yet confirmed or integrated.', 'SDMX API va haftalik yig‘ma fayllarga ega mehnat statistikasi. O‘zbekiston qatorlari hali tasdiqlanmagan va integratsiya qilinmagan.', 'Статистика труда с API SDMX и еженедельными файлами. Ряды по Узбекистану ещё не подтверждены и не интегрированы.'),
+  'src.desc.ilostat': c('Labour statistics with an SDMX API and daily-updated bulk files. Uzbek series not yet integrated.', 'SDMX API va har kuni yangilanadigan yig‘ma fayllarga ega mehnat statistikasi. O‘zbekiston qatorlari hali integratsiya qilinmagan.', 'Статистика труда с API SDMX и ежедневно обновляемыми файлами. Ряды по Узбекистану ещё не интегрированы.'),
   'src.desc.uis': c('SDG 4 education indicators. Current Data API not configured; the old SDMX API is retired.', 'SDG 4 ta’lim ko‘rsatkichlari. Joriy Data API sozlanmagan; eski SDMX API to‘xtatilgan.', 'Показатели образования ЦУР 4. Текущий Data API не настроен; старый SDMX API закрыт.'),
   'src.desc.sdg': c('National SDG indicator series via SDMX. Not integrated. No Fergana-level SDG coverage.', 'SDMX orqali milliy SDG ko‘rsatkichlari. Integratsiya qilinmagan. Farg‘ona darajasida SDG qamrovi yo‘q.', 'Национальные ряды ЦУР через SDMX. Не интегрированы. Данных ЦУР по Фергане нет.'),
   'src.desc.itu': c('ICT skills data collection began in 2024 with limited country reporting.', 'AKT ko‘nikmalari ma’lumotlarini yig‘ish 2024-yilda cheklangan mamlakatlar bilan boshlangan.', 'Сбор данных о навыках ИКТ начат в 2024 году при ограниченном числе стран.'),

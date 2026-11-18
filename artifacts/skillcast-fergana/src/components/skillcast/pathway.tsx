@@ -13,6 +13,7 @@ import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, useSignals, useT } from './shared';
 import { LearningSources } from './learning-sources';
+import { ChoosePathwayEmpty } from './explainer';
 
 // ─── Pathway tab: step-by-step tracked roadmap from the curated registry ───
 // Courses are picked deterministically: gap priority (weight × momentum),
@@ -80,28 +81,19 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
 
   const badges = useMemo(() => {
     const done = nodes.filter((n) => completedCourses.includes(n.courseSlug));
-    const b: Array<{ label: string; icon: typeof Flag; earned: boolean; desc?: string }> = [];
-    b.push({ label: t('badge.first'), desc: t('badge.first.d'), icon: Flag, earned: done.length >= 1 });
-    b.push({ label: t('badge.halfway'), desc: t('badge.halfway.d'), icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2) });
+    const b: BadgeItem[] = [];
+    b.push({ label: t('badge.first'), desc: t('badge.first.d'), icon: Flag, earned: done.length >= 1, tone: 'from-sky-500 to-blue-600' });
+    b.push({ label: t('badge.halfway'), desc: t('badge.halfway.d'), icon: BadgeCheck, earned: nodes.length > 0 && done.length >= Math.ceil(nodes.length / 2), tone: 'from-teal-500 to-emerald-600' });
     const aiDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => AI_SLUGS.has(s)));
-    b.push({ label: t('badge.ai'), desc: t('badge.ai.d'), icon: Sparkles, earned: aiDone });
+    b.push({ label: t('badge.ai'), desc: t('badge.ai.d'), icon: Sparkles, earned: aiDone, tone: 'from-violet-500 to-fuchsia-600' });
     const greenDone = done.some((n) => COURSE_MAP[n.courseSlug].skills.some((s) => GREEN_SLUGS.has(s)));
-    b.push({ label: t('badge.green'), desc: t('badge.green.d'), icon: Trophy, earned: greenDone });
-    b.push({ label: t('badge.complete'), desc: t('badge.complete.d'), icon: Award, earned: nodes.length > 0 && done.length === nodes.length });
+    b.push({ label: t('badge.green'), desc: t('badge.green.d'), icon: Trophy, earned: greenDone, tone: 'from-lime-500 to-emerald-600' });
+    b.push({ label: t('badge.complete'), desc: t('badge.complete.d'), icon: Award, earned: nodes.length > 0 && done.length === nodes.length, tone: 'from-amber-500 to-orange-600' });
     return b;
   }, [nodes, completedCourses, t]);
 
   if (!role || !match) {
-    return (
-      <Card className="text-center">
-        <CardContent className="py-12">
-          <p className="mb-4 text-muted-foreground">{t('sdg.notchosen')}</p>
-          <Button onClick={() => setDashTab('matches')} className="bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
-            {t('tab.matches')} →
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return <ChoosePathwayEmpty onGo={() => setDashTab('matches')} />;
   }
 
   const doneCount = nodes.filter((n) => completedCourses.includes(n.courseSlug)).length;
@@ -158,46 +150,13 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </CardContent>
       </Card>
 
-      {/* Progress + badges */}
-      <Card>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium">{t('pw.progress')}</span>
-            <Progress value={nodes.length ? (doneCount / nodes.length) * 100 : 0} className="h-2 flex-1" aria-label={t('pw.progress')} />
-            <span className="text-sm tabular-nums text-muted-foreground">{Math.round(nodes.length ? (doneCount / nodes.length) * 100 : 0)}%</span>
-          </div>
-          <section aria-labelledby="pw-badges">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 id="pw-badges" className="text-sm font-semibold">{t('pw.badges')}</h3>
-              <span className="text-xs text-muted-foreground">{t('pw.badges.count', { n: badges.filter((b) => b.earned).length, total: badges.length })}</span>
-            </div>
-            <p className="text-xs text-muted-foreground">{t('pw.badges.lede')}</p>
-            <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-              {badges.map((b) => (
-                <li
-                  key={b.label}
-                  className={`flex min-w-0 flex-col items-center rounded-xl border p-3 text-center ${b.earned ? 'border-teal-500/70 bg-teal-50 dark:bg-teal-950/30' : 'border-dashed'}`}
-                >
-                  <span className={`flex h-10 w-10 items-center justify-center rounded-full ${b.earned ? 'bg-teal-700 text-white dark:bg-teal-700' : 'bg-muted text-muted-foreground'}`}>
-                    <b.icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <span className="mt-2 text-sm font-semibold leading-tight">{b.label}</span>
-                  {b.desc && <span className="mt-1 text-xs leading-snug text-muted-foreground">{b.desc}</span>}
-                  <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-medium ${b.earned ? 'text-teal-800 dark:text-teal-300' : 'text-muted-foreground'}`}>
-                    {b.earned ? <Check className="h-3 w-3" aria-hidden /> : <Lock className="h-3 w-3" aria-hidden />}
-                    {b.earned ? t('badge.earned') : t('badge.locked')}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-          {inclusionNeeds.length > 0 && (
-            <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
-              {t('pw.access.note', { needs: inclusionNeeds.join(' · ') })}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Progress + badges: motivating, never colour-only (icon + text state) */}
+      <BadgeShelf badges={badges} done={doneCount} total={nodes.length} />
+      {inclusionNeeds.length > 0 && (
+        <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
+          {t('pw.access.note', { needs: inclusionNeeds.join(' · ') })}
+        </p>
+      )}
 
       {/* Step-by-step learning path */}
       <div className="relative mx-auto max-w-xl">
@@ -310,5 +269,73 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
 
       <LearningSources skills={match.gap.map((g) => g.skill)} />
     </div>
+  );
+}
+
+interface BadgeItem { label: string; icon: typeof Flag; earned: boolean; desc?: string; tone: string }
+
+/** Small SVG progress ring; the number in the middle carries the meaning. */
+function ProgressRing({ value, label }: { value: number; label: string }) {
+  const r = 30, len = 2 * Math.PI * r;
+  return (
+    <div className="relative h-20 w-20 shrink-0" role="img" aria-label={label}>
+      <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90" aria-hidden>
+        <circle cx="36" cy="36" r={r} fill="none" strokeWidth="7" className="stroke-muted" />
+        <circle cx="36" cy="36" r={r} fill="none" strokeWidth="7" strokeLinecap="round" className="stroke-teal-600 transition-[stroke-dashoffset] duration-700 motion-reduce:transition-none dark:stroke-teal-400"
+          strokeDasharray={len} strokeDashoffset={len * (1 - value / 100)} />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center text-lg font-bold tabular-nums">{Math.round(value)}%</span>
+    </div>
+  );
+}
+
+function BadgeShelf({ badges, done, total }: { badges: BadgeItem[]; done: number; total: number }) {
+  const t = useT();
+  const earned = badges.filter((b) => b.earned).length;
+  const next = badges.find((b) => !b.earned);
+  const pct = total ? (done / total) * 100 : 0;
+  const message = total === 0 ? t('nb.msg.noCourses')
+    : earned === badges.length ? t('nb.msg.all')
+      : earned === 0 ? t('nb.msg.zero')
+        : t('nb.msg.some', { name: next?.label ?? '' });
+  return (
+    <section aria-labelledby="pw-badges" className="overflow-hidden rounded-2xl border bg-gradient-to-br from-teal-50 via-background to-amber-50 p-4 shadow-sm dark:from-teal-950/40 dark:via-background dark:to-amber-950/20 sm:p-5">
+      <div className="flex flex-wrap items-center gap-4">
+        <ProgressRing value={pct} label={t('nb.courses', { done, total })} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 id="pw-badges" className="text-lg font-bold">{t('nb.title')}</h3>
+            <span className="rounded-full bg-teal-700 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-white">{t('pw.badges.count', { n: earned, total: badges.length })}</span>
+          </div>
+          <p className="mt-1 text-sm font-medium" aria-live="polite">{message}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('nb.courses', { done, total })}</p>
+        </div>
+      </div>
+      <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+        {badges.map((b) => {
+          const isNext = b === next && total > 0;
+          return (
+            <li key={b.label}
+              className={`relative flex min-w-0 flex-col items-center rounded-xl border p-3 text-center transition-transform motion-safe:hover:-translate-y-0.5 ${b.earned
+                ? 'border-transparent bg-background shadow-md ring-1 ring-teal-500/40'
+                : isNext ? 'border-2 border-dashed border-amber-500/80 bg-background' : 'border-dashed bg-background/60'}`}>
+              {isNext && (
+                <span className="absolute -top-2.5 rounded-full bg-amber-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow">{t('nb.next')}</span>
+              )}
+              <span className={`flex h-12 w-12 items-center justify-center rounded-full ${b.earned ? `bg-gradient-to-br ${b.tone} text-white shadow-lg` : 'bg-muted text-muted-foreground'}`}>
+                <b.icon className="h-6 w-6" aria-hidden />
+              </span>
+              <span className="mt-2 text-sm font-semibold leading-tight">{b.label}</span>
+              {b.desc && <span className="mt-1 text-xs leading-snug text-muted-foreground">{b.desc}</span>}
+              <span className={`mt-auto inline-flex items-center gap-1 pt-2 text-[11px] font-semibold ${b.earned ? 'text-teal-800 dark:text-teal-300' : 'text-muted-foreground'}`}>
+                {b.earned ? <Check className="h-3 w-3" aria-hidden /> : <Lock className="h-3 w-3" aria-hidden />}
+                {b.earned ? t('badge.earned') : t('badge.locked')}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-3 text-center text-xs italic text-muted-foreground">“{t('nb.proverb')}”</p>
+    </section>
   );
 }

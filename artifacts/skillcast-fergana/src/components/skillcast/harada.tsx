@@ -1,5 +1,6 @@
 'use client';
 
+import { ChoosePathwayEmpty } from './explainer';
 import { useMemo, useState } from 'react';
 import { BookOpen, Check, Clock3, Compass, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -346,19 +347,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
   };
 
   if (!role || !match) {
-    return (
-      <Card className="border-blue-100 text-center dark:border-slate-700">
-        <CardContent className="py-12 text-slate-600">
-          {t('sdg.notchosen')}
-          <Button
-            className="ml-3 bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => setDashTab('matches')}
-          >
-            {t('tab.matches')}
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return <ChoosePathwayEmpty onGo={() => setDashTab('matches')} />;
   }
 
   const vision = `Build toward ${roleTitle(t, role.slug)} by strengthening ${

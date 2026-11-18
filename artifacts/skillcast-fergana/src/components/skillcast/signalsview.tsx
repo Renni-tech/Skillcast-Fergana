@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import {
-  ArrowRight, BookOpen, Database, ExternalLink, FileWarning, GitBranch, GraduationCap, Info, Map as MapIcon,
+  ArrowRight, BadgeCheck, BookOpen, ChevronDown, Database, ExternalLink, FileWarning, GitBranch, GraduationCap, Info, Map as MapIcon,
   RadioTower, Radar as RadarIcon, RefreshCw, ScrollText,
 } from 'lucide-react';
 import type { FerganaSourceState } from '@workspace/api-client-react';
@@ -198,6 +198,8 @@ export function SignalsView() {
         </CardContent>
       </Card>
 
+      <StatusLegend st={st} />
+
       {/* Retrieved sources with their real status */}
       <h2 className="mt-6 text-lg font-semibold">{st('src.integrated.title')}</h2>
       <p className="text-sm text-muted-foreground">{st('src.group.integrated.d')}</p>
@@ -276,11 +278,62 @@ function SourceMeta({ source, st }: { source: ApprovedSource; st: SourceT }) {
         <dt className="text-muted-foreground">{st('src.f.lastUpdated')}</dt><dd>{source.lastUpdated ?? st('src.notVerified')}</dd>
         <dt className="text-muted-foreground">{st('src.f.licence')}</dt><dd>{st(`src.licence.${source.licence}`)}</dd>
       </dl>
+      <SourceCheck source={source} st={st} />
       <div className="mt-2 flex flex-wrap gap-3">
         <ExtLink href={source.url} label={st('src.link.official')} st={st} />
         {source.docsUrl && <ExtLink href={source.docsUrl} label={st('src.link.docs')} st={st} />}
       </div>
     </>
+  );
+}
+
+/** What SkillCast confirmed on the publisher's own page, with a dated evidence link. */
+function SourceCheck({ source, st }: { source: ApprovedSource; st: SourceT }) {
+  const { fmt } = useSourceT();
+  if (!source.check) {
+    return (
+      <p className="mt-2 flex items-start gap-1.5 rounded-md border border-dashed px-2 py-1.5 text-[11px] text-muted-foreground">
+        <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+        <span><span className="font-semibold">{st('src.f.check')}:</span> {st('src.check.none')}</span>
+      </p>
+    );
+  }
+  return (
+    <div className="mt-2 rounded-md border border-emerald-500/40 bg-emerald-500/5 px-2 py-1.5 text-[11px]">
+      <p className="flex items-start gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+        <BadgeCheck className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+        <span>{st('src.check.on', { date: fmt(`${source.check.on}T12:00:00Z`, false) ?? source.check.on })}</span>
+      </p>
+      <p className="mt-0.5 text-foreground/90">{st(`src.check.${source.id}`)}</p>
+      <div className="mt-1"><ExtLink href={source.check.url} label={st('src.check.evidence')} st={st} /></div>
+    </div>
+  );
+}
+
+/** Plain-language meaning of each status, so nobody has to guess. */
+function StatusLegend({ st }: { st: SourceT }) {
+  const rows: Array<[string, string]> = [
+    ['periodic', 'src.legend.periodic'], ['cached', 'src.legend.cached'], ['unavailable', 'src.legend.unavailable'],
+    ['demo', 'src.legend.demo'], ['reference', 'src.legend.reference'],
+  ];
+  return (
+    <details className="group mt-4 rounded-lg border bg-muted/30 text-sm">
+      <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 px-3 py-2 font-medium [&::-webkit-details-marker]:hidden">
+        <Info className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden />
+        <span className="min-w-0 flex-1">{st('src.legend.title')}</span>
+        <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <dl className="grid gap-2 px-3 pb-3 sm:grid-cols-[auto_1fr] sm:items-start">
+        {rows.map(([status, key]) => (
+          <div key={status} className="contents">
+            <dt><StatusBadge status={status} label={st(status === 'demo' ? 'src.mode.demo' : `src.status.${status}`)} /></dt>
+            <dd className="text-xs text-muted-foreground">{st(key)}</dd>
+          </div>
+        ))}
+        <dt className="flex items-center gap-1 text-xs font-semibold text-emerald-800 dark:text-emerald-300"><BadgeCheck className="h-3.5 w-3.5" aria-hidden />{st('src.f.check')}</dt>
+        <dd className="text-xs text-muted-foreground">{st('src.legend.checked')}</dd>
+      </dl>
+    </details>
   );
 }
 

@@ -39,7 +39,7 @@ export function InclusiveOpportunities({ matches }: { matches: RoleMatch[] }) {
     .slice(0, 3);
 
   return (
-    <section id="inclusive" aria-labelledby="inclusive-title" className="scroll-mt-24">
+    <section id="inclusive" tabIndex={-1} aria-labelledby="inclusive-title" className="scroll-mt-24 focus:outline-none">
       <Card>
         <CardHeader className="pb-3">
           <CardTitle id="inclusive-title" className="flex items-center gap-2 text-base sm:text-lg">

@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ChevronDown, Info } from 'lucide-react';
+import { ArrowRight, ChevronDown, Compass, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useT } from './shared';
 
 /**
@@ -33,5 +34,24 @@ export function Explainer({ children, next, label, className = '' }: {
         )}
       </div>
     </details>
+  );
+}
+
+/**
+ * Empty state for views that need a chosen pathway. Names the real tab (its
+ * label in the current language) and offers a button straight to it.
+ */
+export function ChoosePathwayEmpty({ onGo }: { onGo: () => void }) {
+  const t = useT();
+  const tab = t('tab.matches');
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed bg-muted/20 px-4 py-10 text-center">
+      <Compass className="h-8 w-8 text-teal-600 dark:text-teal-400" aria-hidden />
+      <h2 className="text-base font-semibold">{t('empty.choosePath.title')}</h2>
+      <p className="max-w-md text-sm text-muted-foreground">{t('empty.choosePath', { tab })}</p>
+      <Button onClick={onGo} className="h-auto min-h-10 whitespace-normal bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
+        {t('empty.go', { tab })} <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+      </Button>
+    </div>
   );
 }

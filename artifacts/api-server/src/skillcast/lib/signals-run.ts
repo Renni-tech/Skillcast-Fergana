@@ -1,5 +1,5 @@
 
-import { db } from '@/lib/db';
+import { getStore } from '@/lib/db';
 import { logger } from '../../lib/logger';
 import { ingestLiveSignals, seedSnapshots } from '@/lib/momentum';
 import type { SignalsPayload, SkillSnapshot } from '@/lib/types';
@@ -29,13 +29,11 @@ export async function buildRun(
   if (live) {
     const { postings, sources, snapshots } = await ingestLiveSignals();
 
-    const run = await db.signalRun.create({
-      data: {
-        live: true,
-        totalPostings: postings.length,
-        sources: JSON.stringify(sources),
-        note: null,
-      },
+    const run = getStore().createRun({
+      live: true,
+      totalPostings: postings.length,
+      sources: JSON.stringify(sources),
+      note: null,
     });
 
     const rows = snapshots.map((s) => ({
@@ -50,20 +48,18 @@ export async function buildRun(
       runId: run.id,
     }));
 
-    await db.signalSnapshot.createMany({ data: rows });
+    getStore().createSnapshots(rows);
 
     return run.id;
   }
 
-  const run = await db.signalRun.create({
-    data: {
-      live: false,
-      totalPostings: 0,
-      sources: JSON.stringify([SEED_SOURCE]),
-      note:
-        fallbackNote ??
-        'Live sources unreachable — showing seeded baseline snapshot.',
-    },
+  const run = getStore().createRun({
+    live: false,
+    totalPostings: 0,
+    sources: JSON.stringify([SEED_SOURCE]),
+    note:
+      fallbackNote ??
+      'Live sources unreachable — showing seeded baseline snapshot.',
   });
 
   const rows = seedSnapshots().map((s) => ({
@@ -78,7 +74,7 @@ export async function buildRun(
     runId: run.id,
   }));
 
-  await db.signalSnapshot.createMany({ data: rows });
+  getStore().createSnapshots(rows);
 
   return run.id;
 }
@@ -102,15 +98,10 @@ function parseSamples(
 export async function payloadFor(
   runId: string
 ): Promise<SignalsPayload> {
-  const run = await db.signalRun.findUniqueOrThrow({
-    where: { id: runId },
-    include: { snapshots: true },
-  });
+  const run = getStore().getRun(runId);
+  if (!run) throw new Error(`Signal run ${runId} not found`);
 
-  const log = await db.changelogEntry.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 8,
-  });
+  const log = getStore().recentChangelog(8);
 
   return {
     runId: run.id,
@@ -148,16 +139,10 @@ export async function payloadFor(
 export async function writeChangelog(
   newRunId: string
 ): Promise<void> {
-  const newRun = await db.signalRun.findUniqueOrThrow({
-    where: { id: newRunId },
-    include: { snapshots: true },
-  });
+  const newRun = getStore().getRun(newRunId);
+  if (!newRun) throw new Error(`Signal run ${newRunId} not found`);
 
-  const prevRun = await db.signalRun.findFirst({
-    where: { id: { not: newRunId } },
-    orderBy: { createdAt: 'desc' },
-    include: { snapshots: true },
-  });
+  const prevRun = getStore().latestRun(newRunId);
 
   const movers: Array<{
     skill: string;
@@ -218,16 +203,14 @@ export async function writeChangelog(
       }`
     : 'Live sources unreachable — serving seeded baseline snapshot (sources & dates still shown)';
 
-  await db.changelogEntry.create({
-    data: {
-      version,
-      live: newRun.live,
-      summary,
-      details: JSON.stringify({
-        movers: top,
-        postings: newRun.totalPostings,
-      }),
-    },
+  getStore().createChangelog({
+    version,
+    live: newRun.live,
+    summary,
+    details: JSON.stringify({
+      movers: top,
+      postings: newRun.totalPostings,
+    }),
   });
 }
 
@@ -237,27 +220,7 @@ export async function pruneOldRuns() {
   const cutoff = new Date(Date.now() - RUN_RETENTION_MS);
 
   try {
-    await db.signalRun.deleteMany({
-      where: { createdAt: { lt: cutoff } },
-    });
-
-    await db.changelogEntry.deleteMany({
-      where: { createdAt: { lt: cutoff } },
-    });
-
-    const keep = await db.changelogEntry.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-      select: { id: true },
-    });
-
-    if (keep.length > 0) {
-      const keepIds = keep.map((e) => e.id);
-
-      await db.changelogEntry.deleteMany({
-        where: { id: { notIn: keepIds } },
-      });
-    }
+    getStore().prune(cutoff, 50);
   } catch (e) {
     logger.error({ err: e }, 'Signal retention cleanup failed');
   }
@@ -268,9 +231,7 @@ export async function pruneOldRuns() {
 export async function ensureFreshRun(
   force: boolean
 ): Promise<string> {
-  const latest = await db.signalRun.findFirst({
-    orderBy: { createdAt: 'desc' },
-  });
+  const latest = getStore().latestRun();
 
   const stale =
     !latest ||
@@ -281,14 +242,11 @@ export async function ensureFreshRun(
     latest &&
     Date.now() - lastForcedAt < FORCE_COOLDOWN_MS
   ) {
-    await db.signalRun.update({
-      where: { id: latest.id },
-      data: {
-        note:
-          `Refresh throttled (cooldown active) — showing data from ` +
-          latest.createdAt.toLocaleString(),
-      },
-    });
+    getStore().setRunNote(
+      latest.id,
+      `Refresh throttled (cooldown active) — showing data from ` +
+        latest.createdAt.toLocaleString(),
+    );
 
     return latest.id;
   }

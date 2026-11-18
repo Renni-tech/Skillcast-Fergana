@@ -183,7 +183,7 @@ export function InstitutionView() {
               <ul className="space-y-1.5 text-sm">
                 {readiness.slice(0, 8).map((r) => (
                   <li key={r.roleSlug} className="flex items-center justify-between gap-2">
-                    <span className="truncate">{r.role}</span>
+                    <span className="min-w-0 leading-snug">{r.role}</span>
                     <span className="shrink-0 text-muted-foreground">{r.students} × · Ø {r.avg}</span>
                   </li>
                 ))}

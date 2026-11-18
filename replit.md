@@ -17,8 +17,8 @@ Career forecasting and reskilling proof of concept imported from Vercel. The ori
 
 - `artifacts/skillcast/`: original React app converted to Vite, preserving the original screens, Tailwind styles, Geist fonts, translations, local profile storage, and matching logic.
 - `artifacts/api-server/`: shared Express backend. Four original API paths: `/api/signals` (GET/POST), `/api/signals/cron`, `/api/coach`, `/api/extract-cv`.
-- `artifacts/api-server/src/skillcast/`: imported signal ingestion, taxonomy and Prisma logic.
-- `artifacts/api-server/prisma/schema.prisma`: original SQLite schema.
+- `artifacts/api-server/src/skillcast/`: imported signal ingestion and taxonomy; `lib/db.ts` stores signal snapshots with Node's built-in SQLite (`node:sqlite`, no Prisma).
+- SQLite schema: `SCHEMA_SQL` in `artifacts/api-server/src/skillcast/lib/db.ts` (same tables as the former Prisma schema).
 - `lib/api-spec/openapi.yaml`: API contract; generated helpers live in the existing shared API packages.
 - `.migration-backup/`: reference copy of the import; excluded from deployment.
 

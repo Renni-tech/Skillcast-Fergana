@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ChevronDown, Table2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Explainer } from './explainer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ROLES, ROLE_MAP } from '@/data/roles';
@@ -81,6 +83,7 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
                 {value}
                 <span className="text-base font-normal text-muted-foreground">/100</span>
               </CardTitle>
+              <p className="text-sm font-semibold">{t(value >= 70 ? 'demand.verdict.high' : value >= 50 ? 'demand.verdict.mid' : 'demand.verdict.low')}</p>
             </CardHeader>
             <CardContent>
               <div className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden>
@@ -90,6 +93,8 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
           </Card>
         ))}
       </div>
+
+      <Explainer label={t('demand.how')}>{t('demand.how.body')}</Explainer>
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline" className="text-muted-foreground">{t('demand.estimate')}</Badge>
@@ -120,7 +125,31 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
             })}
           </ul>
 
-          <div className="overflow-x-auto rounded-lg border">
+          {/* Secondary detail: closed by default. Cards on phones, a table from sm up. */}
+          <details className="group rounded-lg border">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              <Table2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              <span className="min-w-0 flex-1">{t('demand.details')}</span>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <div className="space-y-3 px-3 pb-3">
+              <p className="text-xs text-muted-foreground">{t('demand.cols.help')}</p>
+              <ul className="space-y-2 sm:hidden">
+                {skillRows.map((r) => (
+                  <li key={r.slug} className="rounded-lg border p-3">
+                    <p className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+                      <span className="min-w-0 leading-snug">{r.name}</span>
+                      <span className="shrink-0 tabular-nums">{r.momentum}</span>
+                    </p>
+                    <dl className="mt-1.5 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <dt>{t('demand.freq')}</dt><dd className="tabular-nums">{r.freq}%</dd>
+                      <dt>{t('demand.trend')}</dt><dd className="tabular-nums">{r.trend}/100</dd>
+                      <dt>{t('demand.horizon')}</dt><dd className="tabular-nums">{r.horizon}/100</dd>
+                    </dl>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto rounded-lg border sm:block">
             <table className="w-full min-w-[34rem] text-sm">
               <thead className="bg-muted/50">
                 <tr className="text-left text-xs text-muted-foreground">
@@ -143,7 +172,9 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
                 ))}
               </tbody>
             </table>
-          </div>
+              </div>
+            </div>
+          </details>
           {noSample && <p className="text-xs text-muted-foreground">{t('demand.zeroNote')}</p>}
 
           <div className="flex flex-wrap gap-2">

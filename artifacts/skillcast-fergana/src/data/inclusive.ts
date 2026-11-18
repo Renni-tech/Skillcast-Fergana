@@ -55,7 +55,7 @@ export const INCLUSIVE_ENTRIES: InclusiveEntry[] = [
   },
   {
     id: 'w3c-course', kind: 'training', name: 'Digital Accessibility Foundations (free course)',
-    publisher: 'W3C Web Accessibility Initiative', url: 'https://www.w3.org/WAI/courses/foundations-course/', scope: 'global', verification: 'curated', lastChecked: null,
+    publisher: 'W3C Web Accessibility Initiative', url: 'https://www.w3.org/WAI/courses/foundations-course/', scope: 'global', verification: 'curated', lastChecked: '2026-11-18',
   },
   {
     id: 'demo-employer', kind: 'demo', name: 'Fergana Smart Manufacturing',

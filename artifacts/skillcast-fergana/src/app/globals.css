@@ -428,3 +428,17 @@ html.a11y-spacing p { margin-bottom: 0.5em; }
   font-weight: 600;
 }
 .skip-link:focus { top: 0.75rem; }
+
+/* ─── Translated-text layout safety (uz / ru / en) ─────────────────────────
+   Long Uzbek and Russian words must never widen a layout past the screen.
+   Grid children may shrink below their content width (an implicit grid
+   column otherwise sizes to its longest label), and text
+   wraps at word boundaries (or inside very long words) instead of escaping
+   its container. Fixes the class of problem, not individual strings. */
+.skillcast-app .grid > * { min-width: 0; }
+.skillcast-app :where(h1, h2, h3, h4, p, li, dd, dt, td, th, label, button, a, span) {
+  overflow-wrap: break-word;
+}
+.skillcast-app :where(h1, h2, h3) { text-wrap: balance; }
+/* Icons keep their size next to wrapping labels. */
+.skillcast-app .flex > svg { flex-shrink: 0; }

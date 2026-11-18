@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Accessibility, ArrowRight, BadgeCheck, Building2, FileCheck2, GitBranch, GraduationCap, Mic, Radar, Scale, ShieldCheck, Sparkles, User,
+  Accessibility, ArrowRight, BadgeCheck, Briefcase, Building2, FileCheck2, GitBranch, GraduationCap, Mic, Radar, Scale, ShieldCheck, Sparkles, User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { SdgBadge, useT } from './shared';
 
 export function Landing() {
   const t = useT();
-  const { setView, setUserType, learnerOnboarded } = useSkillCast();
+  const { setView, setUserType, learnerOnboarded, setDashTab } = useSkillCast();
   const { openVoice, setA11yOpen } = usePanels();
 
   const navigate = (type: 'individual' | 'employer' | 'institution') => {
@@ -143,6 +143,17 @@ export function Landing() {
           <CardContent className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openVoice()}><Mic className="h-4 w-4" aria-hidden />{t('va.title')}</Button>
             <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => setA11yOpen(true)}><Accessibility className="h-4 w-4" aria-hidden />{t('a11y.title')}</Button>
+            <Button size="sm" variant="ghost" className="h-auto min-h-8 gap-1.5 whitespace-normal text-left" onClick={() => {
+              setUserType('individual');
+              if (!learnerOnboarded) { setView('onboarding'); return; }
+              setDashTab('matches');
+              setView('dashboard');
+              window.setTimeout(() => {
+                const el = document.getElementById('inclusive');
+                el?.scrollIntoView({ block: 'start' });
+                el?.focus({ preventScroll: true });
+              }, 150);
+            }}><Briefcase className="h-4 w-4 shrink-0" aria-hidden />{t('inc.title')}</Button>
           </CardContent>
         </Card>
       </section>

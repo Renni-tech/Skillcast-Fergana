@@ -10,12 +10,13 @@ import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { roleSdgMechanism, roleTitle, SdgBadge, skillName, SourceChip, useT } from './shared';
 import { pickCourses } from './pathway';
+import { ChoosePathwayEmpty } from './explainer';
 
 // ─── SDG tab: the ledger. Mechanisms, not decoration. ──────────────────────
 
 export function SdgTab({ matches }: { matches: RoleMatch[] }) {
   const t = useT();
-  const { chosenRole, profile, completedCourses } = useSkillCast();
+  const { chosenRole, profile, completedCourses, setDashTab } = useSkillCast();
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
   const match = matches.find((item) => item.roleSlug === chosenRole);
   const courseCount = match
@@ -42,12 +43,11 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
     return { perGoal: map, all: [...goalSet].sort((a, b) => a - b) };
   }, [role, profile.skills]);
 
+  const haveSet = new Set([...(ledger?.perGoal.values() ?? [])].flatMap((e) => e.have));
+  const learnSet = new Set([...(ledger?.perGoal.values() ?? [])].flatMap((e) => e.learning));
+
   if (!role || !ledger) {
-    return (
-      <Card className="text-center">
-        <CardContent className="py-12 text-muted-foreground">{t('sdg.notchosen')}</CardContent>
-      </Card>
-    );
+    return <ChoosePathwayEmpty onGo={() => setDashTab('matches')} />;
   }
 
   return (
@@ -60,7 +60,16 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
           </CardTitle>
           <CardDescription>{t('sdg.desc', { n: ledger.all.length })}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          <dl className="grid grid-cols-3 gap-2 text-center">
+            {([[ledger.all.length, 'sdg.more'], [haveSet.size, 'sdg.have'], [learnSet.size, 'sdg.learning']] as const).map(([n, key]) => (
+              <div key={key} className="flex flex-col-reverse rounded-xl border bg-muted/30 p-2.5">
+                <dt className="text-[11px] leading-tight text-muted-foreground">{t(key)}</dt>
+                <dd className="text-2xl font-bold tabular-nums">{n}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="text-sm font-medium">{t('sdg.summary', { have: haveSet.size, learn: learnSet.size })}</p>
           <p className="mb-2 rounded-md border border-[#C5192D]/40 bg-[#C5192D]/10 px-3 py-2 text-sm font-medium">{t('sdg.core4')}</p>
           <ul className="flex flex-wrap gap-1.5">
             {ledger.all.map((g) => (

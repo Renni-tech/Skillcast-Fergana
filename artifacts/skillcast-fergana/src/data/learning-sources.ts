@@ -34,6 +34,8 @@ export interface LearningSource {
   access: AccessFeature[];
   verification: 'approved' | 'curated';
   lastChecked: string | null;
+  /** Only when the provider itself describes the offer as introductory. */
+  level?: 'beginner';
 }
 
 export const LEARNING_SOURCES: LearningSource[] = [
@@ -42,26 +44,26 @@ export const LEARNING_SOURCES: LearningSource[] = [
     id: 'mehnat-vocational', name: 'Vocational training and employment programmes', provider: 'Ministry of Employment and Poverty Reduction',
     url: 'https://gov.uz/en/bv', region: 'uzbekistan', providerType: 'government', cost: 'free', languages: ['uz', 'ru'],
     skills: ['textile-production', 'electrical-maintenance', 'food-processing', 'tourism-hospitality', 'sales-negotiation', 'entrepreneurship', 'digital-literacy'],
-    access: ['in-person-support'], verification: 'approved', lastChecked: null,
+    access: ['in-person-support'], verification: 'approved', lastChecked: '2026-11-18',
   },
   {
     id: 'itpark', name: 'IT Park Uzbekistan training and digital inclusion', provider: 'IT Park Uzbekistan',
     url: 'https://www.it-park.uz/en', region: 'uzbekistan', providerType: 'government', cost: 'freemium', languages: ['uz', 'ru', 'en'],
     skills: ['software-engineering', 'python', 'data-analysis', 'digital-literacy', 'cybersecurity'],
-    access: ['in-person-support'], verification: 'approved', lastChecked: null,
+    access: ['in-person-support'], verification: 'approved', lastChecked: '2026-11-18',
   },
   // ── International: official and university providers ─────────────────────
   {
     id: 'elementsofai', name: 'Elements of AI', provider: 'University of Helsinki and MinnaLearn',
     url: 'https://www.elementsofai.com', region: 'international', providerType: 'university', cost: 'free', languages: ['en'],
     skills: ['responsible-ai', 'ai-augmented-ops', 'machine-learning'],
-    access: ['self-paced', 'text-first'], verification: 'approved', lastChecked: null,
+    access: ['self-paced', 'text-first'], verification: 'approved', lastChecked: '2026-11-18', level: 'beginner',
   },
   {
     id: 'w3c-wai', name: 'Digital Accessibility Foundations', provider: 'W3C Web Accessibility Initiative',
     url: 'https://www.w3.org/WAI/courses/foundations-course/', region: 'international', providerType: 'international', cost: 'free', languages: ['en'],
     skills: ['software-engineering', 'customer-experience', 'teaching-training', 'graphic-design'],
-    access: ['self-paced', 'text-first', 'captions', 'transcripts'], verification: 'curated', lastChecked: null,
+    access: ['self-paced', 'text-first', 'captions', 'transcripts'], verification: 'curated', lastChecked: '2026-11-18', level: 'beginner',
   },
   {
     id: 'ms-learn', name: 'Microsoft Learn training paths', provider: 'Microsoft Learn',

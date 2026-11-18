@@ -4,11 +4,13 @@
 // Linux. Every step runs as a plain `node` process (no shell syntax), so it
 // behaves the same in PowerShell, cmd.exe and bash.
 //
-//   1. prisma generate      (only when the schema, Prisma version or platform changed)
-//   2. build the API        (artifacts/api-server/build.mjs)
-//   3. prepare the database (artifacts/api-server/prepare-db.mjs, non-destructive)
-//   4. start the API and wait for GET /api/healthz
-//   5. start Vite with BASE_PATH=/ and /api proxied to the API
+//   1. build the API        (artifacts/api-server/build.mjs, esbuild, a few MB)
+//   2. prepare the database (artifacts/api-server/prepare-db.mjs, non-destructive)
+//   3. start the API and wait for GET /api/healthz
+//   4. start Vite with BASE_PATH=/ and /api proxied to the API
+//
+// Nothing is downloaded: the API stores its cache with Node's built-in SQLite
+// (node:sqlite), so there is no Prisma generate step and no engine download.
 //
 // Ctrl+C stops both servers. If either server exits, the other is stopped too.
 // Replit does not use this script; it keeps its own artifact workflows.
@@ -20,7 +22,7 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { classifyFailure, failureAdvice, formatMB, freeBytes, prismaClientState } from './dev-lib.mjs';
+import { MIN_NODE, classifyFailure, failureAdvice, formatMB, lowSpaceLocations, nodeSupported } from './dev-lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const apiDir = path.join(root, 'artifacts', 'api-server');
@@ -33,9 +35,8 @@ const log = (msg) => console.log(`${cyan('[dev]')} ${msg}`);
 const fail = (msg) => { console.error(`${red('[dev]')} ${msg}`); process.exit(1); };
 
 // ── Preconditions ──────────────────────────────────────────────────────────
-const [major, minor] = process.versions.node.split('.').map(Number);
-if (major < 20 || (major === 20 && minor < 12)) {
-  fail(`Node.js 20.12 or newer is required (found ${process.versions.node}). Node 24 LTS is recommended.`);
+if (!nodeSupported(process.versions.node)) {
+  fail(`Node.js ${MIN_NODE.join('.')} or newer is required (found ${process.versions.node}). Install Node 24 LTS from https://nodejs.org and open a new terminal.`);
 }
 if (!existsSync(path.join(root, 'node_modules')) || !existsSync(path.join(webDir, 'node_modules'))) {
   fail('Dependencies are not installed. Run `pnpm install` once in the project folder, then `pnpm dev`.');
@@ -55,13 +56,16 @@ const port = (name, fallback) => {
   return value;
 };
 const API_PORT = port('API_PORT', 8080);
+// 127.0.0.1 by default: no Windows Firewall prompt, nothing exposed on the network.
+// Set HOST=0.0.0.0 in .env to open the app from a phone or tablet on the same Wi-Fi.
+const HOST = process.env.HOST || '127.0.0.1';
 const WEB_PORT = port('WEB_PORT', 5173);
 if (API_PORT === WEB_PORT) fail('API_PORT and WEB_PORT must be different.');
 
 const portFree = (p) => new Promise((resolve) => {
   const server = net.createServer().once('error', () => resolve(false))
     .once('listening', () => server.close(() => resolve(true)));
-  server.listen(p, '0.0.0.0');
+  server.listen(p, HOST);
 });
 
 // Resolve CLIs from the packages that depend on them, so no global installs are needed.
@@ -78,7 +82,6 @@ const resolveBin = (dir, pkg, bin = pkg) => {
     return fail(`Could not find the ${pkg} command-line tool. Run \`pnpm install\` again.`);
   }
 };
-const prismaCli = resolveBin(apiDir, 'prisma');
 const viteCli = resolveBin(webDir, 'vite');
 
 // ── Process management ─────────────────────────────────────────────────────
@@ -177,6 +180,12 @@ async function waitFor(url, label, timeoutMs = 60000) {
   shutdown(1);
 }
 
+function lanUrls() {
+  return Object.values(os.networkInterfaces()).flat()
+    .filter((a) => a && a.family === 'IPv4' && !a.internal)
+    .map((a) => `http://${a.address}:${WEB_PORT}/`);
+}
+
 // ── Start ──────────────────────────────────────────────────────────────────
 for (const [name, p] of [['API_PORT', API_PORT], ['WEB_PORT', WEB_PORT]]) {
   if (!(await portFree(p))) {
@@ -184,34 +193,21 @@ for (const [name, p] of [['API_PORT', API_PORT], ['WEB_PORT', WEB_PORT]]) {
   }
 }
 
-// Prisma: generate only when needed. The first run downloads the platform
-// engines (expected); later runs reuse them instead of rewriting the client.
-const schemaPath = path.join(apiDir, 'prisma', 'schema.prisma');
-const client = prismaClientState(apiDir, schemaPath);
-if (client.current) {
-  log(`Prisma client is up to date ${dim(`(${client.engine})`)}`);
-} else {
-  const lowSpace = [root, os.tmpdir()]
-    .map((dir) => ({ dir, free: freeBytes(dir) }))
-    .filter(({ free }) => free !== null && free < 300 * 1024 * 1024);
-  for (const { dir, free } of lowSpace) {
-    log(red(`Low disk space: ${formatMB(free)} free for ${dir}. Prisma needs roughly 300 MB on first run.`));
-  }
-  await step('Generating Prisma client…', [prismaCli, 'generate', '--schema', schemaPath], apiDir);
-  prismaClientState(apiDir, schemaPath).writeStamp();
+for (const { label, dir, free } of lowSpaceLocations(root)) {
+  log(red(`Low disk space: ${formatMB(free)} free on the drive for ${dir} (${label}). Building may fail; free some space if it does.`));
 }
 await step('Building API…', ['build.mjs'], apiDir, { NODE_ENV: 'development' });
 await step('Preparing local SQLite cache…', ['prepare-db.mjs'], apiDir);
 
 log(`Starting API on port ${API_PORT}…`);
-serve(cyan('[api]'), ['--enable-source-maps', path.join('dist', 'index.mjs')], apiDir, {
-  NODE_ENV: 'development', PORT: String(API_PORT),
+serve(cyan('[api]'), ['--enable-source-maps', '--disable-warning=ExperimentalWarning', path.join('dist', 'index.mjs')], apiDir, {
+  NODE_ENV: 'development', PORT: String(API_PORT), HOST,
 });
 await waitFor(`http://127.0.0.1:${API_PORT}/api/healthz`, 'API');
 
 log(`Starting frontend on port ${WEB_PORT}…`);
 serve(green('[web]'), [viteCli, '--config', 'vite.config.ts'], webDir, {
-  NODE_ENV: 'development', PORT: String(WEB_PORT), BASE_PATH: '/',
+  NODE_ENV: 'development', PORT: String(WEB_PORT), BASE_PATH: '/', WEB_HOST: HOST,
   API_PROXY_TARGET: `http://127.0.0.1:${API_PORT}`,
 });
 await waitFor(`http://127.0.0.1:${WEB_PORT}/`, 'Frontend');
@@ -222,6 +218,7 @@ if (!shuttingDown) {
     bold('  SkillCast Fergana is running'),
     `  ${green('Frontend')}  http://localhost:${WEB_PORT}/`,
     `  ${cyan('API')}       http://localhost:${API_PORT}/api/healthz`,
+    ...(HOST === '0.0.0.0' ? lanUrls().map((u) => `  ${green('On Wi-Fi')}  ${u}`) : []),
     `  ${dim('The frontend proxies /api to the API. Press Ctrl+C to stop both.')}`,
     '',
   ].join('\n'));

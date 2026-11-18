@@ -43,21 +43,23 @@ export function LearningSources({ skills }: { skills: string[] }) {
                   {ranked.map(({ source, reasons }, i) => (
                     <li key={source.id} className={`flex flex-col rounded-lg border p-3 ${i === 0 ? 'border-teal-500/70 bg-teal-50/40 dark:bg-teal-950/20' : ''}`}>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {i === 0 && <Badge className="bg-teal-700 text-white dark:bg-teal-700"><Sparkles className="h-3 w-3" aria-hidden />1</Badge>}
+                        {i === 0 && <Badge className="bg-teal-700 text-white dark:bg-teal-700"><Sparkles className="h-3 w-3" aria-hidden />{t('ls.badge.top')}</Badge>}
                         <Badge variant="outline">{t(`ls.region.${source.region}`)}</Badge>
                         <Badge variant="secondary">{t(`ls.cost.${source.cost}`)}</Badge>
+                        {['government', 'university', 'international'].includes(source.providerType) && <Badge variant="outline" className="border-blue-500/50 text-blue-800 dark:text-blue-300">{t('ls.badge.official')}</Badge>}
+                        {source.level === 'beginner' && <Badge variant="outline" className="border-emerald-500/50 text-emerald-800 dark:text-emerald-300">{t('ls.badge.beginner')}</Badge>}
                       </div>
                       <p className="mt-2 text-sm font-semibold leading-snug">{t(`ls.${source.id}.name`)}</p>
                       <p className="text-xs text-muted-foreground">{source.provider}</p>
                       <p className="mt-1.5 flex-1 text-sm text-muted-foreground">{t(`ls.${source.id}.d`)}</p>
                       <p className="mt-2 text-xs text-muted-foreground">{t('ls.langs', { list: source.languages.map((l) => t(`ls.lang.${l}`)).join(', ') })}</p>
                       {reasons.length > 0 && (
-                        <p className="mt-1 text-xs">
+                        <p className={`mt-1 text-xs ${i === 0 ? 'rounded-md bg-teal-100/60 px-2 py-1 dark:bg-teal-900/30' : ''}`}>
                           <span className="font-medium">{t('ls.why')}: </span>
                           {reasons.map((r) => t(REASON_KEY[r])).join(' · ')}
                         </p>
                       )}
-                      <p className="mt-1 text-[11px] text-muted-foreground">{t(`ls.ver.${source.verification}`)}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">{t(`ls.ver.${source.verification}`)}{source.lastChecked && ` · ${t('ls.checked', { date: source.lastChecked })}`}</p>
                       <a href={source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex w-fit items-center gap-1 text-sm font-medium text-teal-700 hover:underline dark:text-teal-400">
                         {t('ls.open')} <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
                         <span className="sr-only"> {source.provider} ({t('common.newTab')})</span>

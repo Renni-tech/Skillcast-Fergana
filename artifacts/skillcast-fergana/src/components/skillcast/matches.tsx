@@ -333,7 +333,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <CardTitle className="flex flex-wrap items-center gap-2 text-xl text-slate-900">
-              {roleTitle(t, role.slug)}
+              <span className="min-w-0 basis-full leading-snug sm:basis-auto">{roleTitle(t, role.slug)}</span>
 
               <Badge
                 variant="outline"
@@ -363,9 +363,6 @@ function MatchCard({ match }: { match: RoleMatch }) {
               )}
             </CardTitle>
 
-            <CardDescription className="mt-2 max-w-3xl text-sm leading-relaxed">
-              {roleTagline(t, role.slug)}
-            </CardDescription>
           </div>
 
           <div className="flex flex-col items-center gap-1">
@@ -387,6 +384,9 @@ function MatchCard({ match }: { match: RoleMatch }) {
             </Button>
           </div>
         </div>
+        <CardDescription className="mt-2 max-w-3xl text-sm leading-relaxed">
+          {roleTagline(t, role.slug)}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">

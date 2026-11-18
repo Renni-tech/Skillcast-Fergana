@@ -15,11 +15,18 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
+// HOST is optional: `pnpm dev` sets 127.0.0.1 locally; Replit leaves it unset
+// (listen on all interfaces, as before).
+const host = process.env["HOST"];
+
+const onListen = (err?: Error) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
   }
 
-  logger.info({ port }, "Server listening");
-});
+  logger.info({ port, host: host ?? "all interfaces" }, "Server listening");
+};
+
+if (host) app.listen(port, host, onListen);
+else app.listen(port, onListen);

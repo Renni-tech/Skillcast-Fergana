@@ -72,7 +72,8 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: '0.0.0.0',
+    // `pnpm dev` sets WEB_HOST=127.0.0.1 (or HOST from .env); Replit needs 0.0.0.0.
+    host: process.env.WEB_HOST || '0.0.0.0',
     allowedHosts: true,
     fs: {
       strict: false,

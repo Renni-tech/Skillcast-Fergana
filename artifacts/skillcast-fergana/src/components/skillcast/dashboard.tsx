@@ -9,6 +9,8 @@ import {
   RadioTower,
   Radar as RadarIcon,
   ListChecks,
+  ArrowRight,
+  ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -164,28 +166,29 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
           {/* Fixed label/value grid: identical structure in every language */}
           <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {[
-              { label: t('snap.skills'), value: String(Object.keys(profile.skills ?? {}).length) },
-              { label: t('snap.hours'), value: String(profile.budget) },
-              { label: t('snap.completed'), value: String(completedCourses.length) },
               { label: t('snap.pathway'), value: leadingRole ? roleTitle(t, leadingRole.slug) : t('snap.none'), sub: leadingRole ? t('snap.fit', { n: leadingMatch.score }) : undefined, wide: true },
+              { label: t('snap.skills'), value: String(Object.keys(profile.skills ?? {}).length), big: true },
+              { label: t('snap.hours'), value: String(profile.budget), big: true },
+              { label: t('snap.completed'), value: String(completedCourses.length), big: true },
               { label: t('snap.exposure'), value: leadingExposure ? t(leadingExposure) : t('snap.none'), sub: leadingExposure ? t('snap.exposure.note') : undefined },
             ].map((item) => (
               <div key={item.label} className={`flex min-h-[5.5rem] min-w-0 flex-col rounded-xl border border-blue-100 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/60 ${item.wide ? 'col-span-2' : ''}`}>
                 <dt className="text-[11px] font-medium uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">{item.label}</dt>
-                <dd className="mt-1 break-words text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">{item.value}</dd>
+                <dd className={`mt-1 break-words font-semibold leading-snug text-slate-900 dark:text-slate-100 ${item.big ? 'text-3xl font-bold tabular-nums' : item.wide ? 'text-lg font-bold' : 'text-base'}`}>{item.value}</dd>
                 {item.sub && <dd className="mt-auto pt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">{item.sub}</dd>}
               </div>
             ))}
           </dl>
           <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/60 md:flex-row md:items-center md:justify-between">
             <p className="min-w-0 text-sm text-slate-700 dark:text-slate-200">
-              <span className="font-medium text-slate-500 dark:text-slate-400">{t('snap.next')}: </span>
-              {nextCourse ? courseTitle(t, nextCourse.slug) : t('snap.next.none')}
+              <span className="block text-[11px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">{t('ov.nextStep')}</span>
+              <span className="text-base font-semibold">{nextCourse ? courseTitle(t, nextCourse.slug) : t('snap.next.none')}</span>
             </p>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('radar')}>{t('Explore your radar')}</Button>
-              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('pathway')}>{t('Open learning pathway')}</Button>
-              <Button variant="outline" size="sm" className="border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button>
+              <Button size="sm" className="h-auto min-h-9 whitespace-normal bg-blue-600 text-white hover:bg-blue-700" onClick={() => setDashTab(chosenRole ? 'pathway' : 'matches')}>
+                {chosenRole ? t('Open learning pathway') : t('tab.matches')} <ArrowRight className="h-4 w-4" aria-hidden />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-auto min-h-9 whitespace-normal" onClick={() => setDashTab('progress')}>{t('View next steps')}</Button>
             </div>
           </div>
         </CardContent>
@@ -211,20 +214,6 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <Mail className="h-4 w-4" aria-hidden /> {t('ov.email.btn')}
             </Button>
           </div>
-          <ul className="flex w-full flex-wrap gap-2" aria-label={st('src.history.sources')}>
-            {(data?.provenance?.sources ?? []).map((s) => {
-              const def = sourceByIntegratedId(s.id);
-              return (
-                <li key={s.id}>
-                  <a href={def?.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground">
-                    <RadioTower className="h-3 w-3" aria-hidden />
-                    {def?.name ?? s.id} · {st(`src.status.${s.status}`)}
-                    <span className="sr-only"> ({st('src.newTab')})</span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
         </CardContent>
       </Card>
 
@@ -241,7 +230,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
                 <ul className="space-y-1.5">
                   {movers.slice(0, 5).map((m) => (
                     <li key={m.skill} className="flex items-center justify-between gap-2 text-sm">
-                      <span className="truncate">{skillName(t, m.skill)}</span>
+                      <span className="min-w-0 leading-snug">{skillName(t, m.skill)}</span>
                       <span className="flex items-center gap-2">
                         <TrendArrow delta={m.delta} />
                         <MomentumPill momentum={m.momentum} />
@@ -260,7 +249,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               <ul className="space-y-1.5">
                 {strongest.slice(0, 4).map((s) => (
                   <li key={s.slug} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate">{skillName(t, s.slug)}</span>
+                    <span className="min-w-0 leading-snug">{skillName(t, s.slug)}</span>
                     <MomentumPill momentum={s.m} />
                   </li>
                 ))}
@@ -270,10 +259,38 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
               </ul>
             </CardContent>
           </Card>
+
       </div>
 
+      {/* Secondary detail, closed by default: source status and forecast changelog */}
+      <details className="group rounded-xl border bg-card">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 py-3 [&::-webkit-details-marker]:hidden">
+          <RadioTower className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold">{t('ov.details')}</span>
+            <span className="block text-xs text-muted-foreground">{t('ov.details.hint')}</span>
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
+        <div className="space-y-3 px-4 pb-4">
+          <ul className="flex w-full flex-wrap gap-2" aria-label={st('src.history.sources')}>
+            {(data?.provenance?.sources ?? []).map((s) => {
+              const def = sourceByIntegratedId(s.id);
+              return (
+                <li key={s.id}>
+                  <a href={def?.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground">
+                    <RadioTower className="h-3 w-3" aria-hidden />
+                    {def?.name ?? s.id} · {st(`src.status.${s.status}`)}
+                    <span className="sr-only"> ({st('src.newTab')})</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
       {/* Forecast changelog: source → refresh time → data → effect on skills */}
       <ChangelogCard st={st} fmt={fmt} compact onOpenSources={() => setView('signals')} />
+        </div>
+      </details>
 
       {/* Monthly email preview (simulated) */}
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>

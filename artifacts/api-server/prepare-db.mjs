@@ -1,19 +1,16 @@
+// Prepares the local SQLite cache folder (artifacts/api-server/db/).
+// The API creates its tables itself on first use (CREATE TABLE IF NOT EXISTS),
+// using Node's built-in node:sqlite: nothing is generated or downloaded, and
+// an existing skillcast.db is kept as it is.
 import { mkdirSync } from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const require = createRequire(import.meta.url);
-const directory = fileURLToPath(new URL("./db/", import.meta.url));
-mkdirSync(directory, { recursive: true });
-// Retain the imported SQLite store; do not repurpose the workspace's Postgres.
-execFileSync(process.execPath, [
-  require.resolve("prisma/build/index.js"),
-  "db", "push", "--skip-generate",
-  "--schema", fileURLToPath(new URL("./prisma/schema.prisma", import.meta.url)),
-], {
-  stdio: "inherit",
-  // path.join keeps one separator style on Windows (no mixed "\\/").
-  env: { ...process.env, SKILLCAST_SQLITE_URL: `file:${path.join(directory, "skillcast.db")}` },
-});
+const [major, minor] = process.versions.node.split(".").map(Number);
+if (major < 22 || (major === 22 && minor < 13)) {
+  console.error(
+    `SkillCast's API needs Node.js 22.13 or newer for its built-in SQLite (found ${process.versions.node}). Install Node 24 LTS.`,
+  );
+  process.exit(1);
+}
+
+mkdirSync(fileURLToPath(new URL("./db/", import.meta.url)), { recursive: true });

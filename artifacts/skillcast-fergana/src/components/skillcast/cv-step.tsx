@@ -210,7 +210,7 @@ export function CvStep({ onDone, showContinue = true, preserveProfile = false }:
                     key={s.slug}
                     className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm"
                   >
-                    <span className="truncate">{skillName(t, s.slug)}</span>
+                    <span className="min-w-0 leading-snug">{skillName(t, s.slug)}</span>
                     <span className="flex items-center gap-2">
                       {s.strongContext && (
                         <Badge variant="secondary" className="text-[10px]">{t('title context')}</Badge>
