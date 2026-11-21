@@ -255,16 +255,29 @@ with Ctrl+C and run `pnpm dev` again (the API is rebuilt on every start).
 
 ## Testing and verification
 
-| Command | Covers | Result (18 Nov 2026) |
+| Command | Covers | Result (21 Nov 2026) |
 | --- | --- | --- |
 | `pnpm run typecheck` | All packages | Pass |
-| `pnpm --filter @workspace/skillcast-fergana test` | Learner flow, uz/ru/en parity, experience, source-audit rules (Bun) | 62 / 62 |
+| `pnpm --filter @workspace/skillcast-fergana test` | Learner flow, uz/ru/en parity, experience, source-audit rules, weekly hours, skill progression, occupation search, badges, assistant intents, learning-resource honesty and ranking (Bun) | 78 / 78 |
 | `pnpm --filter @workspace/skillcast test` | Original SkillCast app | 47 / 47 |
 | `pnpm run test:api` | API SQLite store, incl. reading an old Prisma-made file | 4 / 4 |
 | `pnpm run test:dev` | `pnpm dev` helpers (disk, Node version, failure messages) | 5 / 5 |
 | `pnpm run build` | Production builds (set `PORT` and `BASE_PATH` as Replit does) | Pass |
 
-Also checked: no horizontal overflow at 360, 768 and 1280 px in all three languages (Playwright probe), and 0 axe WCAG 2.1 A/AA violations on 8 screens × uz/ru × light/dark.
+Also checked in a real browser (Playwright, Chrome):
+
+- No horizontal page overflow at 360, 768 and 1280 px on 11 screens in all three languages.
+- 0 axe WCAG 2.1 A/AA violations on 11 screens × uz/ru/en × light/dark, and in the badge, collection, export and premium dialogs.
+- End-to-end flows:
+  - occupation autocomplete (keyboard, mouse and "Other");
+  - the 168-hour picker;
+  - skill progression;
+  - badge reveal → collection → reload with no replay;
+  - assistant answers, follow-ups and AI fallback/retry;
+  - mocked Uzbek speech (Cyrillic transcript, unsupported language, no speech);
+  - resource ranking and format preference;
+  - PDF downloads in uz/ru/en (text extracted and pages rendered);
+  - the getting-started guide.
 
 ## Roadmap
 

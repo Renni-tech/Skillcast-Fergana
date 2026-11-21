@@ -345,7 +345,7 @@ export function EmployerView() {
             {` · ${t('emp.hr.sample.note', { n: team.length })}`}
           </CardDescription>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" tabIndex={0} role="region" aria-label={t('emp.gaps')}>
           <table className="w-full min-w-[720px] border-separate border-spacing-0.5 text-sm">
             <caption className="sr-only">{t('hr.signals.heatmap.levels')}</caption>
             <thead>

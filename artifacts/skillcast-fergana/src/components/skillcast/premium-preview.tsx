@@ -55,7 +55,7 @@ export function PremiumPreview() {
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle className="flex items-center gap-2 text-base"><Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden />{t('prem.title')}</CardTitle>
-          <Badge className="bg-amber-600 text-white hover:bg-amber-600">{t('prem.badge')}</Badge>
+          <Badge className="bg-amber-800 text-white hover:bg-amber-800">{t('prem.badge')}</Badge>
         </div>
         <CardDescription>{t('prem.lede')}</CardDescription>
       </CardHeader>
