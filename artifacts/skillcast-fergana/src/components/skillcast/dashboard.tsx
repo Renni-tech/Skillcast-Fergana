@@ -33,7 +33,7 @@ import { ChangelogCard, postingLine, StatusBadge } from './signalsview';
 import { sourceByIntegratedId } from '@/data/approved-sources';
 import { useSourceT } from '@/lib/signal-source-i18n';
 import { MatchesTab } from './matches';
-import { PathwayTab, pickCourses } from './pathway';
+import { PathwayTab, pickCourses, rolePathway } from './pathway';
 import { HaradaTab } from './harada';
 import { SdgTab } from './sdgview';
 import { DemandTab } from './demand';
@@ -135,7 +135,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
     if (!role) return null;
     const m = matches.find((x) => x.roleSlug === role.slug);
     if (!m) return null;
-    const node = pickCourses(m.gap, profile.inclusion, profile.budget)
+    const node = rolePathway(m, profile, completedCourses)
       .find((item) => !completedCourses.includes(item.courseSlug));
     return node ? COURSE_MAP[node.courseSlug] : null;
   }, [chosenRole, matches, profile.inclusion, profile.budget, completedCourses]);
@@ -273,6 +273,7 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
           <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
         </summary>
         <div className="space-y-3 px-4 pb-4">
+          <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t('save.local')}</p>
           <ul className="flex w-full flex-wrap gap-2" aria-label={st('src.history.sources')}>
             {(data?.provenance?.sources ?? []).map((s) => {
               const def = sourceByIntegratedId(s.id);

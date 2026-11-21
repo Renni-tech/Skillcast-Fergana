@@ -58,6 +58,9 @@ export function Landing() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </div>
+          {learnerOnboarded && (
+            <p className="mt-3 text-sm font-medium text-emerald-200" role="status">{t('welcome.back')} {t('welcome.continue')}.</p>
+          )}
           <p className="mt-6 text-xs tracking-wide text-blue-100/45">{t('Discover your strengths · Adapt to change · Achieve your next step')}</p>
         </div>
       </section>

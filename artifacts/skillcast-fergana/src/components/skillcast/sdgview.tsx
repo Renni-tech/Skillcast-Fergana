@@ -9,7 +9,7 @@ import { SKILL_MAP } from '@/data/skills';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { roleSdgMechanism, roleTitle, SdgBadge, skillName, SourceChip, useT } from './shared';
-import { pickCourses } from './pathway';
+import { pickCourses, rolePathway } from './pathway';
 import { ChoosePathwayEmpty } from './explainer';
 
 // ─── SDG tab: the ledger. Mechanisms, not decoration. ──────────────────────
@@ -20,7 +20,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
   const match = matches.find((item) => item.roleSlug === chosenRole);
   const courseCount = match
-    ? pickCourses(match.gap, profile.inclusion, profile.budget).filter((node) => completedCourses.includes(node.courseSlug)).length : 0;
+    ? rolePathway(match, profile, completedCourses).filter((node) => completedCourses.includes(node.courseSlug)).length : 0;
   const milestoneCount = (profile.completedRoadmapTasks ?? []).filter((key) => key.startsWith(`${chosenRole}:`)).length;
 
   const ledger = useMemo(() => {

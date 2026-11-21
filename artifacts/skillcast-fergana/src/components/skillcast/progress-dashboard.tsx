@@ -12,7 +12,7 @@ import { COURSE_MAP } from '@/data/courses';
 import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
-import { pickCourses } from './pathway';
+import { pickCourses, rolePathway } from './pathway';
 import { HARADA_TASK_COUNT } from './harada';
 import { courseProvider, courseTitle, roleTitle, skillName, useT } from './shared';
 
@@ -21,7 +21,7 @@ export function ProgressDashboard({ matches }: { matches: RoleMatch[] }) {
   const { profile, chosenRole, completedCourses, setProfile, setDashTab } = useSkillCast();
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
   const match = matches.find((item) => item.roleSlug === chosenRole) ?? null;
-  const roadmap = useMemo(() => match ? pickCourses(match.gap, profile.inclusion, profile.budget) : [], [match, profile.inclusion, profile.budget]);
+  const roadmap = useMemo(() => match ? rolePathway(match, profile, completedCourses) : [], [match, profile, completedCourses]);
   const completedRoadmap = roadmap.filter((item) => completedCourses.includes(item.courseSlug));
   const completedHours = completedRoadmap.reduce((sum, item) => sum + (COURSE_MAP[item.courseSlug]?.totalHours ?? 0), 0);
   const tasks = profile.completedRoadmapTasks ?? [];

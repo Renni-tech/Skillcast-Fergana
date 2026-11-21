@@ -18,7 +18,7 @@ import type { Lang } from '@/lib/types';
 import { usePanels } from '@/lib/ui-panels';
 import { buildSkillIndex, parseIntent, searchCatalogue, type Intent, type NavTarget } from '@/lib/voice-intents';
 import { computeWindRose } from '@/lib/wind-rose';
-import { pickCourses } from './pathway';
+import { pickCourses, rolePathway } from './pathway';
 import { courseProvider, courseTitle, roleTitle, skillCategory, skillName, useSignals, useT } from './shared';
 
 // ─── Voice assistant ───────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ export function VoiceAssistant() {
   function nextCourse() {
     const match = matches.find((m) => m.roleSlug === chosenRole);
     if (!match) return null;
-    const node = pickCourses(match.gap, profile.inclusion, profile.budget).find((n) => !completedCourses.includes(n.courseSlug));
+    const node = rolePathway(match, profile, completedCourses).find((n) => !completedCourses.includes(n.courseSlug));
     return node ? COURSE_MAP[node.courseSlug] : null;
   }
 

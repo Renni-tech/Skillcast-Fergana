@@ -23,6 +23,40 @@ export const QUALITY_COPY: Record<string, Copy> = {
     '{n} часов в неделю — больше, чем очная учёба. Мы сохраним ваш выбор, но построим план из расчёта {cap} часов в неделю, чтобы он был реалистичным и оставлял время на отдых.',
   ),
 
+  // Skill progression after a completed course
+  'prog.title': c('Nice work! Update your skill levels?', 'Barakalla! Ko‘nikma darajalaringizni yangilaymizmi?', 'Отлично! Обновить уровни навыков?'),
+  'prog.lede': c(
+    'You finished “{course}”. A completed course can raise each skill it teaches by one level, up to {cap}/5 for a {level} course. Untick anything you don’t feel ready for.',
+    '“{course}” kursini tugatdingiz. Tugallangan kurs o‘zi o‘rgatadigan har bir ko‘nikmani bir darajaga, {level} kurs uchun ko‘pi bilan {cap}/5 gacha oshirishi mumkin. Tayyor emasman deb hisoblaganingizni belgidan chiqaring.',
+    'Вы завершили «{course}». Пройденный курс может повысить каждый навык, которому он учит, на один уровень — до {cap}/5 для курса уровня «{level}». Снимите отметку, если не чувствуете уверенности.',
+  ),
+  'prog.level.beginner': c('beginner', 'boshlang‘ich', 'начальный'),
+  'prog.level.intermediate': c('intermediate', 'o‘rta', 'средний'),
+  'prog.level.advanced': c('advanced', 'yuqori', 'продвинутый'),
+  'prog.to': c('to', 'gacha', 'до'),
+  'prog.honest': c(
+    'Levels are your own estimate. Un-marking the course later undoes these changes.',
+    'Darajalar sizning shaxsiy bahoingiz. Keyinroq kurs belgisini olib tashlasangiz, bu o‘zgarishlar bekor qilinadi.',
+    'Уровни — ваша собственная оценка. Если позже снять отметку с курса, эти изменения отменятся.',
+  ),
+  'prog.confirm': c('Update my levels', 'Darajalarni yangilash', 'Обновить уровни'),
+  'prog.notNow': c('Not now', 'Hozir emas', 'Не сейчас'),
+  'prog.done.title': c('Your profile is updated. The Wind Rose, matches and next steps now use your new levels.', 'Profilingiz yangilandi. Shamol guli, mosliklar va keyingi qadamlar endi yangi darajalaringiz asosida.', 'Профиль обновлён. Роза ветров, подбор и следующие шаги теперь учитывают новые уровни.'),
+  'prog.done.fit': c('Fit for {role}: {before} → {after}', '{role} uchun moslik: {before} → {after}', 'Соответствие роли «{role}»: {before} → {after}'),
+
+  // Reset and returning users
+  'reset.title': c('Reset all your SkillCast data?', 'SkillCast’dagi barcha ma’lumotlaringiz o‘chirilsinmi?', 'Сбросить все ваши данные SkillCast?'),
+  'reset.body': c(
+    'This deletes your profile, skills, chosen pathway, completed courses, badges and roadmap progress from this browser. It cannot be undone.',
+    'Bu profilingiz, ko‘nikmalaringiz, tanlangan yo‘nalish, tugallangan kurslar, nishonlar va yo‘l xaritasi jarayonini ushbu brauzerdan o‘chiradi. Buni qaytarib bo‘lmaydi.',
+    'Будут удалены профиль, навыки, выбранная траектория, пройденные курсы, значки и прогресс дорожной карты в этом браузере. Отменить нельзя.',
+  ),
+  'reset.confirm': c('Yes, reset', 'Ha, o‘chirish', 'Да, сбросить'),
+  'reset.cancel': c('Keep my data', 'Ma’lumotlarni saqlash', 'Оставить данные'),
+  'save.local': c('Saved automatically in this browser on this device. Nothing is uploaded; there is no cloud sync.', 'Ushbu qurilmadagi brauzerda avtomatik saqlanadi. Hech narsa yuklanmaydi, bulutli sinxronlash yo‘q.', 'Сохраняется автоматически в этом браузере на этом устройстве. Ничего не загружается, облачной синхронизации нет.'),
+  'welcome.back': c('Welcome back! Your plan is saved.', 'Xush kelibsiz! Rejangiz saqlangan.', 'С возвращением! Ваш план сохранён.'),
+  'welcome.continue': c('Continue where you left off', 'Qolgan joyingizdan davom eting', 'Продолжить с того места, где остановились'),
+
   // Empty states that name the real tab, with a button to it
   'empty.choosePath': c(
     'Choose a pathway in “{tab}” first. This view then fills in for that pathway.',

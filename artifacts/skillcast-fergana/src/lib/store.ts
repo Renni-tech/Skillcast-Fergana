@@ -1,5 +1,6 @@
 'use client';
 
+import { applyUpdates, revertUpdates, type ProposedUpdate, type SkillUpdate } from './progression';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
@@ -59,6 +60,13 @@ interface SkillCastState {
   institution: InstitutionProfile;
   chosenRole: string | null;
   completedCourses: string[];
+  /** Logged skill-level changes from completed courses (see lib/progression). */
+  skillUpdates: SkillUpdate[];
+  /** Assistant reads answers aloud (where the browser has a voice). */
+  assistantSpeak: boolean;
+  setAssistantSpeak: (on: boolean) => void;
+  /** Applies user-confirmed level changes for a completed course. */
+  confirmSkillUpdates: (courseSlug: string, chosen: ProposedUpdate[]) => SkillUpdate[];
   haradaTaskStatus: Record<string, HaradaTaskStatus>;
   onboarded: boolean;
   learnerOnboarded: boolean;
@@ -106,7 +114,7 @@ export const EMPTY_INSTITUTION: InstitutionProfile = {
 
 export const useSkillCast = create<SkillCastState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       lang: 'uz',
       view: 'landing',
       userType: null,
@@ -178,11 +186,31 @@ export const useSkillCast = create<SkillCastState>()(
         set({ chosenRole: slug }),
 
       toggleCourse: (slug) =>
-        set((st) => ({
-          completedCourses: st.completedCourses.includes(slug)
-            ? st.completedCourses.filter((c) => c !== slug)
-            : [...st.completedCourses, slug],
-        })),
+        set((st) => {
+          if (!st.completedCourses.includes(slug)) {
+            return { completedCourses: [...st.completedCourses, slug] };
+          }
+          // Un-marking a course reverts the skill levels it raised.
+          const reverted = revertUpdates(slug, st.skillUpdates, st.profile.skills);
+          return {
+            completedCourses: st.completedCourses.filter((c) => c !== slug),
+            skillUpdates: reverted.log,
+            profile: { ...st.profile, skills: reverted.skills },
+          };
+        }),
+
+      skillUpdates: [],
+      assistantSpeak: true,
+      setAssistantSpeak: (on) => set({ assistantSpeak: on }),
+      confirmSkillUpdates: (courseSlug, chosen) => {
+        const st = get();
+        const applied = applyUpdates(courseSlug, chosen, st.profile.skills);
+        set({
+          profile: { ...st.profile, skills: applied.skills },
+          skillUpdates: [...st.skillUpdates.filter((e) => e.courseSlug !== courseSlug), ...applied.log],
+        });
+        return applied.log;
+      },
 
       setHaradaTaskStatus: (taskId, status) =>
         set((st) => ({
@@ -204,6 +232,7 @@ export const useSkillCast = create<SkillCastState>()(
           institution: EMPTY_INSTITUTION,
           chosenRole: null,
           completedCourses: [],
+          skillUpdates: [],
           haradaTaskStatus: {},
           onboarded: false,
           learnerOnboarded: false,
@@ -223,6 +252,9 @@ export const useSkillCast = create<SkillCastState>()(
         institution: s.institution,
         chosenRole: s.chosenRole,
         completedCourses: s.completedCourses,
+        skillUpdates: s.skillUpdates,
+        assistantSpeak: s.assistantSpeak,
+        dashTab: s.dashTab,
         haradaTaskStatus: s.haradaTaskStatus,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
@@ -247,6 +279,12 @@ export const useSkillCast = create<SkillCastState>()(
           institution: { ...EMPTY_INSTITUTION, ...(saved.institution && typeof saved.institution === 'object' ? saved.institution : {}) },
           chosenRole: typeof saved.chosenRole === 'string' && ROLE_MAP[saved.chosenRole] ? saved.chosenRole : null,
           completedCourses: strings(saved.completedCourses),
+          skillUpdates: Array.isArray(saved.skillUpdates)
+            ? (saved.skillUpdates as unknown[]).filter((u): u is SkillUpdate => !!u && typeof u === 'object'
+              && typeof (u as SkillUpdate).courseSlug === 'string' && typeof (u as SkillUpdate).skill === 'string'
+              && Number.isFinite((u as SkillUpdate).from) && Number.isFinite((u as SkillUpdate).to)) : [],
+          assistantSpeak: saved.assistantSpeak !== false,
+          dashTab: typeof saved.dashTab === 'string' ? saved.dashTab as typeof current.dashTab : 'overview',
           haradaTaskStatus: saved.haradaTaskStatus && typeof saved.haradaTaskStatus === 'object'
             ? Object.fromEntries(Object.entries(saved.haradaTaskStatus).filter(([, status]) => ['todo', 'in_progress', 'done'].includes(String(status)))) as Record<string, HaradaTaskStatus> : {},
           onboarded: saved.onboarded === true,

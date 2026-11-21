@@ -111,3 +111,48 @@ describe('weekly study availability (1–168 h)', () => {
     }
   });
 });
+
+describe('skill progression from completed courses', () => {
+  test('proposes +1 per taught skill, capped by course depth, and never above it', async () => {
+    const { proposeUpdates, LEVEL_CAP } = await import('../src/lib/progression');
+    const { COURSE_MAP } = await import('../src/data/courses');
+    const course = Object.values(COURSE_MAP).find((c) => c.level === 'beginner' && c.skills.length > 0)!;
+    const s = course.skills[0];
+    expect(proposeUpdates(course.slug, { [s]: 1 })).toContainEqual({ skill: s, from: 1, to: 2 });
+    expect(proposeUpdates(course.slug, {}).find((u) => u.skill === s)).toEqual({ skill: s, from: 0, to: 1 });
+    expect(proposeUpdates(course.slug, { [s]: LEVEL_CAP.beginner }).find((u) => u.skill === s)).toBeUndefined();
+    expect(proposeUpdates('no-such-course', {})).toEqual([]);
+  });
+
+  test('confirmed updates apply, recompute matches, and un-marking reverts them', async () => {
+    const { useSkillCast } = await import('../src/lib/store');
+    const { matchAll } = await import('../src/lib/matching');
+    const { proposeUpdates } = await import('../src/lib/progression');
+    const st = useSkillCast.getState();
+    st.resetDemo();
+    st.setProfile({ persona: 'working-adult', years: 5, interests: ['technology'], skills: { 'data-analysis': 2, python: 1 } });
+    const before = matchAll(useSkillCast.getState().profile, {}).find((m) => m.roleSlug === 'data-analyst')!.score;
+    useSkillCast.getState().toggleCourse('kaggle-pandas');
+    const proposals = proposeUpdates('kaggle-pandas', useSkillCast.getState().profile.skills);
+    expect(proposals.length).toBeGreaterThan(0);
+    const log = useSkillCast.getState().confirmSkillUpdates('kaggle-pandas', proposals);
+    expect(log.length).toBe(proposals.length);
+    const raised = useSkillCast.getState().profile.skills;
+    for (const u of proposals) expect(raised[u.skill]).toBe(u.to);
+    const after = matchAll(useSkillCast.getState().profile, {}).find((m) => m.roleSlug === 'data-analyst')!.score;
+    expect(after).toBeGreaterThanOrEqual(before);
+    useSkillCast.getState().toggleCourse('kaggle-pandas'); // un-mark
+    expect(useSkillCast.getState().completedCourses).not.toContain('kaggle-pandas');
+    expect(useSkillCast.getState().profile.skills).toEqual({ 'data-analysis': 2, python: 1 });
+    expect(useSkillCast.getState().skillUpdates).toEqual([]);
+  });
+
+  test('a completed course stays on the path after its gap closes', async () => {
+    const { rolePathway } = await import('../src/components/skillcast/pathway');
+    const { matchAll } = await import('../src/lib/matching');
+    const { normalizeProfile } = await import('../src/lib/profile');
+    const p = normalizeProfile({ persona: 'working-adult', years: 5, interests: ['technology'], skills: { 'data-analysis': 5, python: 5 } });
+    const m = matchAll(p, {}).find((x) => x.roleSlug === 'data-analyst')!;
+    expect(rolePathway(m, p, ['kaggle-pandas']).map((n) => n.courseSlug)).toContain('kaggle-pandas');
+  });
+});

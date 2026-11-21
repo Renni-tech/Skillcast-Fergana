@@ -1,7 +1,7 @@
 'use client';
 
 import { planningHours } from '@/lib/profile';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Award, BadgeCheck, BookOpen, Check, Clock, ExternalLink, Flag, Lock, Sparkles, Trophy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,9 @@ import { useSkillCast } from '@/lib/store';
 import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, useSignals, useT } from './shared';
 import { LearningSources } from './learning-sources';
 import { ChoosePathwayEmpty } from './explainer';
+import { SkillUpdateBanner, SkillUpdateDialog } from './skill-progress';
+import { toast } from '@/hooks/use-toast';
+import { proposeUpdates, type ProposedUpdate, type SkillUpdate } from '@/lib/progression';
 
 // ─── Pathway tab: step-by-step tracked roadmap from the curated registry ───
 // Courses are picked deterministically: gap priority (weight × momentum),
@@ -30,11 +33,25 @@ export interface PathwayNode {
 const AI_SLUGS = new Set(['prompt-engineering', 'ai-agents', 'ai-augmented-ops', 'machine-learning', 'ai-content-ops', 'responsible-ai', 'mlops']);
 const GREEN_SLUGS = new Set(['renewable-energy', 'energy-efficiency', 'ev-mobility', 'climate-data', 'smart-agriculture']);
 
-export function pickCourses(gap: RoleMatch['gap'], inclusion: { dyslexia: boolean; visual: boolean; hearing: boolean }, weeklyBudget = 5) {
+export function pickCourses(
+  gap: RoleMatch['gap'], inclusion: { dyslexia: boolean; visual: boolean; hearing: boolean }, weeklyBudget = 5,
+  keep: { completed: string[]; roleSkills: string[] } = { completed: [], roleSkills: [] },
+) {
   const covered = new Set<string>();
   const picked: PathwayNode[] = [];
   let hours = 0;
   const budget = planningHours(weeklyBudget);
+
+  // Completed courses for this pathway stay on it, even once the gap they
+  // closed is gone, so finished steps and their badges never disappear.
+  const roleSkills = new Set(keep.roleSkills);
+  for (const slug of keep.completed) {
+    const c = COURSE_MAP[slug];
+    const skill = c?.skills.find((s) => roleSkills.has(s));
+    if (!c || !skill || picked.some((p) => p.courseSlug === slug)) continue;
+    picked.push({ courseSlug: slug, skill, startWeek: 1, weeks: Math.max(1, Math.ceil(c.totalHours / budget)) });
+    c.skills.forEach((s) => covered.add(s));
+  }
 
   for (const g of gap) {
     if (covered.has(g.skill)) continue;
@@ -64,9 +81,28 @@ export function pickCourses(gap: RoleMatch['gap'], inclusion: { dyslexia: boolea
   return picked;
 }
 
+/** The learner's path for a matched role: completed steps kept, remaining gaps filled. */
+export function rolePathway(
+  match: RoleMatch, profile: { inclusion: { dyslexia: boolean; visual: boolean; hearing: boolean }; budget: number }, completed: string[],
+) {
+  const roleSkills = ROLE_MAP[match.roleSlug]?.skills.map((s) => s.skill) ?? [];
+  return pickCourses(match.gap, profile.inclusion, profile.budget, { completed, roleSkills });
+}
+
 export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const t = useT();
-  const { chosenRole, profile, completedCourses, toggleCourse, setDashTab } = useSkillCast();
+  const { chosenRole, profile, completedCourses, toggleCourse, setDashTab, confirmSkillUpdates } = useSkillCast();
+  const [pending, setPending] = useState<{ slug: string; proposals: ProposedUpdate[] } | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<{ log: SkillUpdate[]; before: number } | null>(null);
+  const markCourse = (slug: string) => {
+    const finishing = !completedCourses.includes(slug);
+    toggleCourse(slug);
+    setLastUpdate(null);
+    if (finishing) {
+      const proposals = proposeUpdates(slug, profile.skills);
+      if (proposals.length > 0) setPending({ slug, proposals });
+    }
+  };
   const { momentumMap } = useSignals();
 
   const match = useMemo(
@@ -76,8 +112,8 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const role = chosenRole ? ROLE_MAP[chosenRole] : null;
 
   const nodes = useMemo(
-    () => (match ? pickCourses(match.gap, profile.inclusion, profile.budget) : []),
-    [match, profile.inclusion, profile.budget],
+    () => (match ? rolePathway(match, profile, completedCourses) : []),
+    [match, profile, completedCourses],
   );
 
   const badges = useMemo(() => {
@@ -152,6 +188,23 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
       </Card>
 
       {/* Progress + badges: motivating, never colour-only (icon + text state) */}
+      {lastUpdate && (
+        <SkillUpdateBanner log={lastUpdate.log} before={lastUpdate.before} after={match.score}
+          roleLabel={roleTitle(t, role.slug)} onDismiss={() => setLastUpdate(null)} />
+      )}
+      <SkillUpdateDialog courseSlug={pending?.slug ?? null} proposals={pending?.proposals ?? []}
+        onClose={() => setPending(null)}
+        onConfirm={(chosen) => {
+          if (!pending) return;
+          const before = match.score;
+          const log = confirmSkillUpdates(pending.slug, chosen);
+          setPending(null);
+          setLastUpdate({ log, before });
+          toast({
+            title: t('prog.done.title'),
+            description: log.map((u) => `${skillName(t, u.skill)} ${u.from}→${u.to}`).join(' · '),
+          });
+        }} />
       <BadgeShelf badges={badges} done={doneCount} total={nodes.length} />
       {inclusionNeeds.length > 0 && (
         <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
@@ -233,7 +286,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                           <Button
                             size="sm"
                             variant={done ? 'secondary' : 'outline'}
-                            onClick={() => toggleCourse(n.courseSlug)}
+                            onClick={() => markCourse(n.courseSlug)}
                             className="h-7 gap-1 text-xs"
                           >
                             {!done && <Check className="h-3 w-3" aria-hidden />}

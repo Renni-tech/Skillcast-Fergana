@@ -1,6 +1,10 @@
 'use client';
 
-import { useEffect, useSyncExternalStore } from 'react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
 import { CloudSun, Languages, Moon, RotateCcw, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,6 +41,7 @@ export function Header() {
   const t = useT();
   const { view, setView, lang, setLang, learnerOnboarded, setUserType, resetDemo } = useSkillCast();
   const { theme, setTheme } = useTheme();
+  const [confirmReset, setConfirmReset] = useState(false);
   const mounted = useMounted();
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const landing = view === 'landing';
@@ -144,9 +149,21 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => resetDemo()}>{t('nav.reset')}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setConfirmReset(true)}>{t('nav.reset')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('reset.title')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('reset.body')}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('reset.cancel')}</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-700 text-white hover:bg-red-800" onClick={() => resetDemo()}>{t('reset.confirm')}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </header>
