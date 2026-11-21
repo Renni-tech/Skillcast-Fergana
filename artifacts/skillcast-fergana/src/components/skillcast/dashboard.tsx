@@ -40,6 +40,7 @@ import { DemandTab } from './demand';
 import { FutureRadarStep } from './onboarding';
 import { ProgressDashboard } from './progress-dashboard';
 import { WindRose } from './wind-rose';
+import { ExportShareButton } from './export-share';
 
 const EMPLOYMENT_STATUS_LABELS = {
   student: 'Student',
@@ -63,9 +64,12 @@ export function Dashboard() {
           <h1 className="text-2xl font-bold tracking-tight">{t('dash.hello')}</h1>
           <p className="text-sm text-muted-foreground">{t('scenario.note')}</p>
         </div>
-        <Button variant="outline" onClick={() => { setUserType('individual'); setView('onboarding'); }}>
-          {t('flow.edit')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <ExportShareButton />
+          <Button variant="outline" onClick={() => { setUserType('individual'); setView('onboarding'); }}>
+            {t('flow.edit')}
+          </Button>
+        </div>
       </div>
 
       <Tabs value={dashTab} onValueChange={setDashTab} className="mt-4">

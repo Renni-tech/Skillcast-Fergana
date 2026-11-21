@@ -76,6 +76,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "jspdf": "^3.0.4",
     "uuid": "^14.0.3",
     "zustand": "^5.1.0"
   }
