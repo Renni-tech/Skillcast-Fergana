@@ -9,6 +9,20 @@ type Copy = { en: string; uz: string; ru: string };
 const c = (en: string, uz: string, ru: string): Copy => ({ en, uz, ru });
 
 export const QUALITY_COPY: Record<string, Copy> = {
+  // Weekly study availability (1–168 h)
+  'onb.budget.q': c('How many hours per week can you dedicate to learning?', 'Haftasiga o‘qishga necha soat ajrata olasiz?', 'Сколько часов в неделю вы можете уделять учёбе?'),
+  'onb.budget.hint': c(
+    'Count your free time for learning across the whole week (up to 168 hours, the full week). Your plan’s timeline is based on it.',
+    'O‘qish uchun butun hafta davomidagi bo‘sh vaqtingizni hisoblang (168 soatgacha, ya’ni to‘liq hafta). Rejangiz muddati shunga qarab tuziladi.',
+    'Посчитайте свободное для учёбы время за всю неделю (до 168 часов, то есть вся неделя). По нему строятся сроки плана.',
+  ),
+  'onb.budget.presets': c('Quick choices', 'Tezkor tanlov', 'Быстрый выбор'),
+  'onb.budget.high': c(
+    '{n} hours a week is more than full-time study. We keep your selection, but pace your plan at {cap} hours a week so it stays realistic and leaves time for rest.',
+    'Haftasiga {n} soat to‘liq kunlik o‘qishdan ko‘p. Tanlovingiz saqlanadi, lekin reja real va dam olishga vaqt qolishi uchun haftasiga {cap} soat hisobida tuziladi.',
+    '{n} часов в неделю — больше, чем очная учёба. Мы сохраним ваш выбор, но построим план из расчёта {cap} часов в неделю, чтобы он был реалистичным и оставлял время на отдых.',
+  ),
+
   // Empty states that name the real tab, with a button to it
   'empty.choosePath': c(
     'Choose a pathway in “{tab}” first. This view then fills in for that pathway.',

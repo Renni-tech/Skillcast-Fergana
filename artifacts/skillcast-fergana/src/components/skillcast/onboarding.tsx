@@ -5,7 +5,7 @@ import {
   ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Briefcase, Building2, CalendarClock, Check, ClipboardList,
   ClipboardCheck, FileArchive, Gauge, Globe, GraduationCap, LayoutTemplate, MapPin,
   Link as LinkIcon, ListChecks, Laptop, Rocket, ScanSearch, ShieldCheck, Sparkles, Target, Upload,
-  User, Wallet, Clock3, Home, VolumeX, FileText, Accessibility, MessageSquareText, Radar, Search, Plus, X, SlidersHorizontal,
+  User, Wallet, Clock3, Home, VolumeX, FileText, Accessibility, MessageSquareText, Radar, Search, Plus, X, SlidersHorizontal, Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ import { FIELDS_OF_STUDY } from '@/data/institution';
 import { INTERESTS, PERSONAS, useSkillCast } from '@/lib/store';
 import { LANGS } from '@/lib/i18n';
 import { matchAll } from '@/lib/matching';
+import { MAX_WEEKLY_HOURS, PLAN_PACE_CAP } from '@/lib/profile';
 import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualProfileDetails } from '@/lib/types';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
@@ -167,9 +168,9 @@ function OnboardingShell({
           <CardContent className="space-y-6">{children}</CardContent>
         </Card>
 
-        <div className={`mt-4 flex items-center justify-between ${light ? 'lg:col-start-2' : ''}`}>
+        <div className={`mt-4 flex flex-wrap items-center justify-between gap-2 ${light ? 'lg:col-start-2' : ''}`}>
           {onSkip && (
-            <Button variant="ghost" onClick={onSkip} className="text-slate-600 hover:text-blue-800">
+            <Button variant="ghost" onClick={onSkip} className="order-3 w-full text-slate-600 hover:text-blue-800 sm:order-none sm:w-auto">
               {t('Skip for now')}
             </Button>
           )}
@@ -180,12 +181,12 @@ function OnboardingShell({
             <Button
               onClick={onNext}
               disabled={nextDisabled}
-              className={`gap-1 ${light ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}
+              className={`ml-auto gap-1 ${light ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}
             >
               {t(nextLabel)} <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
-            <Button onClick={finish} className={`gap-2 ${light ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}>
+            <Button onClick={finish} className={`ml-auto gap-2 ${light ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}>
               <Rocket className="h-4 w-4" aria-hidden /> {t('onb.finish')}
             </Button>
           )}
@@ -244,7 +245,7 @@ function IndividualOnboarding() {
   const canNext = useMemo(() => {
     switch (step) {
       case 2: return Boolean(details.employmentStatus && yearsValid);
-      case 3: return profile.interests.length > 0 && profile.budget >= 1 && profile.budget <= 25;
+      case 3: return profile.interests.length > 0 && profile.budget >= 1 && profile.budget <= MAX_WEEKLY_HOURS;
       case 5:
         if (details.careerStrategy === 'enhance') return Boolean(details.strategyRole && details.focusSkill);
         if (details.careerStrategy === 'related-transition') return Boolean(details.strategyRole);
@@ -1468,24 +1469,7 @@ function StepInterests() {
         ))}
       </div>
       <div>
-        <Label htmlFor="budget">
-          {t('onb.budget.q')}{' '}
-          <span className="font-semibold text-foreground">
-            {profile.budget} {t('common.hrsweek')}
-          </span>
-        </Label>
-        <Slider
-          id="budget"
-          min={1}
-          max={25}
-          step={1}
-          value={[profile.budget]}
-          onValueChange={([v]) => setProfile({ budget: v })}
-          className="mt-2"
-        />
-        <p className="mt-2 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-          {t('onb.budget.hint')}
-        </p>
+        <WeeklyHoursPicker value={profile.budget} onChange={(v) => setProfile({ budget: v })} />
       </div>
     </div>
   );
@@ -1668,6 +1652,44 @@ function StepInclusion() {
           {t('harada.method')}
         </Badge>
       </div>
+    </div>
+  );
+}
+
+/** Weekly study availability, 1–168 h: slider, presets and an exact number. */
+export function WeeklyHoursPicker({ value, onChange }: { value: number; onChange: (hours: number) => void }) {
+  const t = useT();
+  const set = (n: number) => onChange(Math.min(MAX_WEEKLY_HOURS, Math.max(1, Math.round(n) || 1)));
+  const presets = [5, 10, 20, 40, 80, 120, 168];
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <Label htmlFor="budget-number">{t('onb.budget.q')}</Label>
+        <span className="flex items-center gap-1.5">
+          <Input id="budget-number" type="number" inputMode="numeric" min={1} max={MAX_WEEKLY_HOURS} step={1}
+            value={value} onChange={(e) => set(Number(e.target.value))}
+            className="h-9 w-20 text-right font-semibold tabular-nums" aria-describedby="budget-help" />
+          <span className="text-sm text-muted-foreground">{t('common.hrsweek')}</span>
+        </span>
+      </div>
+      <Slider id="budget" min={1} max={MAX_WEEKLY_HOURS} step={1} value={[value]}
+        onValueChange={([v]) => set(v)} aria-label={t('onb.budget.q')} />
+      <div className="flex justify-between text-[11px] text-muted-foreground" aria-hidden><span>1</span><span>84</span><span>{MAX_WEEKLY_HOURS}</span></div>
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('onb.budget.presets')}>
+        {presets.map((n) => (
+          <button key={n} type="button" onClick={() => set(n)} aria-pressed={value === n}
+            className={`min-h-8 rounded-full border px-3 text-xs font-medium tabular-nums transition-colors ${value === n ? 'border-blue-600 bg-blue-600 text-white' : 'hover:border-blue-400'}`}>
+            {n} {t('common.hrsweek')}
+          </button>
+        ))}
+      </div>
+      <p id="budget-help" className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">{t('onb.budget.hint')}</p>
+      {value > PLAN_PACE_CAP && (
+        <p role="status" className="flex items-start gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-200">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+          <span>{t('onb.budget.high', { n: value, cap: PLAN_PACE_CAP })}</span>
+        </p>
+      )}
     </div>
   );
 }

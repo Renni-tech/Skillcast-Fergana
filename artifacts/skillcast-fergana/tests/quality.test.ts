@@ -78,3 +78,36 @@ describe('quality copy', () => {
     expect(makeT('ru')('nb.msg.some', { name: 'X' })).toContain('X');
   });
 });
+
+describe('weekly study availability (1–168 h)', () => {
+  test('profiles accept the whole week and clamp beyond it', async () => {
+    const { normalizeProfile, MAX_WEEKLY_HOURS } = await import('../src/lib/profile');
+    expect(MAX_WEEKLY_HOURS).toBe(168);
+    for (const h of [150, 160, 168]) expect(normalizeProfile({ budget: h }).budget).toBe(h);
+    expect(normalizeProfile({ budget: 500 }).budget).toBe(168);
+    expect(normalizeProfile({ budget: 0 }).budget).toBe(1);
+  });
+
+  test('plans are paced realistically: at most 40 h a week, otherwise the user’s hours', async () => {
+    const { planningHours, PLAN_PACE_CAP } = await import('../src/lib/profile');
+    expect(planningHours(8)).toBe(8);
+    expect(planningHours(40)).toBe(40);
+    expect(planningHours(168)).toBe(PLAN_PACE_CAP);
+    const { pickCourses } = await import('../src/components/skillcast/pathway');
+    const { matchAll } = await import('../src/lib/matching');
+    const { normalizeProfile } = await import('../src/lib/profile');
+    const p = normalizeProfile({ persona: 'working-adult', years: 5, interests: ['technology'], skills: { python: 1, 'data-analysis': 2 } });
+    const gap = matchAll(p, {}).find((m) => pickCourses(m.gap, p.inclusion, 8).length > 1)!.gap;
+    const weeks = (h: number) => pickCourses(gap, p.inclusion, h).map((n) => n.weeks);
+    expect(weeks(168)).toEqual(weeks(40));
+    expect(weeks(5).reduce((a, b) => a + b, 0)).toBeGreaterThan(weeks(40).reduce((a, b) => a + b, 0));
+  });
+
+  test('copy explains the weekly scope and the high-value note in all languages', () => {
+    for (const lang of LANGS) {
+      const t = makeT(lang);
+      expect(t('onb.budget.hint')).toContain('168');
+      expect(t('onb.budget.high', { n: 160, cap: 40 })).toContain('160');
+    }
+  });
+});

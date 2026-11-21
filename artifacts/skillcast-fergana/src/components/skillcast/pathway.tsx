@@ -1,5 +1,6 @@
 'use client';
 
+import { planningHours } from '@/lib/profile';
 import { useMemo } from 'react';
 import { Award, BadgeCheck, BookOpen, Check, Clock, ExternalLink, Flag, Lock, Sparkles, Trophy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +34,7 @@ export function pickCourses(gap: RoleMatch['gap'], inclusion: { dyslexia: boolea
   const covered = new Set<string>();
   const picked: PathwayNode[] = [];
   let hours = 0;
-  const budget = Math.max(1, weeklyBudget || 5);
+  const budget = planningHours(weeklyBudget);
 
   for (const g of gap) {
     if (covered.has(g.skill)) continue;
@@ -113,7 +114,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </div>
         <Badge variant="outline" className="gap-1.5">
           <Clock className="h-3.5 w-3.5" aria-hidden />
-          {doneCount}/{nodes.length} · {Math.max(0, Math.ceil(nodes.reduce((hours, node) => hours + COURSE_MAP[node.courseSlug].totalHours, 0) / profile.budget))} {t('pw.weeks')}
+          {doneCount}/{nodes.length} · {Math.max(0, Math.ceil(nodes.reduce((hours, node) => hours + COURSE_MAP[node.courseSlug].totalHours, 0) / planningHours(profile.budget)))} {t('pw.weeks')}
         </Badge>
       </div>
 

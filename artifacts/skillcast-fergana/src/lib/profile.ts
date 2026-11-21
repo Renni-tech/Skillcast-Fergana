@@ -60,6 +60,19 @@ function stringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
 
+/** Weekly study availability: the whole week can be selected (7 × 24 = 168 h). */
+export const MAX_WEEKLY_HOURS = 168;
+/**
+ * Plans are paced at no more than full-time study, however much time is
+ * available. Above this the user sees a note; the selection itself is kept.
+ */
+export const PLAN_PACE_CAP = 40;
+/** Hours per week a learning plan is paced at. */
+export function planningHours(weeklyHours: number): number {
+  const h = Number.isFinite(weeklyHours) && weeklyHours > 0 ? weeklyHours : EMPTY_PROFILE.budget;
+  return Math.min(Math.max(1, h), PLAN_PACE_CAP);
+}
+
 function boundedNumber(value: unknown, fallback: number, min: number, max: number): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
   return Math.min(max, Math.max(min, value));
@@ -122,7 +135,7 @@ export function normalizeProfile(value: unknown): Profile {
     persona: PERSONAS.includes(source.persona as Persona) ? source.persona as Persona : null,
     years: boundedNumber(source.years, 0, 0, 60),
     interests: stringArray(source.interests),
-    budget: boundedNumber(source.budget, EMPTY_PROFILE.budget, 1, 25),
+    budget: Math.round(boundedNumber(source.budget, EMPTY_PROFILE.budget, 1, MAX_WEEKLY_HOURS)),
     skills,
     inclusion,
     objective: stringValue(source.objective),
