@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LANGS } from '@/lib/i18n';
 import { A11yButton } from './a11y';
+import { CollectionButton } from './achievements';
 import { useSkillCast, type View } from '@/lib/store';
 import { useT } from './shared';
 import {
@@ -98,6 +99,7 @@ export function Header() {
         </nav>
 
         <div className="order-2 ml-auto flex items-center gap-2 sm:order-3">
+          {mounted && <CollectionButton landing={landing} />}
           <A11yButton landing={landing} />
           <TooltipProvider>
             <Tooltip>

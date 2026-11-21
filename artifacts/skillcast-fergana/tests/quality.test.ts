@@ -198,3 +198,74 @@ describe('occupation taxonomy and autocomplete', () => {
     expect(normalizeProfile({ extended: { professionId: 'made-up' } }).extended.professionId).toBe('');
   });
 });
+
+describe('badge rewards', () => {
+  const base = {
+    onboarded: true, ratedSkills: 0, chosenRole: false, readiness: 0, coursesDone: 0, aiCoursesDone: 0, greenCoursesDone: 0,
+    activeDays: 0, levelUps: 0, milestones: 0, pathway: { done: 0, total: 0 }, roleMilestones: { done: 0, total: 0 },
+  };
+
+  test('badges come from real progress, in tier order', async () => {
+    const { eligibleBadges, ALL_BADGES } = await import('../src/lib/achievements');
+    expect(ALL_BADGES.length).toBe(24);
+    expect(eligibleBadges({ ...base, onboarded: false })).toEqual([]);
+    expect(eligibleBadges(base)).toEqual(['first-steps:bronze']);
+    const some = eligibleBadges({ ...base, ratedSkills: 6, chosenRole: true, readiness: 70, coursesDone: 3, aiCoursesDone: 1, levelUps: 5, activeDays: 2, pathway: { done: 3, total: 5 } });
+    expect(some).toContain('first-steps:gold');
+    expect(some).toContain('career-explorer:silver');
+    expect(some).not.toContain('career-explorer:gold');
+    expect(some).toContain('knowledge-seeker:silver');
+    expect(some).toContain('skill-builder:silver');
+    expect(some).toContain('curious-mind:bronze');
+    expect(some).not.toContain('curious-mind:silver');
+    expect(some).toContain('future-ready:bronze');
+    expect(some).not.toContain('future-ready:silver');
+    // A finished pathway alone is not enough without real skill growth.
+    expect(eligibleBadges({ ...base, chosenRole: true, readiness: 42, pathway: { done: 1, total: 1 } })).not.toContain('future-ready:silver');
+    expect(eligibleBadges({ ...base, chosenRole: true, readiness: 72, pathway: { done: 1, total: 1 } })).toContain('future-ready:silver');
+    // An empty pathway never counts as "half done".
+    expect(eligibleBadges({ ...base, pathway: { done: 0, total: 0 } })).not.toContain('future-ready:bronze');
+  });
+
+  test('rewards: titles, themes, completed sets and milestones', async () => {
+    const { rewardsFor, titleFor, WIND_ROSE_THEMES } = await import('../src/lib/achievements');
+    expect(titleFor(0).current).toBe('newcomer');
+    expect(titleFor(3).current).toBe('explorer');
+    expect(rewardsFor('first-steps:gold', ['first-steps:bronze', 'first-steps:silver'])).toMatchObject({ set: 'first-steps', title: 'explorer', theme: 'saffron' });
+    expect(WIND_ROSE_THEMES.silk.unlock(['a', 'b', 'c', 'd'])).toBe(false);
+    expect(rewardsFor('x:bronze', ['1', '2', '3', '4', '5']).milestone).toBe(25);
+  });
+
+  test('earned badges and seen reveals persist; reset clears them', async () => {
+    const { useSkillCast } = await import('../src/lib/store');
+    const st = useSkillCast.getState();
+    st.resetDemo();
+    st.awardBadges(['first-steps:bronze', 'not-a-badge']);
+    st.markBadgesSeen(['first-steps:bronze']);
+    const firstAt = useSkillCast.getState().badges['first-steps:bronze'];
+    st.awardBadges(['first-steps:bronze']);
+    expect(useSkillCast.getState().badges['first-steps:bronze']).toBe(firstAt);
+    const saved = JSON.parse(localStorage.getItem('skillcast-poc')!).state;
+    const merged = useSkillCast.persist.getOptions().merge!(saved, useSkillCast.getState());
+    expect(Object.keys(merged.badges)).toEqual(['first-steps:bronze']);
+    expect(merged.badgesSeen).toEqual(['first-steps:bronze']);
+    expect(merged.badgeSound).toBe(false);
+    st.toggleCourse('python-for-data');
+    expect(useSkillCast.getState().activeDays.length).toBe(1);
+    st.resetDemo();
+    expect(useSkillCast.getState().badges).toEqual({});
+    expect(useSkillCast.getState().activeDays).toEqual([]);
+  });
+
+  test('every category, tier and title is translated', async () => {
+    const { CATEGORIES, TIERS, TITLES } = await import('../src/lib/achievements');
+    for (const lang of LANGS) {
+      const t = makeT(lang);
+      for (const cat of CATEGORIES) {
+        t(`ach.cat.${cat.id}`); t(`ach.why.${cat.id}`);
+        for (const tier of TIERS) { t(`ach.req.${cat.id}.${tier}`); t(`ach.tier.${tier}`); t(`ach.msg.${tier}`); }
+      }
+      for (const title of TITLES) t(`ach.titles.${title.id}`);
+    }
+  });
+});

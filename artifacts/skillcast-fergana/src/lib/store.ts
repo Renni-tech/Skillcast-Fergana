@@ -1,6 +1,7 @@
 'use client';
 
 import { applyUpdates, revertUpdates, type ProposedUpdate, type SkillUpdate } from './progression';
+import { today, ALL_BADGES, WIND_ROSE_THEMES, type WindRoseTheme } from './achievements';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
@@ -25,6 +26,11 @@ export type View =
   | 'signals';
 
 type HaradaTaskStatus = 'todo' | 'in_progress' | 'done';
+
+const withToday = (days: string[]) => {
+  const d = today();
+  return days.includes(d) ? days : [...days, d].slice(-400);
+};
 
 /** Personal display preferences. Kept when the demo data is reset. */
 export interface A11ySettings {
@@ -68,6 +74,20 @@ interface SkillCastState {
   /** Applies user-confirmed level changes for a completed course. */
   confirmSkillUpdates: (courseSlug: string, chosen: ProposedUpdate[]) => SkillUpdate[];
   haradaTaskStatus: Record<string, HaradaTaskStatus>;
+  /** Earned badges: id → ISO time first earned. Never removed except by reset. */
+  badges: Record<string, string>;
+  /** Badges whose reveal has been shown (or skipped). */
+  badgesSeen: string[];
+  /** Distinct local days with real learning activity (YYYY-MM-DD). */
+  activeDays: string[];
+  /** Reward sound; off by default. */
+  badgeSound: boolean;
+  windRoseTheme: WindRoseTheme;
+  awardBadges: (ids: string[]) => void;
+  markBadgesSeen: (ids: string[]) => void;
+  setBadgeSound: (on: boolean) => void;
+  setWindRoseTheme: (theme: WindRoseTheme) => void;
+  recordActivity: () => void;
   onboarded: boolean;
   learnerOnboarded: boolean;
   dashTab: string;
@@ -147,6 +167,10 @@ export const useSkillCast = create<SkillCastState>()(
           const extended = p.extended
             ? { ...st.profile.extended, ...p.extended }
             : st.profile.extended;
+          // A newly completed Harada task or milestone counts as a study day.
+          const before = st.profile.haradaTaskStatuses ?? {};
+          const progressed = Object.entries(p.haradaTaskStatuses ?? {}).some(([k, v]) => v === 'completed' && before[k] !== 'completed')
+            || (p.completedRoadmapTasks ?? []).some((k) => !(st.profile.completedRoadmapTasks ?? []).includes(k));
           return {
             profile: normalizeProfile({
               ...st.profile,
@@ -154,6 +178,7 @@ export const useSkillCast = create<SkillCastState>()(
               inclusion,
               extended,
             }),
+            ...(progressed ? { activeDays: withToday(st.activeDays) } : {}),
           };
         }),
 
@@ -188,7 +213,7 @@ export const useSkillCast = create<SkillCastState>()(
       toggleCourse: (slug) =>
         set((st) => {
           if (!st.completedCourses.includes(slug)) {
-            return { completedCourses: [...st.completedCourses, slug] };
+            return { completedCourses: [...st.completedCourses, slug], activeDays: withToday(st.activeDays) };
           }
           // Un-marking a course reverts the skill levels it raised.
           const reverted = revertUpdates(slug, st.skillUpdates, st.profile.skills);
@@ -208,6 +233,7 @@ export const useSkillCast = create<SkillCastState>()(
         set({
           profile: { ...st.profile, skills: applied.skills },
           skillUpdates: [...st.skillUpdates.filter((e) => e.courseSlug !== courseSlug), ...applied.log],
+          activeDays: applied.log.length ? withToday(st.activeDays) : st.activeDays,
         });
         return applied.log;
       },
@@ -218,7 +244,24 @@ export const useSkillCast = create<SkillCastState>()(
             ...st.haradaTaskStatus,
             [taskId]: status,
           },
+          activeDays: status === 'done' ? withToday(st.activeDays) : st.activeDays,
         })),
+
+      badges: {},
+      badgesSeen: [],
+      activeDays: [],
+      badgeSound: false,
+      windRoseTheme: 'classic',
+      awardBadges: (ids) => set((st) => {
+        const fresh = ids.filter((id) => !st.badges[id]);
+        if (!fresh.length) return {};
+        const at = new Date().toISOString();
+        return { badges: { ...st.badges, ...Object.fromEntries(fresh.map((id) => [id, at])) } };
+      }),
+      markBadgesSeen: (ids) => set((st) => ({ badgesSeen: [...new Set([...st.badgesSeen, ...ids])] })),
+      setBadgeSound: (on) => set({ badgeSound: on }),
+      setWindRoseTheme: (theme) => set({ windRoseTheme: theme }),
+      recordActivity: () => set((st) => ({ activeDays: withToday(st.activeDays) })),
 
       setDashTab: (tab) =>
         set({ dashTab: tab }),
@@ -234,6 +277,10 @@ export const useSkillCast = create<SkillCastState>()(
           completedCourses: [],
           skillUpdates: [],
           haradaTaskStatus: {},
+          badges: {},
+          badgesSeen: [],
+          activeDays: [],
+          windRoseTheme: 'classic',
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -256,6 +303,11 @@ export const useSkillCast = create<SkillCastState>()(
         assistantSpeak: s.assistantSpeak,
         dashTab: s.dashTab,
         haradaTaskStatus: s.haradaTaskStatus,
+        badges: s.badges,
+        badgesSeen: s.badgesSeen,
+        activeDays: s.activeDays,
+        badgeSound: s.badgeSound,
+        windRoseTheme: s.windRoseTheme,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -287,6 +339,13 @@ export const useSkillCast = create<SkillCastState>()(
           dashTab: typeof saved.dashTab === 'string' ? saved.dashTab as typeof current.dashTab : 'overview',
           haradaTaskStatus: saved.haradaTaskStatus && typeof saved.haradaTaskStatus === 'object'
             ? Object.fromEntries(Object.entries(saved.haradaTaskStatus).filter(([, status]) => ['todo', 'in_progress', 'done'].includes(String(status)))) as Record<string, HaradaTaskStatus> : {},
+          badges: saved.badges && typeof saved.badges === 'object'
+            ? Object.fromEntries(Object.entries(saved.badges as Record<string, unknown>)
+              .filter(([id, at]) => ALL_BADGES.includes(id) && typeof at === 'string')) as Record<string, string> : {},
+          badgesSeen: strings(saved.badgesSeen).filter((id) => ALL_BADGES.includes(id)),
+          activeDays: strings(saved.activeDays).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-400),
+          badgeSound: saved.badgeSound === true,
+          windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
           onboarded: saved.onboarded === true,
           learnerOnboarded: typeof saved.learnerOnboarded === 'boolean'
             ? saved.learnerOnboarded : saved.userType === 'individual' && saved.onboarded === true,

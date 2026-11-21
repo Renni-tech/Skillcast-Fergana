@@ -12,6 +12,7 @@ import { EmployerView } from '@/components/skillcast/employer';
 import { InstitutionView } from '@/components/skillcast/institution';
 import { SignalsView } from '@/components/skillcast/signalsview';
 import { A11yEffects, A11yPanel } from '@/components/skillcast/a11y';
+import { AchievementsHost, BadgeCollection } from '@/components/skillcast/achievements';
 import { VoiceAssistant, VoiceLauncher } from '@/components/skillcast/voice-assistant';
 
 // Hydration guard: server snapshot = false, client snapshot = true.
@@ -42,6 +43,8 @@ function Shell() {
     <div className="skillcast-app flex min-h-screen flex-col">
       <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
       <A11yEffects />
+      {mounted && <AchievementsHost />}
+      {mounted && <BadgeCollection />}
       <Header />
       <main id="main-content" tabIndex={-1} className="flex-1 pb-16 focus:outline-none">
         {!mounted ? (

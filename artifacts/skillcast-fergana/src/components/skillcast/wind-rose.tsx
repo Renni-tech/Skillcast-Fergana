@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSkillCast } from '@/lib/store';
+import { WIND_ROSE_THEMES } from '@/lib/achievements';
 import { usePanels } from '@/lib/ui-panels';
 import { computeWindRose, type WindRosePoint } from '@/lib/wind-rose';
 import { useReducedMotion } from './a11y';
@@ -17,7 +18,7 @@ import { skillName, useSignals, useT } from './shared';
 // Blue filled = you now; violet solid = market direction; amber dashed =
 // pathway target. Line style + legend text + table, never colour alone.
 
-const COLORS = { you: '#2563eb', market: '#7c3aed', target: '#d97706' };
+const BASE_COLORS = { you: '#2563eb', market: '#7c3aed', target: '#d97706' };
 
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -45,7 +46,9 @@ function wrapLabel(text: string, max: number, maxLines = 3): string[] {
 
 export function WindRose({ compact = false }: { compact?: boolean }) {
   const t = useT();
-  const { profile, chosenRole, setDashTab, setView } = useSkillCast();
+  const { profile, chosenRole, setDashTab, setView, windRoseTheme } = useSkillCast();
+  // "You" colour follows the Wind Rose colour unlocked with badges.
+  const COLORS = { ...BASE_COLORS, you: WIND_ROSE_THEMES[windRoseTheme]?.you ?? BASE_COLORS.you };
   const { momentumMap } = useSignals();
   const openVoice = usePanels((s) => s.openVoice);
   const reduceMotion = useReducedMotion();

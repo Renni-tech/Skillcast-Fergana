@@ -24,13 +24,16 @@ Three audiences, one engine:
 | Feature | What it does |
 | --- | --- |
 | **Onboarding** (6 steps) | Profile (status, field, profession, experience, education), skills with 1–5 levels or a CV, interests and weekly learning hours, work preferences and accessibility needs. |
+| **Field and profession autocomplete** | Search 17 sectors and 131 occupations (ISCO-08 codes, plus local crafts such as suzani embroidery, silk weaving and Rishton pottery) by partial words and aliases in Uzbek, Russian or English, with mouse or keyboard. "Other / not listed" keeps your own wording. Current and target profession are stored separately and both feed matching. |
+| **Weekly study hours** | 1–168 hours a week with quick choices. Plans are paced at up to 40 hours a week and say so when you choose more, so timelines stay realistic. |
 | **CV extraction** | PII scrubbed in the browser; skills proposed by the model or by a deterministic in-browser extractor; the user confirms and edits the levels. |
 | **Future Skills Radar** (forecast) | Scenario demand index (0–100) for the best-matching pathways under **moderate** or **fast** AI adoption, plus an employment-outlook chart over three horizons. |
 | **Career matching** | 16 future roles in three strategies (*Work with AI*, *Pivot to another career*, *Emerging opportunities*), 13 sectors. Fit score, matching skills, skills to build, market outlook, AI task exposure, SDG tags and "Why this match?". |
 | **Wind Rose** | Signature radar: current skills (blue), market direction (violet), pathway target; tap any skill for a detail panel; "What this means for you", "Promising directions", "Improve next", and an accessible data table. |
 | **Harada-inspired roadmap** | One goal → 8 skill areas → 64 tasks with estimated hours and a status (Not started / In progress / Completed) saved in the browser. |
 | **What to learn** | Skill gaps linked to real courses (23 in the catalogue), ordered by gap priority, shown as a Duolingo-style path that unlocks step by step. |
-| **Badges** | Five badges (First step, Halfway, AI explorer, Green skill, Path complete), progress ring and encouraging messages written natively in each language. |
+| **Skill progression** | Marking a course done proposes a +1 level for each skill it teaches (capped by course level). You confirm which to apply; the fit score, Wind Rose and next steps update, and un-marking the course reverts it. |
+| **Badges and rewards** | 24 badges (Bronze / Silver / Gold in 8 categories: First Steps, Career Explorer, Curious Mind, Consistent Learner, Skill Builder, Knowledge Seeker, Goal Achiever, Future Ready), each tied to real progress such as completed courses, confirmed level-ups, Harada milestones, study days and skill readiness. A new badge plays a short reveal once (silhouette, spin, light burst, meaning and how it was earned) and then flies into the collection. Skip, "skip all", reduced-motion and an optional sound (off by default) are supported. The collection shows progress toward locked badges, replays earned ones, and unlocks titles, a profile frame and Wind Rose colours. |
 | **Best places to learn** | 14 curated learning providers ranked by language, cost, accessibility and local (Uzbekistan) relevance, with "Recommended for you", "Official provider", "Beginner-friendly" and link-check labels. |
 | **Progress** | Course completion, hours learned, role skill milestones, Harada tasks and a private weekly reflection note. |
 | **SDG impact** | Every pathway mapped to UN SDG targets, with SDG 4 (Quality Education) at the core. |
