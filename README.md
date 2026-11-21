@@ -1,17 +1,130 @@
 # SkillCast Fergana
 
-An AI-assisted Smart Education and future-skills platform for learners in
-Fergana City, Uzbekistan and beyond. It is a pnpm monorepo:
+**A learning forecast for the AI era.** SkillCast Fergana shows people in the Fergana region of Uzbekistan which skills are rising, how well they fit future roles, and turns the gap into a personal, step-by-step learning plan built from real courses. It was built for the **Aiversecity Future-Ready Workforce** challenge (SDG "Survive AI" domain) as a working proof of concept.
 
-| Path | What it is |
+Three audiences, one engine:
+
+- **Learners** (workers, teachers, students, job seekers): forecast → matching → Wind Rose → Harada roadmap → Duolingo-style course path.
+- **Employers / HR**: team skill gaps, AI-exposure risk, adoption scenarios and an explainable training plan.
+- **Training institutions**: cohort readiness and the best-matching pathway per student.
+
+### Key characteristics
+
+- **Deterministic, explainable core.** Matching and momentum use published formulas that run in code, not in a language model. The same inputs always give the same result, and every score has a "Why?" explanation.
+- **AI only where it is safe.** A self-hosted model (Qwen2.5-7B-Instruct on RunPod) only proposes CV skills and narrates explanations. Both have deterministic fallbacks, and the user confirms every extracted skill.
+- **Honest data.** Signals come from official and open sources and carry their real status (periodic, cached, unavailable, demo baseline). 17 of the 26 catalogue sources carry a dated check against the publisher's own page. Scenario indices are labelled as estimates, never as job counts.
+- **Privacy by design.** The profile lives in the user's browser. A CV is scrubbed of personal details in the browser before any text is sent; the coach receives only scores and gaps. No account is needed.
+- **Accessible and inclusive.** Uzbek (default), Russian and English; text size, contrast, spacing, reduced motion, keyboard use and a voice assistant; 0 axe WCAG 2.1 A/AA violations on the main screens; a dedicated route to inclusive opportunities.
+- **Synthetic people only.** Demo profiles, teams and the sample CV are fabricated (competition rule).
+
+## Features
+
+### Learner journey
+
+| Feature | What it does |
 | --- | --- |
-| `artifacts/skillcast-fergana/` | **SkillCast Fergana** frontend (React + Vite). Uzbek by default, also Russian and English. |
-| `artifacts/api-server/` | Express API: signal sources, forecast changelog, CV extraction and coach endpoints. Stores signal snapshots in a local SQLite file. |
-| `artifacts/skillcast/` | The original SkillCast app (kept for reference, served at `/skillcast/` on Replit). |
-| `lib/` | Shared API contract (`api-spec`), generated clients (`api-client-react`, `api-zod`) and a PostgreSQL helper (`db`, unused by the API). |
-| `scripts/` | Workspace scripts, including `dev.mjs` (local `pnpm dev`). |
+| **Onboarding** (6 steps) | Profile (status, field, profession, experience, education), skills with 1–5 levels or a CV, interests and weekly learning hours, work preferences and accessibility needs. |
+| **CV extraction** | PII scrubbed in the browser; skills proposed by the model or by a deterministic in-browser extractor; the user confirms and edits the levels. |
+| **Future Skills Radar** (forecast) | Scenario demand index (0–100) for the best-matching pathways under **moderate** or **fast** AI adoption, plus an employment-outlook chart over three horizons. |
+| **Career matching** | 16 future roles in three strategies (*Work with AI*, *Pivot to another career*, *Emerging opportunities*), 13 sectors. Fit score, matching skills, skills to build, market outlook, AI task exposure, SDG tags and "Why this match?". |
+| **Wind Rose** | Signature radar: current skills (blue), market direction (violet), pathway target; tap any skill for a detail panel; "What this means for you", "Promising directions", "Improve next", and an accessible data table. |
+| **Harada-inspired roadmap** | One goal → 8 skill areas → 64 tasks with estimated hours and a status (Not started / In progress / Completed) saved in the browser. |
+| **What to learn** | Skill gaps linked to real courses (23 in the catalogue), ordered by gap priority, shown as a Duolingo-style path that unlocks step by step. |
+| **Badges** | Five badges (First step, Halfway, AI explorer, Green skill, Path complete), progress ring and encouraging messages written natively in each language. |
+| **Best places to learn** | 14 curated learning providers ranked by language, cost, accessibility and local (Uzbekistan) relevance, with "Recommended for you", "Official provider", "Beginner-friendly" and link-check labels. |
+| **Progress** | Course completion, hours learned, role skill milestones, Harada tasks and a private weekly reflection note. |
+| **SDG impact** | Every pathway mapped to UN SDG targets, with SDG 4 (Quality Education) at the core. |
+| **Demand stats** | Scenario indices with plain-language verdicts and the skill-momentum calculation behind them. |
+| **Inclusive opportunities** | Jobs, training and support programmes relevant to people with disabilities, with verified entries kept separate from examples. |
 
-## Run it locally (Windows, macOS, Linux)
+### Employer / HR view
+
+Team learning priorities and skill gaps for a synthetic team: company context, target-role readiness, roles most exposed to AI, most exposed staff, AI-adoption planning scenarios, an explainable training plan per role, a transition plan and SDG connections. All figures are labelled as illustrative.
+
+### Institution view
+
+Cohort readiness and the best-matching entry-level pathway per student, for training centres and universities.
+
+### Signal sources
+
+A five-step chain from source to recommendation, the live status of every retrieved source, and the approved catalogue (26 sources: 3 periodic, 3 needing an API key, 17 reference, 3 planned) with scope, data type, update frequency, licence, why it matters, and the dated SkillCast check with an evidence link. A forecast changelog records what changed after each refresh.
+
+### Accessibility
+
+Language switch (uz / ru / en), text size, high contrast, line spacing, underlined links, reduced motion, keyboard navigation with visible focus, non-colour status cues, chart text alternatives, and a **voice assistant** (Web Speech API in Chrome/Edge, typed input everywhere) that can find jobs, professions and courses, explain results and navigate.
+
+## How it works
+
+**Match score** (per role, in `src/lib/matching.ts`):
+
+```
+match = 0.45 × skill readiness + 0.25 × interest fit + 0.20 × experience fit + 0.10 × work-preference fit
+```
+
+**Skill Momentum Index** (per skill, in `artifacts/api-server/src/skillcast/lib/momentum.ts`):
+
+```
+momentum = 0.50 × posting frequency + 0.30 × trend (recent vs earlier postings) + 0.20 × research horizon (WEF Future of Jobs 2025, Stanford AI Index)
+```
+
+**Data sources retrieved by the API** (on a schedule, never real time):
+
+| Source | Provides | Used for |
+| --- | --- | --- |
+| Statistics Agency of Uzbekistan (SIAT, dataset 1311) | Employment rate, Fergana region and national, annual (CC BY 4.0) | Local labour-market context |
+| World Bank Indicators API | Labour-force participation, Uzbekistan (CC BY 4.0) | National trend |
+| Remotive, Arbeitnow, Greenhouse, Ashby job APIs | Job postings (free, no key) | Skill frequency and trend → momentum |
+
+When a source cannot be reached, the app shows the last cached copy or a clearly labelled baseline; it never invents numbers.
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui (Radix UI), Recharts, Framer Motion, Zustand (localStorage persistence), TanStack Query, React Hook Form + Zod, Lucide icons |
+| API | Node.js 24, Express 5, Zod, Pino logging, esbuild bundle |
+| Storage | SQLite through Node's built-in `node:sqlite` (signal runs, snapshots, changelog); user data in the browser only |
+| AI | Qwen2.5-7B-Instruct on vLLM, self-hosted on RunPod serverless (CV extraction proposals and narration only) |
+| Contract | OpenAPI spec with generated React Query client and Zod schemas (`lib/`) |
+| Browser APIs | Web Speech API (voice), localStorage |
+| Tooling | pnpm workspaces (monorepo), TypeScript project references, Bun test runner, Node test runner, Playwright + axe-core (audits) |
+| Hosting | Replit (autoscale deployment) |
+
+## Project structure
+
+```
+artifacts/
+  skillcast-fergana/        # SkillCast Fergana frontend (React + Vite)
+    src/components/skillcast/  # landing, onboarding, dashboard, wind-rose, harada, pathway,
+                               # sdgview, demand, employer, institution, signalsview,
+                               # voice-assistant, a11y, inclusive, learning-sources
+    src/lib/                # matching, wind-rose, harada, learning-rank, cv (PII scrubber),
+                            # voice-intents, store, i18n (uz/ru/en copy tables)
+    src/data/               # roles (16), skills (50), courses (23), approved-sources (26),
+                            # learning-sources (14), inclusive (8), team, institution, sample CV
+    tests/                  # learner flow, i18n parity, experience, quality
+  api-server/               # Express API
+    src/routes/             # health, skillcast (signals, coach, extract-cv), fergana-signals
+    src/skillcast/lib/      # momentum, signals-run, fergana-signals, runpod, db (node:sqlite)
+  skillcast/                # original SkillCast app (reference, served at /skillcast/)
+  mockup-sandbox/           # UI component sandbox
+lib/                        # api-spec (OpenAPI), api-client-react, api-zod, db
+scripts/                    # dev.mjs (one-command local dev), dev-lib + tests, post-merge hook
+```
+
+## API
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/healthz` | Health check |
+| GET | `/api/signals` | Latest skill-momentum snapshot (cached) |
+| POST | `/api/signals` | Refresh signals (60 s cooldown) |
+| GET | `/api/signals/cron` | Scheduled refresh; needs `Authorization: Bearer $CRON_SECRET` |
+| GET | `/api/fergana/signals` | SIAT, World Bank and Remotive signals with provenance and status |
+| POST | `/api/coach` | Narrated explanation from scores and gaps only (deterministic fallback) |
+| POST | `/api/extract-cv` | Skill proposals from scrubbed CV text (deterministic fallback) |
+
+## Getting started (Windows, macOS, Linux)
 
 > **Tested so far:** Linux (full run: install, `pnpm dev`, API, frontend, Ctrl+C).
 > Windows-specific behaviour (paths, process shutdown, PowerShell) is handled in
@@ -120,60 +233,46 @@ with Ctrl+C and run `pnpm dev` again (the API is rebuilt on every start).
 
 `DATABASE_URL` is **not** needed.
 
-### Checks
+## Data, privacy and verification
 
-```powershell
-pnpm run typecheck
-pnpm run test:dev                                   # pnpm dev helpers (Node test runner)
-pnpm run test:api                                   # API SQLite store (Node test runner)
-pnpm --filter @workspace/skillcast-fergana test     # frontend (needs Bun)
-pnpm run build                                      # production builds
-```
+- `artifacts/skillcast-fergana/src/data/approved-sources.ts` is the approved source catalogue. **Integration status** (periodic, cached, unavailable, demo baseline, reference, planned, key required) and the **SkillCast check** (`check: { on, url }`, the date someone read the publisher's own page) are shown separately. Sources whose sites block automated checks stay "not checked yet". Last audit: 18 November 2026.
+- The learner profile, Harada task status and completed courses are stored in the browser (`localStorage`). Reset clears them.
+- `POST /api/extract-cv` receives only scrubbed text; `POST /api/coach` receives scores and skill gaps only. The RunPod endpoint does not persist prompts.
 
-The frontend tests use [Bun](https://bun.sh) (`bun test`). Install Bun to run
-them; `pnpm dev` does not need it.
+## Testing and verification
 
-## Accessibility and the voice assistant
+| Command | Covers | Result (18 Nov 2026) |
+| --- | --- | --- |
+| `pnpm run typecheck` | All packages | Pass |
+| `pnpm --filter @workspace/skillcast-fergana test` | Learner flow, uz/ru/en parity, experience, source-audit rules (Bun) | 62 / 62 |
+| `pnpm --filter @workspace/skillcast test` | Original SkillCast app | 47 / 47 |
+| `pnpm run test:api` | API SQLite store, incl. reading an old Prisma-made file | 4 / 4 |
+| `pnpm run test:dev` | `pnpm dev` helpers (disk, Node version, failure messages) | 5 / 5 |
+| `pnpm run build` | Production builds (set `PORT` and `BASE_PATH` as Replit does) | Pass |
 
-- **Display settings** (header → Accessibility): text size, high contrast,
-  reduced motion, underlined links and reading spacing. Saved in the browser.
-  A skip link, visible keyboard focus and labelled controls are always on.
-- **Voice assistant** (floating button, or header → Accessibility): runs in
-  the browser with no external service. It opens sections, explains skills and
-  the Wind Rose, suggests what to learn next, recommends pathways, reads
-  answers aloud and searches SkillCast's pathways, courses, learning sources
-  and inclusive opportunities. Answers come only from SkillCast data.
-  - Speech input uses the browser's Web Speech API (Chrome and Edge). In other
-    browsers, type instead; everything else works the same.
-  - Reading aloud uses the voices installed on the device. If there is no
-    voice for the selected language (common for Uzbek), the answer is shown
-    as text instead of being read with the wrong voice.
-  - It does not browse the internet or list live vacancies.
-- **Inclusive opportunities** and **learning sources** live in
-  `artifacts/skillcast-fergana/src/data/inclusive.ts` and
-  `src/data/learning-sources.ts`. Every entry carries a verification level
-  (approved list, official publisher, curated, or fictional demo) shown in the
-  UI. Add entries there with a real URL; set `lastChecked` once someone has
-  opened the link.
+Also checked: no horizontal overflow at 360, 768 and 1280 px in all three languages (Playwright probe), and 0 axe WCAG 2.1 A/AA violations on 8 screens × uz/ru × light/dark.
 
-## Signal sources and verification
+## Roadmap
 
-`artifacts/skillcast-fergana/src/data/approved-sources.ts` is the approved
-source catalogue. Two kinds of status are shown, and they mean different things:
+**Short term (next 3 months)**
 
-- **Integration status**: *periodic* (the API retrieves it on a schedule, never
-  real time), *cached*, *unavailable*, *demo baseline*, *reference* (a link
-  only), *planned*, *API key required*.
-- **SkillCast check** (`check: { on, url }`): the date someone opened the
-  publisher's own page and confirmed the facts in `src.check.<id>`, with the
-  page as evidence. Sources whose sites block automated checks (data.egov.uz,
-  OECD, the ILO DOI link) or whose file could not be read stay "not checked yet".
-  Unconfirmed fields show "Not confirmed yet"; nothing is marked verified
-  without a check. Last audit: 18 November 2026 (it corrected ILOSTAT's update
-  cadence to daily and the moved UN SDG database link).
+- **Verified Skill Passport**: one click exports a shareable summary or PDF of completed Harada goals, the Wind Rose and earned badges, with a QR code that verifies it.
+- **B2B Talent Matcher**: employers search anonymised Wind Rose profiles of learners who earned specific badges and pay to unlock a candidate who has opted in.
+- **Telegram bot and PWA**: reminders, weekly progress and offline access for low-bandwidth users.
+- **More local data**: integrate ish.mehnat.uz vacancies (with access) and ILOSTAT series; add regional breakdowns.
+- **Pilot** with one school, one employment centre and one training provider in Fergana.
 
-When you re-check a source, update `check.on`, keep `check.url` pointing at the
-page you read, and edit `src.check.<id>` in all three languages.
+**Long term (6–24 months)**
+
+- Cover all 14 regions of Uzbekistan, then Central Asia, with Tajik and Kazakh interfaces.
+- Course partnerships (IT Park, universities, online platforms) with completion data that updates skill levels automatically.
+- Institution dashboards for employment centres and ministries: anonymised regional skill-gap maps to plan training budgets.
+- Mentor and peer-learning matching; employer-sponsored learning paths.
+- Independent audit of the scoring formulas for fairness and bias.
+
+**Business model**
+
+Free for learners. Revenue from employers (talent matching, team reskilling plans), training providers (verified course placement and referrals) and public-sector licences (regional analytics), always with anonymised, consented data.
 
 ## Troubleshooting
 
