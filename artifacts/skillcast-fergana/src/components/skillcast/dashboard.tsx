@@ -41,6 +41,7 @@ import { FutureRadarStep } from './onboarding';
 import { ProgressDashboard } from './progress-dashboard';
 import { WindRose } from './wind-rose';
 import { ExportShareButton } from './export-share';
+import { GettingStarted } from './getting-started';
 
 const EMPLOYMENT_STATUS_LABELS = {
   student: 'Student',
@@ -86,6 +87,7 @@ export function Dashboard() {
         <p className="mt-3 text-sm text-muted-foreground">{t(`flow.${['overview', 'matches', 'pathway', 'radar', 'harada', 'progress', 'sdg', 'demand'].includes(dashTab) ? dashTab : 'overview'}`)}</p>
 
         <TabsContent value="overview" className="mt-4">
+          <GettingStarted />
           <OverviewTab matches={matches} />
         </TabsContent>
         <TabsContent value="matches" className="mt-4">

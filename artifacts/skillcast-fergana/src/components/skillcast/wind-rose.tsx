@@ -46,7 +46,7 @@ function wrapLabel(text: string, max: number, maxLines = 3): string[] {
 
 export function WindRose({ compact = false }: { compact?: boolean }) {
   const t = useT();
-  const { profile, chosenRole, setDashTab, setView, windRoseTheme } = useSkillCast();
+  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip } = useSkillCast();
   // "You" colour follows the Wind Rose colour unlocked with badges.
   const COLORS = { ...BASE_COLORS, you: WIND_ROSE_THEMES[windRoseTheme]?.you ?? BASE_COLORS.you };
   const { momentumMap } = useSignals();
@@ -103,7 +103,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
   const marketWord = (m: number) => t(m >= 60 ? 'wr.detail.strong' : m >= 45 ? 'wr.detail.steady' : 'wr.detail.softer');
 
   return (
-    <Card className="relative overflow-hidden border-blue-300 shadow-md ring-1 ring-blue-500/10 dark:border-blue-800">
+    <Card id="wind-rose" className="relative scroll-mt-20 overflow-hidden border-blue-300 shadow-md ring-1 ring-blue-500/10 dark:border-blue-800">
       <div aria-hidden className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-violet-600 to-amber-500" />
       <CardHeader className="gap-1 pb-2">
         <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
@@ -128,6 +128,13 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!seenTips.includes('rose-tip') && (
+          <div role="note" className="flex items-start gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-sm text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">
+            <span aria-hidden className="mt-0.5 text-lg leading-none">👆</span>
+            <p className="flex-1">{t('wr.tip')}</p>
+            <button type="button" onClick={() => { dismissTip('rose-tip'); dismissTip('rose-read'); }} className="shrink-0 rounded px-2 py-0.5 text-xs font-semibold underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">{t('wr.tip.ok')}</button>
+          </div>
+        )}
         <div className={`grid gap-4 ${compact ? '' : 'lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'}`}>
           <div className="min-w-0">
             <div
@@ -158,7 +165,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             <ol className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
               {data.map((p) => (
                 <li key={p.slug}>
-                  <button type="button" aria-pressed={selected === p.slug} onClick={() => setSelected(selected === p.slug ? null : p.slug)}
+                  <button type="button" aria-pressed={selected === p.slug} onClick={() => { setSelected(selected === p.slug ? null : p.slug); dismissTip('rose-read'); dismissTip('rose-tip'); }}
                     className={`flex min-h-8 items-center gap-1.5 rounded-full border px-2 py-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selected === p.slug ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'}`}>
                     <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${selected === p.slug ? 'bg-white/20' : p.gap >= 20 ? 'bg-amber-600 text-white' : 'bg-muted'}`}>{p.n}</span>
                     <span className="min-w-0">{p.label}</span>

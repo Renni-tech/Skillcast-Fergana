@@ -417,7 +417,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
 
         <CardContent className="space-y-4">
           <p className="text-xs text-slate-500">
-            {t('Direct skills use the selected role&apos;s required level. Adjacent supporting skills use a level 2 foundation target unless another role defines a requirement.')}
+            {t('Direct skills use the selected role’s required level. Adjacent supporting skills use a level 2 foundation target unless another role defines a requirement.')}
           </p>
 
           <div
@@ -680,7 +680,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             {t('Role Skill Profile')}
           </CardTitle>
           <CardDescription>
-            {t('Current profile levels compared with the selected career&apos;s required skills and available momentum signals.')}
+            {t('Current profile levels compared with the selected career’s required skills and available momentum signals.')}
           </CardDescription>
         </CardHeader>
 

@@ -83,6 +83,9 @@ interface SkillCastState {
   /** Reward sound; off by default. */
   badgeSound: boolean;
   windRoseTheme: WindRoseTheme;
+  /** One-time hints and guides the learner has dismissed. */
+  seenTips: string[];
+  dismissTip: (id: string) => void;
   awardBadges: (ids: string[]) => void;
   markBadgesSeen: (ids: string[]) => void;
   setBadgeSound: (on: boolean) => void;
@@ -252,6 +255,8 @@ export const useSkillCast = create<SkillCastState>()(
       activeDays: [],
       badgeSound: false,
       windRoseTheme: 'classic',
+      seenTips: [],
+      dismissTip: (id) => set((st) => ({ seenTips: [...new Set([...st.seenTips, id])] })),
       awardBadges: (ids) => set((st) => {
         const fresh = ids.filter((id) => !st.badges[id]);
         if (!fresh.length) return {};
@@ -281,6 +286,7 @@ export const useSkillCast = create<SkillCastState>()(
           badgesSeen: [],
           activeDays: [],
           windRoseTheme: 'classic',
+          seenTips: [],
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -308,6 +314,7 @@ export const useSkillCast = create<SkillCastState>()(
         activeDays: s.activeDays,
         badgeSound: s.badgeSound,
         windRoseTheme: s.windRoseTheme,
+        seenTips: s.seenTips,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -346,6 +353,7 @@ export const useSkillCast = create<SkillCastState>()(
           activeDays: strings(saved.activeDays).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-400),
           badgeSound: saved.badgeSound === true,
           windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
+          seenTips: strings(saved.seenTips).slice(0, 50),
           onboarded: saved.onboarded === true,
           learnerOnboarded: typeof saved.learnerOnboarded === 'boolean'
             ? saved.learnerOnboarded : saved.userType === 'individual' && saved.onboarded === true,

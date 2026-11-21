@@ -570,7 +570,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
             <div className="mt-3 space-y-3 border-t border-blue-50 pt-3 text-sm text-slate-600">
               <p>
                 {recommendationReason(role.slug, safeProfile, t)}
-                {t('The compatibility score uses your saved profile and this role&apos;s requirements. Skill readiness is shown separately.')}
+                {t('The compatibility score uses your saved profile and this role’s requirements. Skill readiness is shown separately.')}
               </p>
 
               <p className="font-medium text-slate-700">
