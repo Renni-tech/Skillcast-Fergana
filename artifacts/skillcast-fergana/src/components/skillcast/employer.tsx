@@ -19,6 +19,7 @@ import { matchAll } from '@/lib/matching';
 import { useSkillCast } from '@/lib/store';
 import type { CourseDef, Profile, TeamMemberDef } from '@/lib/types';
 import { SdgBadge, SourceChip, useSignals, useT } from './shared';
+import { PremiumPreview } from './premium-preview';
 import { HrMarketSignals, HrSignalEvidence } from './hr-market-signals';
 
 // ─── Employer / HR view: workforce skills-gap heatmap (good-to-have) ───────
@@ -570,6 +571,7 @@ export function EmployerView() {
           </ul>
         </CardContent>
       </Card>
+      <PremiumPreview />
     </div>
   );
 }

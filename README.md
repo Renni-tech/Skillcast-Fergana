@@ -45,6 +45,8 @@ Three audiences, one engine:
 
 Team learning priorities and skill gaps for a synthetic team: company context, target-role readiness, roles most exposed to AI, most exposed staff, AI-adoption planning scenarios, an explainable training plan per role, a transition plan and SDG connections. All figures are labelled as illustrative.
 
+**Premium analytics (prototype).** Four locked previews: team skills heatmap, talent matcher, reskilling return forecast and skill passport checks. Each is blurred behind a lock with a Premium label. Its preview explains what it would show, which data it would use (opt-in and anonymised) and that it is not available yet. There is no payment flow, and nothing is sold.
+
 ### Institution view
 
 Cohort readiness and the best-matching entry-level pathway per student, for training centres and universities.
