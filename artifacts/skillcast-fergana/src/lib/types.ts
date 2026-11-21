@@ -21,6 +21,8 @@ export interface IndividualProfileDetails {
   professionId?: string;
   /** Desired future profession (kept separate from the current one). */
   targetOccupationId?: string;
+  /** Preferred way to learn, used to rank learning resources. */
+  learningFormat?: 'any' | 'online' | 'in-person';
   specialization?: string;
   educationLevel?: string;
   country?: string;

@@ -15,7 +15,8 @@ import { ROLE_MAP } from '@/data/roles';
 import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, useSignals, useT } from './shared';
-import { LearningSources } from './learning-sources';
+import { ResourceFinder } from './resource-finder';
+import { bestForSkill } from '@/lib/resource-match';
 import { ChoosePathwayEmpty } from './explainer';
 import { SkillUpdateBanner, SkillUpdateDialog } from './skill-progress';
 import { toast } from '@/hooks/use-toast';
@@ -91,7 +92,7 @@ export function rolePathway(
 
 export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const t = useT();
-  const { chosenRole, profile, completedCourses, toggleCourse, setDashTab, confirmSkillUpdates } = useSkillCast();
+  const { chosenRole, profile, completedCourses, toggleCourse, setDashTab, confirmSkillUpdates, lang } = useSkillCast();
   const [pending, setPending] = useState<{ slug: string; proposals: ProposedUpdate[] } | null>(null);
   const [lastUpdate, setLastUpdate] = useState<{ log: SkillUpdate[]; before: number } | null>(null);
   const markCourse = (slug: string) => {
@@ -248,6 +249,18 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <p className="text-sm text-muted-foreground">{t('pw.youll', { outcome: courseOutcome(t, course.slug) })}</p>
+                    {!done && (() => {
+                      // Another place to learn the same skill, chosen for this learner.
+                      const alt = bestForSkill(profile, n.skill, lang);
+                      return alt ? (
+                        <p className="text-xs text-muted-foreground">
+                          <a href="#where-to-learn" className="font-medium text-teal-700 hover:underline dark:text-teal-400">
+                            {t('lr.step', { name: t(`${alt.resource.copy}.${alt.resource.id}.name`) })}
+                          </a>
+                          {' '}({t(`lr.area.${alt.resource.area}`)} · {t(`lr.format.${alt.resource.format}`)})
+                        </p>
+                      ) : null;
+                    })()}
                     <div className="flex flex-wrap items-center gap-1.5">
                       {course.skills.map((s) => (
                         <span key={s} className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
@@ -309,7 +322,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </ol>
       </div>
 
-      <LearningSources skills={match.gap.map((g) => g.skill)} />
+      <ResourceFinder gaps={match.gap.map((g) => g.skill)} />
     </div>
   );
 }

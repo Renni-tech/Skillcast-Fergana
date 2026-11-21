@@ -295,3 +295,45 @@ describe('career assistant intents', () => {
     expect(kind(uzCyrillicToLatin('Кейинги нима ўрганишим керак?'))).toBe('next-learning');
   });
 });
+
+describe('learning resources by place and topic', () => {
+  test('every resource is translated, linked, dated and honest about addresses', async () => {
+    const { LEARNING_RESOURCES, LOCAL_RESOURCE_IDS } = await import('../src/data/learning-resources');
+    expect(LOCAL_RESOURCE_IDS.length).toBeGreaterThanOrEqual(15);
+    for (const lang of LANGS) {
+      const t = makeT(lang);
+      for (const r of LEARNING_RESOURCES) { t(`${r.copy}.${r.id}.name`); t(`${r.copy}.${r.id}.d`); for (const tp of r.topics) t(`lr.topic.${tp}`); }
+    }
+    for (const r of LEARNING_RESOURCES.filter((x) => LOCAL_RESOURCE_IDS.includes(x.id))) {
+      expect(r.url, r.id).toMatch(/^https:\/\//);
+      expect(r.evidence, r.id).toMatch(/^https:\/\//);
+      expect(r.checked, r.id).toMatch(isoDay);
+      if (r.address) expect(r.address.source, r.id).toMatch(/^https:\/\//);
+      if (r.format === 'online') expect(r.address, r.id).toBeUndefined();
+    }
+    // All four areas and the requested topics are covered.
+    for (const area of ['fergana', 'uzbekistan', 'central-asia', 'global']) expect(LEARNING_RESOURCES.some((r) => r.area === area)).toBe(true);
+    for (const tp of ['programming', 'ai', 'business', 'languages', 'design', 'crafts', 'embroidery', 'knitting', 'sewing', 'painting', 'agriculture', 'vocational']) {
+      expect(LEARNING_RESOURCES.some((r) => r.topics.includes(tp as never)), tp).toBe(true);
+    }
+  });
+
+  test('ranking follows profession, place, format and gaps', async () => {
+    const { rankResources, homeArea } = await import('../src/lib/resource-match');
+    const { normalizeProfile } = await import('../src/lib/profile');
+    const base = (extended: Record<string, unknown>) => normalizeProfile({ budget: 6, extended: { country: 'Uzbekistan', city: 'Fergana', ...extended } });
+    expect(homeArea(base({}))).toBe('fergana');
+    expect(homeArea(base({ city: 'Tashkent' }))).toBe('uzbekistan');
+    const embroiderer = base({ professionId: 'embroiderer', learningFormat: 'in-person' });
+    const inPerson = rankResources(embroiderer, { lang: 'uz', gaps: [] }).map((r) => r.resource.id);
+    expect(inPerson[0]).toBe('margilan-crafts');
+    const online = rankResources(base({ professionId: 'embroiderer', learningFormat: 'online' }), { lang: 'en', gaps: [] }).map((r) => r.resource.id);
+    expect(online.slice(0, 3)).toContain('rsn');
+    expect(online.indexOf('margilan-crafts')).toBeGreaterThan(online.indexOf('rsn'));
+    const coder = rankResources(base({}), { lang: 'uz', gaps: ['python'] });
+    expect(coder[0].resource.id).toBe('uzbekcoders');
+    expect(coder[0].reasons).toContain('skill');
+    const abroad = rankResources(normalizeProfile({ extended: { country: 'Germany', professionId: 'potter' } }), { lang: 'en', gaps: [] }).map((r) => r.resource.id);
+    expect(abroad.indexOf('rishton-ceramics')).toBeGreaterThan(abroad.indexOf('domestika'));
+  });
+});
