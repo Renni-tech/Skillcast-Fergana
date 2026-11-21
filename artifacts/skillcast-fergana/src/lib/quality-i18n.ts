@@ -23,6 +23,23 @@ export const QUALITY_COPY: Record<string, Copy> = {
     '{n} часов в неделю — больше, чем очная учёба. Мы сохраним ваш выбор, но построим план из расчёта {cap} часов в неделю, чтобы он был реалистичным и оставлял время на отдых.',
   ),
 
+  // Sector / profession autocomplete
+  'occ.field.label': c('Field or industry', 'Soha yoki tarmoq', 'Сфера или отрасль'),
+  'occ.field.ph': c('Start typing, or pick from the list', 'Yozishni boshlang yoki ro‘yxatdan tanlang', 'Начните вводить или выберите из списка'),
+  'occ.current.label': c('Current profession', 'Hozirgi kasbingiz', 'Текущая профессия'),
+  'occ.target.label': c('Profession you would like to move into (optional)', 'O‘tmoqchi bo‘lgan kasbingiz (ixtiyoriy)', 'Профессия, в которую хотите перейти (необязательно)'),
+  'occ.target.hint': c('Helps us rank future roles and learning places for that direction. It does not replace your current profession.', 'Bu yo‘nalish bo‘yicha kelajak kasblari va o‘qish joylarini saralashga yordam beradi. Hozirgi kasbingiz o‘zgarmaydi.', 'Помогает упорядочить будущие роли и места обучения в этом направлении. Текущая профессия не меняется.'),
+  'occ.ph': c('e.g. teacher, embroidery, software, agronomist', 'masalan: o‘qituvchi, kashta, dasturchi, agronom', 'например: учитель, вышивка, программист, агроном'),
+  'occ.sectors': c('Fields', 'Sohalar', 'Сферы'),
+  'occ.matches': c('Best matches', 'Eng mos', 'Лучшие совпадения'),
+  'occ.related': c('Related professions', 'Yaqin kasblar', 'Похожие профессии'),
+  'occ.notListed': c('Not listed?', 'Ro‘yxatda yo‘qmi?', 'Нет в списке?'),
+  'occ.other': c('Other / not listed', 'Boshqa / ro‘yxatda yo‘q', 'Другое / нет в списке'),
+  'occ.other.use': c('Other / not listed: use “{text}”', 'Boshqa / ro‘yxatda yo‘q: “{text}” deb yozish', 'Другое / нет в списке: указать «{text}»'),
+  'occ.other.text': c('Describe your profession in your own words', 'Kasbingizni o‘z so‘zlaringiz bilan yozing', 'Опишите профессию своими словами'),
+  'occ.none': c('No matches. Try a shorter word, or choose “Other”.', 'Mos keladigani yo‘q. Qisqaroq so‘z yozing yoki “Boshqa”ni tanlang.', 'Совпадений нет. Попробуйте короче или выберите «Другое».'),
+  'occ.clear': c('Clear selection', 'Tanlovni tozalash', 'Очистить выбор'),
+
   // Skill progression after a completed course
   'prog.title': c('Nice work! Update your skill levels?', 'Barakalla! Ko‘nikma darajalaringizni yangilaymizmi?', 'Отлично! Обновить уровни навыков?'),
   'prog.lede': c(

@@ -1,3 +1,5 @@
+import { OCCUPATION_MAP, SECTOR_MAP, occupationKeywords, type SectorId } from '@/data/occupations';
+const sectorKeywords = (id: string) => { const sec = SECTOR_MAP[id as SectorId]; return sec ? `${sec.name.en} ${sec.aliases} ${sec.roleCategories.join(' ')}` : ''; };
 import { ROLE_MAP, ROLES } from '@/data/roles';
 import { SKILL_MAP } from '@/data/skills';
 import { COURSES } from '@/data/courses';
@@ -91,7 +93,10 @@ export function strategyPriority(profileInput: Profile | Partial<Profile> | null
   if (!role) return 99;
   const details = profile.extended;
   const strategy = details?.careerStrategy as string | undefined;
-  const currentWork = [details?.profession, details?.fieldOfWork, details?.specialization, profile.objective].filter(Boolean).join(' ');
+  // Selected occupation/sector add their standard English names, aliases and
+  // role categories, so a profession chosen in Uzbek or Russian still matches.
+  const currentWork = [details?.profession, details?.fieldOfWork, details?.specialization, profile.objective,
+    occupationKeywords(details?.professionId), details?.fieldId ? sectorKeywords(details.fieldId) : ''].filter(Boolean).join(' ');
   const targetRole = details?.strategyRole ? ROLE_MAP[details.strategyRole] : undefined;
 
   if (details?.strategyRole === roleSlug) return 0;
@@ -108,6 +113,9 @@ export function strategyPriority(profileInput: Profile | Partial<Profile> | null
     return 3;
   }
   if (strategy === 'new-field' || strategy === 'different-field') {
+    const target = details?.targetOccupationId ? OCCUPATION_MAP[details.targetOccupationId] : undefined;
+    if (target && SECTOR_MAP[target.sector].roleCategories.includes(role.category)
+      && (!details?.newField || details.newField === role.category)) return 0;
     if (details?.newField && role.category.toLowerCase() === details.newField.toLowerCase()) return 0;
     if (details?.newField && categoryMatches(details.newField, role.category)) return 1;
     return 2;

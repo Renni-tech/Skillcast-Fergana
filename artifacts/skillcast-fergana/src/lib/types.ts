@@ -14,7 +14,13 @@ export type CareerStrategy = 'enhance' | 'related-transition' | 'new-field' | 'a
 export interface IndividualProfileDetails {
   employmentStatus?: EmploymentStatus;
   fieldOfWork?: string;
+  /** Sector id from data/occupations (fieldOfWork keeps the display text). */
+  fieldId?: string;
+  /** Current profession: occupation id from data/occupations, or 'other'. */
   profession?: string;
+  professionId?: string;
+  /** Desired future profession (kept separate from the current one). */
+  targetOccupationId?: string;
   specialization?: string;
   educationLevel?: string;
   country?: string;

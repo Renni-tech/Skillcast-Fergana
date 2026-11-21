@@ -29,6 +29,8 @@ import { INTERESTS, PERSONAS, useSkillCast } from '@/lib/store';
 import { LANGS } from '@/lib/i18n';
 import { matchAll } from '@/lib/matching';
 import { MAX_WEEKLY_HOURS, PLAN_PACE_CAP } from '@/lib/profile';
+import { OCCUPATION_MAP, OTHER_OCCUPATION, SECTOR_MAP } from '@/data/occupations';
+import { OccupationPicker, SectorPicker } from './occupation-picker';
 import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualProfileDetails } from '@/lib/types';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
@@ -307,7 +309,7 @@ function ProfileStep({
   details: IndividualProfileDetails;
   patchDetails: (patch: Partial<IndividualProfileDetails>) => void;
 }) {
-  const { profile, setProfile } = useSkillCast();
+  const { profile, setProfile, lang } = useSkillCast();
   const languages = details.languages ?? [];
   const [languageChoice, setLanguageChoice] = useState('');
 
@@ -343,13 +345,21 @@ function ProfileStep({
           </Select>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="field-work" className="text-slate-800">{t('flow.field')}</Label>
-            <Input id="field-work" value={details.fieldOfWork ?? ''} onChange={(e) => patchDetails({ fieldOfWork: e.target.value })} placeholder={t('e.g. Healthcare, finance, technology')} className={LIGHT_INPUT} />
-          </div>
-          <div>
-            <Label htmlFor="profession" className="text-slate-800">{t('Profession')}</Label>
-            <Input id="profession" value={details.profession ?? ''} onChange={(e) => patchDetails({ profession: e.target.value })} placeholder={t('e.g. Operations analyst')} className={LIGHT_INPUT} />
+          <SectorPicker value={details.fieldId ?? ''} onChange={(id, label) => patchDetails({ fieldId: id, fieldOfWork: label })} />
+          <div className="space-y-2">
+            <OccupationPicker label={t('occ.current.label')} value={details.professionId ?? ''} customText={details.profession}
+              sector={details.fieldId}
+              onChange={(id, label) => {
+                const occ = OCCUPATION_MAP[id];
+                patchDetails({
+                  professionId: id, profession: label,
+                  ...(occ && !details.fieldId ? { fieldId: occ.sector, fieldOfWork: SECTOR_MAP[occ.sector].name[lang] } : {}),
+                });
+              }} />
+            {details.professionId === OTHER_OCCUPATION && (
+              <Input aria-label={t('occ.other.text')} value={details.profession ?? ''} onChange={(e) => patchDetails({ profession: e.target.value })}
+                placeholder={t('occ.other.text')} className={LIGHT_INPUT} />
+            )}
           </div>
           <div>
             <Label htmlFor="specialization" className="text-slate-800">{t('Specialization')}</Label>
@@ -786,6 +796,11 @@ function CareerStrategyStep({ details, patchDetails }: { details: IndividualProf
               </details>
             </div>;
           })}</div>
+          <div className="rounded-xl border border-blue-100 bg-white p-4 dark:border-slate-700">
+            <OccupationPicker label={t('occ.target.label')} value={details.targetOccupationId ?? ''} allowOther={false}
+              onChange={(id) => { const occ = OCCUPATION_MAP[id]; patchDetails({ targetOccupationId: id, ...(occ ? { newField: SECTOR_MAP[occ.sector].roleCategories[0] ?? details.newField } : {}) }); }} />
+            <p className="mt-1.5 text-xs text-slate-500">{t('occ.target.hint')}</p>
+          </div>
           {categorySuggestions.length > 4 && <Button type="button" variant="outline" onClick={() => setShowAllFields((shown) => !shown)} className="border-blue-200 text-blue-700 hover:bg-blue-50">{showAllFields ? 'Show fewer fields' : 'Show all fields'}</Button>}
           {!hasPersonalData && <p className="text-xs text-slate-500">{t('General field suggestions shown because profile details are limited.')}</p>}
           {details.newField && <div className="space-y-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white p-4"><h4 className="font-semibold text-slate-900">{details.newField}{t(': related roles and learning priorities')}</h4>

@@ -1,3 +1,4 @@
+import { OCCUPATION_MAP, OTHER_OCCUPATION, SECTOR_MAP, type SectorId } from '@/data/occupations';
 import type {
   CareerStrategy,
   EmploymentStatus,
@@ -9,7 +10,10 @@ import type {
 const EMPTY_DETAILS: IndividualProfileDetails = {
   employmentStatus: '',
   fieldOfWork: '',
+  fieldId: '',
   profession: '',
+  professionId: '',
+  targetOccupationId: '',
   specialization: '',
   educationLevel: '',
   country: '',
@@ -105,6 +109,9 @@ export function normalizeProfile(value: unknown): Profile {
       : '',
     fieldOfWork: stringValue(details.fieldOfWork),
     profession: stringValue(details.profession),
+    fieldId: SECTOR_MAP[stringValue(details.fieldId) as SectorId] ? stringValue(details.fieldId) : '',
+    professionId: OCCUPATION_MAP[stringValue(details.professionId)] || stringValue(details.professionId) === OTHER_OCCUPATION ? stringValue(details.professionId) : '',
+    targetOccupationId: OCCUPATION_MAP[stringValue(details.targetOccupationId)] ? stringValue(details.targetOccupationId) : '',
     specialization: stringValue(details.specialization),
     educationLevel: stringValue(details.educationLevel),
     country: stringValue(details.country),

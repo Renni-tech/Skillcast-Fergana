@@ -156,3 +156,45 @@ describe('skill progression from completed courses', () => {
     expect(rolePathway(m, p, ['kaggle-pandas']).map((n) => n.courseSlug)).toContain('kaggle-pandas');
   });
 });
+
+describe('occupation taxonomy and autocomplete', () => {
+  test('covers every sector with unique, trilingual, valid entries', async () => {
+    const { OCCUPATIONS, SECTORS } = await import('../src/data/occupations');
+    const { SKILL_MAP } = await import('../src/data/skills');
+    expect(new Set(OCCUPATIONS.map((o) => o.id)).size).toBe(OCCUPATIONS.length);
+    for (const sec of SECTORS) expect(OCCUPATIONS.some((o) => o.sector === sec.id), sec.id).toBe(true);
+    for (const o of OCCUPATIONS) {
+      for (const l of LANGS) expect(o.name[l].trim(), o.id).toBeTruthy();
+      expect(o.name.uz).not.toMatch(/[а-яё]/i);
+      for (const sk of o.skills) expect(SKILL_MAP[sk], `${o.id}:${sk}`).toBeDefined();
+      if (o.isco) expect(o.isco).toMatch(/^\d{4}$/);
+    }
+  });
+
+  test('partial words find the right professions in all three languages', async () => {
+    const { searchOccupations } = await import('../src/data/occupations');
+    const top = (q: string, l: 'en' | 'uz' | 'ru') => searchOccupations(q, l).map((h) => h.item.id);
+    expect(top('soft', 'en')[0]).toBe('software-developer');
+    expect(top('design', 'en').slice(0, 4)).toEqual(expect.arrayContaining(['graphic-designer', 'ux-designer', 'interior-designer']));
+    expect(top('design', 'en')).not.toContain('actor-performer');
+    expect(top('emb', 'en')[0]).toBe('embroiderer');
+    expect(top('agri', 'en')).toEqual(expect.arrayContaining(['agri-technician', 'agronomist', 'crop-farmer']));
+    expect(top("o'qituvchi", 'uz')).toContain('school-teacher');
+    expect(top('кашта', 'ru')).toEqual([]);
+    expect(top('выш', 'ru')[0]).toBe('embroiderer');
+    expect(top('teacher', 'uz')[0]).toBe('school-teacher');
+  });
+
+  test('a selected profession feeds matching, and current ≠ target', async () => {
+    const { normalizeProfile } = await import('../src/lib/profile');
+    const { strategyPriority } = await import('../src/lib/matching');
+    const base = { persona: 'working-adult', years: 3, interests: ['health'], skills: { communication: 3 } };
+    const nurse = normalizeProfile({ ...base, extended: { careerStrategy: 'enhance', professionId: 'nurse', profession: 'Hamshira' } });
+    expect(strategyPriority(nurse, 'telehealth-coordinator')).toBe(0);
+    const target = normalizeProfile({ ...base, extended: { careerStrategy: 'new-field', professionId: 'nurse', targetOccupationId: 'solar-installer' } });
+    expect(target.extended.professionId).toBe('nurse');
+    expect(target.extended.targetOccupationId).toBe('solar-installer');
+    expect(strategyPriority(target, 'solar-technician')).toBe(0);
+    expect(normalizeProfile({ extended: { professionId: 'made-up' } }).extended.professionId).toBe('');
+  });
+});
