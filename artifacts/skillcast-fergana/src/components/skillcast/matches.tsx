@@ -18,6 +18,7 @@ import { INTERESTS, useSkillCast } from '@/lib/store';
 import { strategyPriority } from '@/lib/matching';
 import { normalizeProfile } from '@/lib/profile';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
+import { explainMatch } from './voice-assistant';
 import { InclusiveOpportunities } from './inclusive';
 
 const FORKS = [
@@ -297,7 +298,8 @@ function MatchCard({ match }: { match: RoleMatch }) {
         fallback?: boolean;
       };
 
-      setCoach(json.narration ?? null);
+      // The no-LLM fallback template is English only; localise it here.
+      setCoach(json.fallback && lang !== 'en' ? explainMatch(t, match) : json.narration ?? null);
       setCoachFallback(Boolean(json.fallback));
     } catch {
       setCoach(t('match.coach.fallback'));

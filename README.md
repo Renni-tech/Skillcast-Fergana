@@ -54,7 +54,15 @@ A five-step chain from source to recommendation, the live status of every retrie
 
 ### Accessibility
 
-Language switch (uz / ru / en), text size, high contrast, line spacing, underlined links, reduced motion, keyboard navigation with visible focus, non-colour status cues, chart text alternatives, and a **voice assistant** (Web Speech API in Chrome/Edge, typed input everywhere) that can find jobs, professions and courses, explain results and navigate.
+Language switch (uz / ru / en), text size, high contrast, line spacing, underlined links, reduced motion, keyboard navigation with visible focus, non-colour status cues, chart text alternatives, and a **career assistant** (voice or typed). It answers from the learner's saved profile and SkillCast data:
+  - what to learn next and why a pathway fits;
+  - what is missing and how long it will take;
+  - a plan for the week, progress so far, and where to learn a skill.
+
+  It also handles follow-up questions ("why?", "how do I learn it?", "tell me more") and offers buttons that open the relevant section. "Explain in more detail" calls the optional LLM narrator, with loading, error and retry states; without the LLM, a deterministic explanation in the learner's language is shown. Speech:
+  - Uzbek recognition with Cyrillic-to-Latin normalisation;
+  - clear messages for no speech, network or unsupported language, with "listen in Russian instead" when Uzbek recognition is unavailable;
+  - when the device has no Uzbek voice, the same answer can be read aloud in Russian or English.
 
 ## How it works
 

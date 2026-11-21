@@ -269,3 +269,29 @@ describe('badge rewards', () => {
     }
   });
 });
+
+describe('career assistant intents', () => {
+  test('advisor questions and follow-ups in three languages', async () => {
+    const { buildSkillIndex, parseIntent, uzCyrillicToLatin } = await import('../src/lib/voice-intents');
+    const { SKILLS } = await import('../src/data/skills');
+    const { SKILL_COPY } = await import('../src/lib/catalog-i18n');
+    const index = buildSkillIndex(SKILLS.map((s) => ({ slug: s.slug, names: [s.name, SKILL_COPY[s.slug]?.uz ?? '', SKILL_COPY[s.slug]?.ru ?? ''], aliases: s.aliases })));
+    const kind = (q: string) => parseIntent(q, index).kind;
+    for (const lang of LANGS) {
+      const t = makeT(lang);
+      expect(kind(t('va.f.why'))).toBe('why-match');
+      expect(kind(t('va.f.gaps'))).toBe('gaps');
+      expect(kind(t('va.f.time'))).toBe('time');
+      expect(kind(t('va.f.week'))).toBe('week-plan');
+      expect(kind(t('va.f.status'))).toBe('status');
+      expect(parseIntent(t('va.f.learn'), index)).toEqual({ kind: 'learn-skill', skill: null });
+      expect(kind(t('va.ex.next'))).toBe('next-learning');
+    }
+    expect(parseIntent('How do I learn machine learning?', index)).toEqual({ kind: 'learn-skill', skill: 'machine-learning' });
+    expect(kind('tell me more')).toBe('more');
+    expect(kind('batafsil')).toBe('more');
+    expect(kind('подробнее')).toBe('more');
+    expect(kind('Open progress')).toBe('navigate');
+    expect(kind(uzCyrillicToLatin('Кейинги нима ўрганишим керак?'))).toBe('next-learning');
+  });
+});
