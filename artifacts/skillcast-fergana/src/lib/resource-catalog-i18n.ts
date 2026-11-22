@@ -104,6 +104,16 @@ export const RESOURCE_CATALOG_COPY: Record<string, Copy> = {
   'lp.pathTabs': c('Your paths', 'Yo‘llaringiz', 'Ваши пути'),
   'lp.unavailable': c('This entry is no longer in the catalogue.', 'Bu yozuv endi katalogda yo‘q.', 'Этой записи больше нет в каталоге.'),
 
+  'mjs.title': c('Your way to this job in six steps', 'Bu ishga olti qadamda yo‘l', 'Путь к этой работе за шесть шагов'),
+  'mjs.howto': c(
+    'Each card answers six questions: where you are now, where you are going, what is missing, what to learn first, where to learn it and what to do next.',
+    'Har bir kartochka oltita savolga javob beradi: hozir qayerdasiz, qayerga borasiz, nima yetishmaydi, avval nimani o‘rganish kerak, qayerda o‘rganish mumkin va keyin nima qilish kerak.',
+    'Каждая карточка отвечает на шесть вопросов: где вы сейчас, куда идёте, чего не хватает, что изучить сначала, где это изучить и что сделать дальше.',
+  ),
+  'mjs.now': c('You have {n}% of the skills this job needs', 'Bu ish uchun kerakli ko‘nikmalarning {n}% sizda bor', 'У вас {n}% навыков, нужных для этой работы'),
+  'mjs.best': c('Best fit for you', 'Sizga eng mos', 'Подходит вам лучше всего'),
+  'mjs.learn.none': c('Nothing missing — keep practising', 'Hech narsa yetishmaydi — mashq qilishda davom eting', 'Всего хватает — продолжайте практиковаться'),
+  'mjs.where.none': c('Open the learning pathway to choose a course', 'Kurs tanlash uchun o‘quv yo‘lini oching', 'Откройте учебный путь, чтобы выбрать курс'),
   'pws.title': c('Your learning plan at a glance', 'O‘quv rejangiz bir qarashda', 'Ваш учебный план кратко'),
   'pws.now': c('Where you are', 'Hozir qayerdasiz', 'Где вы сейчас'),
   'pws.now.v': c('{score}% ready for {role}', '{role} uchun {score}% tayyor', 'Готовность к роли «{role}»: {score}%'),

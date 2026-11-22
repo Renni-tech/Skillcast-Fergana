@@ -383,7 +383,7 @@ export function CollectionButton({ landing }: { landing: boolean }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <button id="badge-collection-target" type="button" onClick={() => setCollection(true)} aria-label={label}
-          className={`chest-btn relative inline-flex h-9 min-w-11 items-center gap-1.5 overflow-visible rounded-full border px-2.5 text-xs font-bold tabular-nums transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 ${landing
+          className={`chest-btn relative inline-flex h-11 min-w-11 sm:h-9 items-center gap-1.5 overflow-visible rounded-full border px-2.5 text-xs font-bold tabular-nums transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 ${landing
             ? 'border-amber-400/40 bg-amber-400/10 text-amber-100 hover:bg-amber-400/20'
             : 'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200 dark:hover:bg-amber-500/20'}`}>
           <span key={pulse} className={pulse ? 'bc-landed inline-flex' : 'inline-flex'}><TreasureChest /></span>

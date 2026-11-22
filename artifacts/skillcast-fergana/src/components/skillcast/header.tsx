@@ -16,6 +16,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LANGS } from '@/lib/i18n';
+
+/** Short labels so four languages fit the 360px header. */
+const LANG_SHORT: Record<string, string> = { uz: 'UZ', 'uz-cyrl': 'ЎЗ', ru: 'RU', en: 'EN' };
 import { A11yButton } from './a11y';
 import { CollectionButton } from './achievements';
 import { useSkillCast, type View } from '@/lib/store';
@@ -73,7 +76,7 @@ export function Header() {
   ];
 
   return (
-    <header className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-colors ${landing
+    <header className={`relative top-0 z-40 sm:sticky border-b backdrop-blur-xl transition-colors ${landing
       ? 'border-white/10 bg-[#090b2b] text-white'
       : 'border-border bg-background/90 text-foreground supports-[backdrop-filter]:bg-background/75'
     }`}>
@@ -92,7 +95,7 @@ export function Header() {
           </span>
         </button>
 
-        <nav aria-label={t('Primary')} className="order-3 flex flex-1 flex-wrap items-center gap-1 sm:order-2 sm:justify-center">
+        <nav aria-label={t('Primary')} className="order-3 -mx-1 flex basis-full items-center sm:basis-auto sm:flex-1 gap-1 overflow-x-auto px-1 [scrollbar-width:none] sm:order-2 sm:mx-0 sm:w-auto sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
           {views.map((v) => (
             <Button
               key={v.id}
@@ -105,7 +108,7 @@ export function Header() {
                   setView(learnerOnboarded ? 'dashboard' : 'onboarding');
                 } else setView(v.id);
               }}
-              className={`h-8 text-sm ${landing
+              className={`h-11 shrink-0 text-sm sm:h-8 ${landing
                 ? view === v.id
                   ? 'bg-white/10 text-white hover:bg-white/15 hover:text-white'
                   : 'text-blue-100/70 hover:bg-white/[0.07] hover:text-white disabled:text-blue-100/30'
@@ -116,7 +119,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="order-2 ml-auto flex items-center gap-2 sm:order-3">
+        <div className="order-2 ml-auto flex items-center gap-1 sm:order-3 sm:gap-2">
           {mounted && <CollectionButton landing={landing} />}
           <A11yButton landing={landing} />
           <TooltipProvider>
@@ -125,7 +128,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 ${landing ? 'text-blue-100/75 hover:bg-white/10 hover:text-white' : ''}`}
+                  className={`h-11 w-11 sm:h-8 sm:w-8 ${landing ? 'text-blue-100/75 hover:bg-white/10 hover:text-white' : ''}`}
                   aria-label={t('nav.theme')}
                   onClick={() => switchTheme(() => setTheme(theme === 'dark' ? 'light' : 'dark'))}
                 >
@@ -145,9 +148,12 @@ export function Header() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Select value={lang} onValueChange={(v) => setLang(v as typeof lang)}>
-                  <SelectTrigger size="sm" aria-label={t('nav.lang')} className={`h-8 w-auto gap-1 text-xs ${landing ? 'border-white/15 bg-white/[0.04] text-blue-100/85 hover:bg-white/10' : 'border-dashed'}`}>
+                  <SelectTrigger size="sm" aria-label={t('nav.lang')} className={`w-auto gap-1 px-2 text-xs data-[size=sm]:h-11 sm:px-3 sm:data-[size=sm]:h-8 ${landing ? 'border-white/15 bg-white/[0.04] text-blue-100/85 hover:bg-white/10' : 'border-dashed'}`}>
                     <Languages className="h-3.5 w-3.5" aria-hidden />
-                    <SelectValue aria-label={t('nav.lang')} />
+                    <SelectValue aria-label={t('nav.lang')}>
+                      <span className="sm:hidden">{LANG_SHORT[lang]}</span>
+                      <span className="hidden sm:inline">{LANGS.find((l) => l.code === lang)?.label}</span>
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {LANGS.map((l) => (
@@ -158,13 +164,13 @@ export function Header() {
                   </SelectContent>
                 </Select>
               </TooltipTrigger>
-              <TooltipContent className="text-xs">{t('English · Uzbek · Русский')}</TooltipContent>
+              <TooltipContent className="text-xs">{t('English · Uzbek (Latin, Cyrillic) · Русский')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className={`h-8 w-8 ${landing ? 'text-blue-100/75 hover:bg-white/10 hover:text-white' : ''}`} aria-label={t('nav.reset')}>
+              <Button variant="ghost" size="icon" className={`h-11 w-11 sm:h-8 sm:w-8 ${landing ? 'text-blue-100/75 hover:bg-white/10 hover:text-white' : ''}`} aria-label={t('nav.reset')}>
                 <RotateCcw className="h-4 w-4" aria-hidden />
               </Button>
             </DropdownMenuTrigger>

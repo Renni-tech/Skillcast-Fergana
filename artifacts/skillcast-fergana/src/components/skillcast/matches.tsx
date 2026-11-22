@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Bot, CircleCheck, Cpu, GitBranch, Sparkles, Sprout } from 'lucide-react';
+import { ArrowRight, Bot, CircleCheck, Cpu, ExternalLink, GitBranch, Sparkles, Sprout } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,8 @@ import { normalizeProfile } from '@/lib/profile';
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { explainMatch } from './voice-assistant';
 import { InclusiveOpportunities } from './inclusive';
+import { bestForSkill } from '@/lib/resource-match';
+import { CATALOG_MAP, entryName } from '@/lib/resource-catalog';
 
 const FORKS = [
   {
@@ -123,6 +125,9 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
       <p className="text-sm text-muted-foreground">
         {t('match.guidance')}
       </p>
+      <p className="rounded-lg border border-teal-600/30 bg-teal-50/60 px-3 py-2 text-sm text-teal-900 dark:bg-teal-950/30 dark:text-teal-100">
+        {t('mjs.howto')}
+      </p>
 
       {!hasProfileSignals && validMatches.length > 0 && (
         <Card className="border-blue-200 bg-blue-50/60 dark:bg-slate-900">
@@ -185,8 +190,8 @@ export function MatchesTab({ matches }: { matches: RoleMatch[] }) {
             </Card>
           ) : (
             <div className="flex w-full min-w-0 flex-col gap-4">
-              {forkMatches.map((match) => (
-                <MatchCard key={match.roleSlug} match={match} />
+              {forkMatches.map((match, i) => (
+                <MatchCard key={match.roleSlug} match={match} best={i === 0} />
               ))}
             </div>
           )}
@@ -223,7 +228,7 @@ function isRenderableMatch(value: unknown): value is RoleMatch {
   );
 }
 
-function MatchCard({ match }: { match: RoleMatch }) {
+function MatchCard({ match, best = false }: { match: RoleMatch; best?: boolean }) {
   const t = useT();
   const {
     lang,
@@ -332,7 +337,7 @@ function MatchCard({ match }: { match: RoleMatch }) {
       }`}
     >
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
             <CardTitle className="flex flex-wrap items-center gap-2 text-xl text-slate-900">
               <span className="min-w-0 basis-full leading-snug sm:basis-auto">{roleTitle(t, role.slug)}</span>
@@ -357,6 +362,10 @@ function MatchCard({ match }: { match: RoleMatch }) {
                 </Badge>
               )}
 
+              {best && (
+                <Badge className="bg-teal-700 text-white">{t('mjs.best')}</Badge>
+              )}
+
               {isChosen && (
                 <Badge className="gap-1 bg-blue-600 text-white">
                   <CircleCheck className="h-3 w-3" aria-hidden />
@@ -367,16 +376,16 @@ function MatchCard({ match }: { match: RoleMatch }) {
 
           </div>
 
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-row items-center gap-3 sm:flex-col sm:gap-1">
             <div
-              className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.75rem] border border-blue-200 bg-blue-50 text-blue-800 shadow-sm sm:h-28 sm:w-28"
+              className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-[1.75rem] border border-blue-200 bg-blue-50 text-blue-800 shadow-sm sm:h-28 sm:w-28"
               role="img"
               aria-label={`${t('match.score')} ${match.score}%`}
             >
-              <span className="text-3xl font-bold leading-none tracking-tight sm:text-4xl">
+              <span className="text-2xl font-bold leading-none tracking-tight sm:text-4xl">
                 {match.score}%
               </span>
-              <span className="mt-2 text-sm font-medium tracking-wide">
+              <span className="mt-1 text-sm font-medium tracking-wide sm:mt-2">
                 {t('match')}
               </span>
             </div>
@@ -392,6 +401,8 @@ function MatchCard({ match }: { match: RoleMatch }) {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        <MatchJourney match={match} onLearn={openLearning} />
+
         <section
           aria-label={t('Current skill readiness')}
           className="rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/70 p-4"
@@ -649,5 +660,53 @@ function MatchCard({ match }: { match: RoleMatch }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+/** Six plain questions for one role: where am I → where am I going → what is
+ *  missing → what to learn → where to learn it → what to do next. */
+function MatchJourney({ match, onLearn }: { match: RoleMatch; onLearn: () => void }) {
+  const t = useT();
+  const { lang, profile } = useSkillCast();
+  const first = match.missingSkills[0]?.skill ?? match.gap[0]?.skill ?? null;
+  const best = useMemo(() => (first ? bestForSkill(profile, first, lang) : null), [profile, first, lang]);
+  const entry = best ? CATALOG_MAP[best.resource.id] : undefined;
+  const whereName = best ? (entry ? entryName(t, lang, entry) : best.resource.provider) : null;
+  const steps: Array<[string, React.ReactNode]> = [
+    [t('pws.now'), t('mjs.now', { n: match.skillReadiness })],
+    [t('pws.goal'), roleTitle(t, match.roleSlug)],
+    [t('pws.gap'), match.missingSkills.length ? t('pws.gap.v', { n: match.missingSkills.length }) : t('pws.gap.none')],
+    [t('pws.learn'), first ? skillName(t, first) : t('mjs.learn.none')],
+    [t('pws.where'), best && whereName ? (
+      <a href={best.resource.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-teal-600/50 underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300">
+        {whereName}
+        <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+        <span className="sr-only">({t('common.newTab')})</span>
+      </a>
+    ) : t('mjs.where.none')],
+  ];
+  return (
+    <section aria-label={t('mjs.title')} className="rounded-xl border border-teal-600/30 bg-teal-50/40 p-3 dark:bg-teal-950/20">
+      <h3 className="mb-2 text-sm font-semibold">{t('mjs.title')}</h3>
+      <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {steps.map(([label, value], i) => (
+          <li key={label} className="flex min-w-0 items-start gap-2 rounded-lg border bg-card p-2.5">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xs font-bold text-white" aria-hidden>{i + 1}</span>
+            <span className="min-w-0">
+              <span className="block text-xs text-muted-foreground">{label}</span>
+              <span className="block break-words text-sm font-medium">{value}</span>
+            </span>
+          </li>
+        ))}
+        <li className="flex min-w-0 items-start gap-2 rounded-lg border border-teal-600/50 bg-card p-2.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xs font-bold text-white" aria-hidden>6</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs text-muted-foreground">{t('pws.next')}</span>
+            <Button size="sm" className="mt-1 h-auto min-h-9 w-full gap-1 whitespace-normal bg-teal-700 py-1.5 text-white hover:bg-teal-800 dark:bg-teal-600" onClick={onLearn}>
+              {t('Open learning pathway')} <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </Button>
+          </span>
+        </li>
+      </ol>
+    </section>
   );
 }

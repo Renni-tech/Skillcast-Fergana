@@ -74,7 +74,7 @@ const inlineCopy: Record<string, { uz: string; ru: string }> = {
   "Illustrative demo": { uz: "Namoyish uchun demo", ru: "Иллюстративная демо-версия" },
   "Discover your strengths · Adapt to change · Achieve your next step": { uz: "Kuchli tomonlaringizni kashf eting · O'zgarishlarga moslashing · Keyingi qadamingizga erishing", ru: "Откройте свои сильные стороны · Адаптируйтесь к изменениям · Достигайте новых высот" },
   "2 scenarios": { uz: "2 ta stsenariy", ru: "2 сценария" },
-  "English · Uzbek · Русский": { uz: "Ingliz tili · O'zbek tili · Rus tili", ru: "Английский · Узбекский · Русский" },
+  "English · Uzbek (Latin, Cyrillic) · Русский": { uz: "Ingliz tili · O‘zbek tili (lotin, kirill) · Rus tili", ru: "Английский · Узбекский (латиница, кириллица) · Русский" },
   "SDG ledger on every role": { uz: "Har bir lavozim bo'yicha SDG daftari", ru: "Реестр ЦУР для каждой роли" },
   "match": { uz: "moslik", ru: "соответствие" },
   "Explore Roadmap": { uz: "Yo'l xaritasini ko'rish", ru: "Изучить дорожную карту" },

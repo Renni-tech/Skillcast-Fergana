@@ -53,6 +53,23 @@ export const FERGANA_UI_COPY: Record<string, Copy> = {
     'Aqlli ta’lim · Farg‘ona shahri → O‘zbekiston → Dunyo',
     'Умное образование · Фергана → Узбекистан → мир',
   ),
+  // Simplified hero: one headline, one subtitle, one action (plain words)
+  'hero.badge': c(
+    'Free demo · sample profiles only',
+    'Bepul demo · faqat namunaviy profillar',
+    'Бесплатное демо · только примерные профили',
+  ),
+  'hero.title': c(
+    'See which skills your next job needs',
+    'Keyingi ishingiz uchun qaysi ko‘nikmalar kerakligini bilib oling',
+    'Узнайте, какие навыки нужны для вашей следующей работы',
+  ),
+  'hero.subtitle': c(
+    'Answer a few short questions and get a step-by-step learning plan with real courses in Fergana, across Uzbekistan and online.',
+    'Bir nechta qisqa savolga javob bering va Farg‘onada, butun O‘zbekistonda hamda onlayn mavjud haqiqiy kurslar bilan bosqichma-bosqich o‘quv rejasini oling.',
+    'Ответьте на несколько коротких вопросов и получите пошаговый план обучения с реальными курсами в Фергане, по всему Узбекистану и онлайн.',
+  ),
+  'hero.cta': c('Build my skill plan', 'Ko‘nikma rejamni tuzish', 'Составить мой план навыков'),
   'landing.kicker': c(
     'An AI-assisted Smart Education and future-skills platform. Proof of concept with synthetic demo profiles only.',
     'Sun’iy intellekt yordamidagi aqlli ta’lim va kelajak ko‘nikmalari platformasi. Faqat sintetik demo profillar bilan ishlaydigan prototip.',
@@ -71,21 +88,21 @@ export const FERGANA_UI_COPY: Record<string, Copy> = {
   ),
   'landing.step2': c('Understand future skills', 'Kelajak ko‘nikmalarini tushuning', 'Поймите навыки будущего'),
   'landing.step2d': c(
-    'The Future Skills Radar shows which skills are rising, using dated, cited sources. Indicative, not a guarantee.',
-    'Kelajak ko‘nikmalari radari qaysi ko‘nikmalar o‘sib borayotganini sanasi va manbasi ko‘rsatilgan ma’lumotlar asosida ko‘rsatadi. Bu taxmin, kafolat emas.',
-    'Радар навыков будущего показывает растущие навыки по датированным источникам со ссылками. Это ориентир, а не гарантия.',
+    'See which skills employers are asking for more often. Every number shows its source and date. It is a guide, not a promise.',
+    'Ish beruvchilar qaysi ko‘nikmalarni ko‘proq so‘rayotganini ko‘ring. Har bir raqamning manbasi va sanasi ko‘rsatilgan. Bu yo‘l-yo‘riq, va’da emas.',
+    'Посмотрите, какие навыки работодатели просят всё чаще. У каждой цифры указаны источник и дата. Это ориентир, а не обещание.',
   ),
   'landing.step3': c('Find your gaps and pathways', 'Bo‘shliqlar va yo‘nalishlarni toping', 'Найдите пробелы и траектории'),
   'landing.step3d': c(
-    'Learning & career pathways explain which skills you already have and which ones to learn — work with AI, or move into a new field.',
-    'O‘quv va kasbiy yo‘nalishlar qaysi ko‘nikmalaringiz borligini va nimani o‘rganish kerakligini tushuntiradi — AI bilan ishlash yoki yangi sohaga o‘tish.',
-    'Учебные и карьерные траектории показывают, какие навыки у вас есть и чему учиться: работать вместе с ИИ или перейти в новую сферу.',
+    'See which skills you already have, which ones a job needs, and what is missing. Grow in your current field or move to a new one.',
+    'Qaysi ko‘nikmalaringiz borligini, ish uchun qaysilari kerakligini va nima yetishmayotganini ko‘ring. Hozirgi sohangizda o‘sing yoki yangisiga o‘ting.',
+    'Узнайте, какие навыки у вас уже есть, какие нужны для работы и чего не хватает. Растите в своей сфере или переходите в новую.',
   ),
   'landing.step4': c('Build and track your roadmap', 'Yo‘l xaritangizni tuzing va kuzating', 'Постройте маршрут и следите за прогрессом'),
   'landing.step4d': c(
-    'A Harada-inspired learning roadmap with real free courses and weekly milestones, linked to the SDGs.',
-    'Haqiqiy bepul kurslar va haftalik bosqichlardan iborat, BRM bilan bog‘langan Harada usuliga asoslangan o‘quv yo‘l xaritasi.',
-    'Учебный маршрут по мотивам метода Харада с реальными бесплатными курсами и еженедельными этапами, связанный с ЦУР.',
+    'Get a step-by-step plan with real courses — many of them free — and small weekly goals. Tick off each step as you go.',
+    'Haqiqiy kurslar (ko‘pchiligi bepul) va kichik haftalik maqsadlar bilan bosqichma-bosqich reja oling. Har bir qadamni bajargach, belgilab boring.',
+    'Получите пошаговый план с реальными курсами (многие бесплатны) и небольшими целями на неделю. Отмечайте каждый пройденный шаг.',
   ),
   'landing.sdg.title': c('Learning first: SDG 4 at the core', 'Avvalo ta’lim: markazda BRM 4', 'Сначала обучение: ЦУР 4 в основе'),
   'landing.sdg.desc': c(

@@ -250,15 +250,30 @@ body:has(.skillcast-landing) footer {
   50% { transform: translate3d(0, -15px, 0); }
 }
 
+/* Tablets: the labelled bubble moves to the bottom corner, clear of the copy. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .skillcast-bubble--five { top: auto; bottom: 6%; right: 5%; width: 104px; height: 104px; }
+  .skillcast-bubble--two { top: 30%; left: 2%; width: 48px; height: 48px; }
+}
+/* Below 640px every bubble sits fully inside the viewport, in the empty
+   bands above and below the centred hero copy, so none covers the text. */
 @media (max-width: 640px) {
-  .skillcast-bubble--one { top: 6%; left: -34px; width: 78px; height: 78px; }
-  .skillcast-bubble--two { top: 39%; left: -29px; width: 60px; height: 60px; }
-  .skillcast-bubble--three { bottom: 3%; left: 2%; width: 72px; height: 72px; }
-  .skillcast-bubble--four { top: 7%; right: -24px; width: 64px; height: 64px; }
-  .skillcast-bubble--five { top: 48%; right: -42px; width: 92px; height: 92px; }
-  .skillcast-bubble--six { right: 4%; bottom: 2%; width: 52px; height: 52px; }
-  .skillcast-bubble span { font-size: 0.62rem; }
+  .skillcast-bubble--one { top: 14px; left: 12px; width: 56px; height: 56px; }
+  .skillcast-bubble--two { top: 78px; left: 58px; width: 28px; height: 28px; }
+  .skillcast-bubble--three { top: auto; bottom: 14px; left: 12px; width: 76px; height: 76px; }
+  .skillcast-bubble--four { top: 22px; right: 14px; width: 44px; height: 44px; }
+  .skillcast-bubble--five { top: auto; bottom: 18px; right: 12px; width: 80px; height: 80px; }
+  .skillcast-bubble--six { bottom: 104px; right: 70px; width: 26px; height: 26px; }
+  .skillcast-bubble span { font-size: 0.62rem; line-height: 1.15; padding: 0 6px; }
   .skillcast-bubble small { font-size: 0.5rem; }
+  @keyframes skillcast-float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -6px, 0); }
+  }
+}
+/* Short screens (landscape phones): keep only the small plain bubbles. */
+@media (max-width: 900px) and (max-height: 620px) {
+  .skillcast-bubble--three, .skillcast-bubble--five { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -542,3 +557,27 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 @keyframes refl-slide { from { opacity: 0; transform: translate(-24px, -18px) rotate(-6deg) scale(.9) } to { opacity: 1; transform: rotate(var(--tilt, 0deg)) } }
 @keyframes refl-pin { 0% { transform: translateY(-26px) scale(1.4); opacity: 0 } 60% { transform: translateY(3px) scale(.9); opacity: 1 } 100% { transform: none } }
 @media (prefers-reduced-motion: reduce) { .refl-note, .refl-ready, .refl-enter, .refl-pin-drop, .refl-leave { animation: none !important; transition: none !important; } }
+
+/* Phones: every control is at least 44×44 px (WCAG 2.5.5 target size).
+   Dense grids that need smaller cells opt out with data-compact. */
+@media (max-width: 639px) {
+  button:not([data-compact]),
+  [role="tab"]:not([data-compact]),
+  [role="combobox"]:not([data-compact]),
+  a[data-slot="button"],
+  a[href].inline-flex,
+  a[href].flex {
+    min-height: 44px;
+  }
+  a[href].block:not([data-compact]) { padding-block: 12px; }
+  button:not([data-compact]),
+  [role="combobox"]:not([data-compact]) {
+    min-width: 44px;
+  }
+  .skip-link { min-height: 44px; }
+}
+
+/* Phones: body copy reads at 15px (Tailwind's text-sm) and 16px (text-base). */
+@media (max-width: 639px) {
+  :root { --text-sm: 0.9375rem; --text-sm--line-height: 1.5; }
+}

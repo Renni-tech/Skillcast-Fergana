@@ -73,7 +73,7 @@ export function A11yButton({ landing }: { landing: boolean }) {
       size="sm"
       onClick={() => setOpen(true)}
       aria-label={t('a11y.button')}
-      className={`h-8 gap-1.5 px-2 text-xs ${landing ? 'text-blue-100/80 hover:bg-white/10 hover:text-white' : ''}`}
+      className={`h-11 min-w-11 gap-1.5 px-2 text-xs sm:h-8 sm:min-w-0 ${landing ? 'text-blue-100/80 hover:bg-white/10 hover:text-white' : ''}`}
     >
       <Accessibility className="h-4 w-4 shrink-0" aria-hidden />
       <span className="hidden md:inline">{t('a11y.title')}</span>

@@ -41,27 +41,25 @@ export function Landing() {
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <Badge variant="outline" className="mb-6 gap-1.5 border-indigo-200/25 bg-white/[0.06] px-3 py-1 text-indigo-100 shadow-[0_0_32px_rgba(112,118,255,.15)] backdrop-blur-md">
             <Sparkles className="h-3 w-3" aria-hidden />
-            {t('landing.badge')}
+            {t('hero.badge')}
           </Badge>
-          <h1 className="mx-auto max-w-4xl text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-balance text-white sm:text-6xl lg:text-7xl">
-            {t('landing.title')}
+          <h1 className="mx-auto max-w-4xl text-[26px] font-semibold leading-[1.15] tracking-[-0.04em] text-balance text-white sm:text-6xl lg:text-7xl">
+            {t('hero.title')}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-blue-100/70 sm:text-lg sm:leading-8">{t('landing.subtitle')}</p>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-blue-100/55">{t('landing.kicker')}</p>
+          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-blue-100/75 sm:mt-6 sm:text-lg sm:leading-8">{t('hero.subtitle')}</p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
               size="lg"
               onClick={() => navigate('individual')}
-              className="h-12 gap-2 rounded-full border border-indigo-200/25 bg-gradient-to-r from-indigo-500 to-violet-500 px-7 text-white shadow-[0_10px_40px_rgba(91,91,220,.38)] transition-transform hover:-translate-y-0.5 hover:from-indigo-400 hover:to-violet-400"
+              className="mx-auto h-12 gap-2 rounded-full border border-indigo-200/25 bg-gradient-to-r from-indigo-500 to-violet-500 px-7 text-white shadow-[0_10px_40px_rgba(91,91,220,.38)] transition-transform hover:-translate-y-0.5 hover:from-indigo-400 hover:to-violet-400"
             >
-              {t(learnerOnboarded ? 'nav.dashboard' : 'landing.cta')}
+              {t(learnerOnboarded ? 'nav.dashboard' : 'hero.cta')}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </div>
           {learnerOnboarded && (
             <p className="mt-3 text-sm font-medium text-emerald-200" role="status">{t('welcome.back')} {t('welcome.continue')}.</p>
           )}
-          <p className="mt-6 text-xs tracking-wide text-blue-100/45">{t('Discover your strengths · Adapt to change · Achieve your next step')}</p>
         </div>
       </section>
 

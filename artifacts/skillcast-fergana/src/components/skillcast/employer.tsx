@@ -182,7 +182,7 @@ export function EmployerView() {
           </div>
         </div>
         {isDemo && (
-          <Button variant="outline" size="sm" onClick={() => { setUserType('employer'); setView('onboarding'); }} className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => { setUserType('employer'); setView('onboarding'); }} className="h-auto max-w-full gap-2 whitespace-normal py-2 text-left">
             <Building2 className="h-4 w-4" aria-hidden /> {t('emp.setup.cta')}
           </Button>
         )}
