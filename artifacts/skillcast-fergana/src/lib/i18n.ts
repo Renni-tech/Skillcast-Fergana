@@ -12,6 +12,7 @@ import { LEARNER_FLOW_COPY } from './learner-flow-i18n';
 import { FERGANA_UI_COPY } from './fergana-ui-i18n';
 import { EXPERIENCE_COPY } from './experience-i18n';
 import { QUALITY_COPY } from './quality-i18n';
+import { latinToCyrillic } from './uz-cyrillic';
 import { RESOURCE_CATALOG_COPY, TOPIC_COPY } from './resource-catalog-i18n';
 import { SILK_BADGE_COPY } from './silk-badges-i18n';
 
@@ -1000,6 +1001,7 @@ const DICTS: Record<Lang, Dict> = {
   en: { ...en, ...HR_DICTIONARIES.en },
   uz: { ...uz, ...HR_DICTIONARIES.uz },
   ru: { ...ru, ...HR_DICTIONARIES.ru },
+  'uz-cyrl': {}, // built from the finished Uzbek (Latin) dictionary below
 };
 
 for (const skill of SKILLS) {
@@ -1091,6 +1093,10 @@ for (const key of Object.keys(DICTS.uz)) {
   DICTS.uz[key] = DICTS.uz[key].replace(/SDG(?! Academy)/g, 'BRM');
 }
 
+// Uzbek Cyrillic: the reviewed Uzbek Latin copy in Cyrillic script (lib/uz-cyrillic).
+for (const [key, value] of Object.entries(DICTS.uz)) DICTS['uz-cyrl'][key] = latinToCyrillic(value);
+DICTS['uz-cyrl']['lang.uz'] = 'Ўзбекча (Лотин)';
+
 const referenceKeys = Object.keys(DICTS.en).sort();
 for (const code of Object.keys(DICTS) as Lang[]) {
   const keys = Object.keys(DICTS[code]).sort();
@@ -1107,9 +1113,10 @@ for (const code of Object.keys(DICTS) as Lang[]) {
 /** Read-only view of the assembled dictionaries, for parity tests and audits. */
 export const I18N_DICTS: Readonly<Record<Lang, Readonly<Dict>>> = DICTS;
 
-// Exactly three languages; Uzbek is the default (see store.ts).
+// Four interface languages; Uzbek (Latin) is the default (see store.ts).
 export const LANGS: Array<{ code: Lang; label: string; short: string }> = [
-  { code: 'uz', label: 'O‘zbek', short: 'UZ' },
+  { code: 'uz', label: 'O‘zbek (Lotin)', short: 'UZ' },
+  { code: 'uz-cyrl', label: 'Ўзбекча (Кирилл)', short: 'ЎЗ' },
   { code: 'ru', label: 'Русский', short: 'RU' },
   { code: 'en', label: 'English', short: 'EN' },
 ];

@@ -25,6 +25,7 @@ import raw from '@/data/catalog/resources.json';
 import { LEARNING_RESOURCES, type LearningResource, type ResourceArea } from '@/data/learning-resources';
 import { LEARNING_SOURCE_MAP } from '@/data/learning-sources';
 import type { Lang } from './types';
+import { latinToCyrillic } from './uz-cyrillic';
 
 export const CATALOG_TOPICS = [
   'ai', 'programming', 'data', 'cybersecurity', 'robotics', 'digital', 'design', 'ecommerce',
@@ -223,17 +224,23 @@ type T = (key: string, vars?: Record<string, string | number>) => string;
 export function textLang(lang: Lang): TextLang {
   return (lang === 'ru' || lang === 'en' ? lang : 'uz');
 }
+/** Inline catalogue text in the interface language (Uzbek Cyrillic from the Uzbek copy). */
+function pick(lang: Lang, text: Record<TextLang, string> | undefined): string | null {
+  if (!text) return null;
+  const v = text[textLang(lang)];
+  return lang === 'uz-cyrl' ? latinToCyrillic(v) : v;
+}
 export function entryName(t: T, lang: Lang, e: CatalogEntry): string {
-  return e.text ? e.text.name[textLang(lang)] : t(`${e.copyKey}.name`);
+  return pick(lang, e.text?.name) ?? t(`${e.copyKey}.name`);
 }
 export function entryDesc(t: T, lang: Lang, e: CatalogEntry): string {
-  return e.text ? e.text.d[textLang(lang)] : t(`${e.copyKey}.d`);
+  return pick(lang, e.text?.d) ?? t(`${e.copyKey}.d`);
 }
 export function entryNote(lang: Lang, e: CatalogEntry): string | null {
-  return e.text?.note?.[textLang(lang)] ?? null;
+  return pick(lang, e.text?.note);
 }
 export function entryDuration(lang: Lang, e: CatalogEntry): string | null {
-  return e.duration?.[textLang(lang)] ?? null;
+  return pick(lang, e.duration);
 }
 
 /** Shape the existing ranking (lib/resource-match) understands. */

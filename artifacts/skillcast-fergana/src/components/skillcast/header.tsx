@@ -62,7 +62,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const [confirmReset, setConfirmReset] = useState(false);
   const mounted = useMounted();
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  useEffect(() => { document.documentElement.lang = lang === 'uz-cyrl' ? 'uz-Cyrl' : lang; }, [lang]);
   const landing = view === 'landing';
 
   const views: Array<{ id: View; label: string; enabled: boolean }> = [

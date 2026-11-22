@@ -92,8 +92,8 @@ export function ResourceFinder({ gaps }: { gaps: string[] }) {
           })}
         </div>
 
-        <div className="grid grid-cols-3 items-end gap-2 sm:gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
-          <label htmlFor={searchId} className="col-span-3 grid gap-1.5 text-xs font-medium lg:col-span-1">
+        <div className="grid grid-cols-1 items-end gap-2 min-[440px]:grid-cols-3 sm:gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+          <label htmlFor={searchId} className="grid gap-1.5 text-xs font-medium min-[440px]:col-span-3 lg:col-span-1">
             {t('cat.search.label')}
             <span className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />

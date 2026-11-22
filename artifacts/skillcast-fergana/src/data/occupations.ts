@@ -1,3 +1,4 @@
+import { latinToCyrillic } from '@/lib/uz-cyrillic';
 // ─── Occupation & sector taxonomy (EN / UZ / RU) ───────────────────────────
 // Foundation: ILO ISCO-08 (International Standard Classification of
 // Occupations), unit-group codes in `isco` where the mapping is direct.
@@ -18,7 +19,7 @@ export type SectorId =
 
 export interface Sector {
   id: SectorId;
-  name: { en: string; uz: string; ru: string };
+  name: { en: string; uz: string; ru: string; 'uz-cyrl': string };
   /** SkillCast role categories this sector feeds (data/roles.ts `category`). */
   roleCategories: string[];
   /** Interest ids (lib/store INTERESTS). */
@@ -31,13 +32,13 @@ export interface Occupation {
   /** ISCO-08 unit group, when the mapping is direct. */
   isco: string | null;
   sector: SectorId;
-  name: { en: string; uz: string; ru: string };
+  name: { en: string; uz: string; ru: string; 'uz-cyrl': string };
   aliases: string;
   skills: string[];
 }
 
 const s = (id: SectorId, en: string, uz: string, ru: string, roleCategories: string[], interests: string[], aliases = ''): Sector =>
-  ({ id, name: { en, uz, ru }, roleCategories, interests, aliases });
+  ({ id, name: { en, uz, ru, 'uz-cyrl': latinToCyrillic(uz) }, roleCategories, interests, aliases });
 
 export const SECTORS: Sector[] = [
   s('it', 'Information technology & software', 'Axborot texnologiyalari va dasturlash', 'ИТ и разработка ПО', ['Technology', 'AI'], ['technology', 'ai'], 'software computer digital it dasturiy kompyuter программ компьютер цифров'),
@@ -61,7 +62,7 @@ export const SECTORS: Sector[] = [
 export const SECTOR_MAP: Record<SectorId, Sector> = Object.fromEntries(SECTORS.map((x) => [x.id, x])) as Record<SectorId, Sector>;
 
 const o = (id: string, isco: string | null, sector: SectorId, [en, uz, ru]: [string, string, string], aliases: string, skills: string[]): Occupation =>
-  ({ id, isco, sector, name: { en, uz, ru }, aliases, skills });
+  ({ id, isco, sector, name: { en, uz, ru, 'uz-cyrl': latinToCyrillic(uz) }, aliases, skills });
 
 export const OCCUPATIONS: Occupation[] = [
   // IT & software
@@ -219,7 +220,7 @@ export const OCCUPATION_MAP: Record<string, Occupation> = Object.fromEntries(OCC
 /** Sentinel for "my profession is not listed" (free text is kept separately). */
 export const OTHER_OCCUPATION = 'other';
 
-type Lang = 'en' | 'uz' | 'ru';
+type Lang = 'en' | 'uz' | 'ru' | 'uz-cyrl';
 
 /** Lower-cases and folds apostrophe variants so "o'qituvchi" finds "o‘qituvchi". */
 export function fold(text: string): string {
@@ -259,7 +260,7 @@ export function searchOccupations(query: string, lang: Lang, sector?: SectorId |
     let total = 0;
     for (const w of words) {
       const sc = Math.max(scoreText(w, [item.name[lang]]) * 1.2,
-        scoreText(w, [item.name.en, item.name.uz, item.name.ru, item.isco ?? '', item.aliases]));
+        scoreText(w, [item.name.en, item.name.uz, item.name.ru, item.name['uz-cyrl'], item.isco ?? '', item.aliases]));
       if (sc === 0) return { item, score: 0 };
       total += sc;
     }

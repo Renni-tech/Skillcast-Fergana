@@ -4,6 +4,8 @@
 // render correctly. Nothing leaves the device: the file is downloaded or
 // handed to the system share sheet.
 
+import type { Lang } from './types';
+import { latinToCyrillic } from './uz-cyrillic';
 import type { jsPDF as JsPDF } from 'jspdf';
 import type { WindRose } from './wind-rose';
 
@@ -13,7 +15,7 @@ type Translate = (key: string, vars?: Record<string, string | number>) => string
 export interface ReportData {
   kind: ReportKind;
   t: Translate;
-  lang: 'uz' | 'ru' | 'en';
+  lang: Lang;
   /** Shown only if the learner typed it in the export dialog. */
   name?: string;
   date: Date;
@@ -78,8 +80,8 @@ export async function buildReport(d: ReportData): Promise<Blob> {
   text(t(`pdf.title.${d.kind}`), 20, true);
   // Browsers format Uzbek dates inconsistently ("2026 M11 21"), so spell them out.
   const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
-  const dateStr = d.lang === 'uz'
-    ? `${d.date.getFullYear()}-yil ${d.date.getDate()}-${UZ_MONTHS[d.date.getMonth()]}`
+  const dateStr = d.lang === 'uz' || d.lang === 'uz-cyrl'
+    ? (d.lang === 'uz' ? (s: string) => s : latinToCyrillic)(`${d.date.getFullYear()}-yil ${d.date.getDate()}-${UZ_MONTHS[d.date.getMonth()]}`)
     : new Intl.DateTimeFormat(d.lang === 'ru' ? 'ru-RU' : 'en-GB', { dateStyle: 'long' }).format(d.date);
   text([d.name?.trim() ? t('pdf.for', { name: d.name.trim() }) : '', t('pdf.date', { date: dateStr })].filter(Boolean).join(' · '), 10, false, MUTED);
   text(d.profileLine, 10, false, MUTED);

@@ -1,3 +1,4 @@
+import { latinToCyrillic } from './uz-cyrillic';
 import { useSkillCast } from '@/lib/store';
 import type { Lang } from '@/lib/types';
 
@@ -345,14 +346,14 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'src.skills.empty': c('No skill counts in demo baseline mode.', 'Demo rejimida ko‘nikma sonlari yo‘q.', 'В демо-режиме счётчиков навыков нет.'),
 };
 
-const LOCALE: Record<Lang, string> = { en: 'en-GB', uz: 'uz-Latn-UZ', ru: 'ru-RU' };
+const LOCALE: Record<Lang, string> = { en: 'en-GB', uz: 'uz-Latn-UZ', ru: 'ru-RU', 'uz-cyrl': 'uz-Cyrl-UZ' };
 
 export type SourceT = (key: string, vars?: Record<string, string | number>) => string;
 
 export function makeSourceT(lang: Lang): SourceT {
   return (key, vars) => {
     const entry = SOURCE_COPY[key];
-    let s = entry ? entry[lang] ?? entry.en : key;
+    let s = entry ? (lang === 'uz-cyrl' ? latinToCyrillic(entry.uz) : entry[lang] ?? entry.en) : key;
     if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
     return s;
   };
@@ -366,7 +367,7 @@ export function useSourceT() {
     if (Number.isNaN(d.getTime())) return null;
     // Browser ICU data for uz-Latn is sparse (e.g. "2026 M11 17"): use the
     // dd.mm.yyyy form common in Uzbekistan instead.
-    if (lang === 'uz') {
+    if (lang === 'uz' || lang === 'uz-cyrl') {
       const p = (n: number) => String(n).padStart(2, '0');
       const date = `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`;
       return withTime ? `${date}, ${p(d.getHours())}:${p(d.getMinutes())}` : date;

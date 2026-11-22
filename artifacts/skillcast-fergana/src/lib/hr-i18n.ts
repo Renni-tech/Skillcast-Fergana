@@ -327,7 +327,7 @@ const COPY: Record<string, [en: string, ru: string]> = {
   "hr.person.Employee 12 (batch, synthetic)": ["Employee 12", "Сотрудник 12"],
 };
 
-export const HR_DICTIONARIES: Record<Lang, Record<string, string>> = {
+export const HR_DICTIONARIES: Record<Exclude<Lang, 'uz-cyrl'>, Record<string, string>> = {
   en: {},
   uz: { ...hrUz },
   ru: {},

@@ -173,14 +173,16 @@ describe('occupation taxonomy and autocomplete', () => {
 
   test('partial words find the right professions in all three languages', async () => {
     const { searchOccupations } = await import('../src/data/occupations');
-    const top = (q: string, l: 'en' | 'uz' | 'ru') => searchOccupations(q, l).map((h) => h.item.id);
+    const top = (q: string, l: 'en' | 'uz' | 'ru' | 'uz-cyrl') => searchOccupations(q, l).map((h) => h.item.id);
     expect(top('soft', 'en')[0]).toBe('software-developer');
     expect(top('design', 'en').slice(0, 4)).toEqual(expect.arrayContaining(['graphic-designer', 'ux-designer', 'interior-designer']));
     expect(top('design', 'en')).not.toContain('actor-performer');
     expect(top('emb', 'en')[0]).toBe('embroiderer');
     expect(top('agri', 'en')).toEqual(expect.arrayContaining(['agri-technician', 'agronomist', 'crop-farmer']));
     expect(top("o'qituvchi", 'uz')).toContain('school-teacher');
-    expect(top('кашта', 'ru')).toEqual([]);
+    // "кашта" is Uzbek Cyrillic for embroidery, so it now finds the embroiderer.
+    expect(top('кашта', 'uz-cyrl')[0]).toBe('embroiderer');
+    expect(top('ўқитувчи', 'uz-cyrl')).toContain('school-teacher');
     expect(top('выш', 'ru')[0]).toBe('embroiderer');
     expect(top('teacher', 'uz')[0]).toBe('school-teacher');
   });

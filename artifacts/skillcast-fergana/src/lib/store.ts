@@ -449,7 +449,7 @@ export const useSkillCast = create<SkillCastState>()(
           ? value.filter((item): item is string => typeof item === 'string') : [];
         return {
           ...current,
-          lang: ['en', 'uz', 'ru'].includes(String(saved.lang)) ? saved.lang as Lang : 'uz',
+          lang: ['en', 'uz', 'ru', 'uz-cyrl'].includes(String(saved.lang)) ? saved.lang as Lang : 'uz',
           scenario: saved.scenario === 'accelerated' ? 'accelerated' : 'moderate',
           userType: ['individual', 'employer', 'institution'].includes(String(saved.userType))
             ? saved.userType as UserType : null,
@@ -492,7 +492,7 @@ export const useSkillCast = create<SkillCastState>()(
       },
       onRehydrateStorage: () => (state) => {
         if (state) state.setProfile(normalizeProfile(state.profile));
-        if (state && !['en', 'uz', 'ru'].includes(String(state.lang))) {
+        if (state && !['en', 'uz', 'ru', 'uz-cyrl'].includes(String(state.lang))) {
           state.setLang('uz');
         }
         if (state && String(state.employer?.budgetPref) === 'hrd') {

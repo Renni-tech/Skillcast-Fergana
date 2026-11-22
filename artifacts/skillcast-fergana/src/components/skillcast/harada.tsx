@@ -558,11 +558,11 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h3 className="font-semibold text-slate-900">
-                  {selected?.name ?? t('Choose a skill')}
+                  {selected ? skillName(t, selected.skill) : t('Choose a skill')}
                 </h3>
                 <p className="mt-1 text-sm text-slate-600">
                   {selected
-                    ? `${selected.current}/5 current · ${selected.target}/5 target · ${skillCategory(t, selected.category)}`
+                    ? `${t('harada.current')}: ${selected.current}/5 · ${t('harada.required')}: ${selected.target}/5 · ${skillCategory(t, selected.category)}`
                     : t('No role skills are available.')}
                 </p>
               </div>
@@ -802,7 +802,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   <tr key={row.skill} className="border-b last:border-0">
                     <td className="py-2.5 pr-3">
                       <span className="font-medium text-slate-900">
-                        {row.name}
+                        {skillName(t, row.skill)}
                       </span>
                       <span className="block text-xs text-slate-500">
                         {skillCategory(t, row.category)}

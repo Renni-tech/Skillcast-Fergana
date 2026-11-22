@@ -9,7 +9,7 @@
 import { chunkForSpeech, normalizeForSpeech, type SpeechLang } from './speech-text';
 
 export const NEURAL_VOICES: Record<'uz' | 'ru' | 'en', Array<{ id: string; label: string }>> = {
-  uz: [{ id: 'uz-UZ-MadinaNeural', label: 'Madina' }, { id: 'uz-UZ-SardorNeural', label: 'Sardor' }],
+  uz: [{ id: 'uz-UZ-MadinaNeural', label: 'Madina / Мадина' }, { id: 'uz-UZ-SardorNeural', label: 'Sardor / Сардор' }],
   ru: [{ id: 'ru-RU-SvetlanaNeural', label: 'Светлана' }, { id: 'ru-RU-DmitryNeural', label: 'Дмитрий' }],
   en: [{ id: 'en-US-AvaNeural', label: 'Ava' }, { id: 'en-US-AndrewNeural', label: 'Andrew' }],
 };

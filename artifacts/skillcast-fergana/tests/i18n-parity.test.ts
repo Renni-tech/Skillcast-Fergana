@@ -11,10 +11,10 @@ import { useSkillCast } from '../src/lib/store';
 
 const LANG_CODES = ['uz', 'ru', 'en'] as const;
 
-describe('localization: Uzbek, Russian and English only', () => {
-  test('exactly three selectable languages, Uzbek first', () => {
-    expect(LANGS.map((l) => l.code)).toEqual(['uz', 'ru', 'en']);
-    expect(Object.keys(I18N_DICTS).sort()).toEqual(['en', 'ru', 'uz']);
+describe('localization: Uzbek (Latin and Cyrillic), Russian and English', () => {
+  test('four selectable languages, Uzbek (Latin) first, then Uzbek Cyrillic', () => {
+    expect(LANGS.map((l) => l.code)).toEqual(['uz', 'uz-cyrl', 'ru', 'en']);
+    expect(Object.keys(I18N_DICTS).sort()).toEqual(['en', 'ru', 'uz', 'uz-cyrl']);
   });
 
   test('a new visitor sees Uzbek', () => {

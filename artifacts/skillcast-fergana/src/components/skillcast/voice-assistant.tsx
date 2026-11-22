@@ -40,8 +40,8 @@ import { courseProvider, courseTitle, roleTitle, skillCategory, skillName, useSi
 
 type Translate = ReturnType<typeof makeT>;
 
-const SPEECH_LANG: Record<Lang, string> = { uz: 'uz-UZ', ru: 'ru-RU', en: 'en-GB' };
-const LANG_NAME_KEY: Record<Lang, string> = { uz: 'ls.lang.uz', ru: 'ls.lang.ru', en: 'ls.lang.en' };
+const SPEECH_LANG: Record<Lang, string> = { uz: 'uz-UZ', 'uz-cyrl': 'uz-UZ', ru: 'ru-RU', en: 'en-GB' };
+const LANG_NAME_KEY: Record<Lang, string> = { uz: 'ls.lang.uz', 'uz-cyrl': 'ls.lang.uz', ru: 'ls.lang.ru', en: 'ls.lang.en' };
 
 type Recognition = {
   lang: string; interimResults: boolean; continuous: boolean; maxAlternatives: number;
@@ -161,7 +161,7 @@ export function VoiceAssistant() {
 
   function voiceFor(l: Lang): SpeechSynthesisVoice | null {
     void voices; // re-evaluated when the device's voice list loads
-    return deviceVoiceFor(l);
+    return deviceVoiceFor(l === 'uz-cyrl' ? 'uz' : l);
   }
 
   async function speakText(text: string, l: Lang): Promise<boolean> {
@@ -469,7 +469,8 @@ export function VoiceAssistant() {
   }
 
   function handle(text: string) {
-    const clean = (lang === 'uz' ? uzCyrillicToLatin(text) : text).trim();
+    // Uzbek questions are understood in Latin script, whichever script the learner uses.
+    const clean = (lang === 'uz' || lang === 'uz-cyrl' ? uzCyrillicToLatin(text) : text).trim();
     if (!clean) return;
     if (a11y.handsFree && supported.mic) afterSpeech.current = () => { if (usePanels.getState().voiceOpen) toggleMic(); };
     const cmd = parseCommand(clean);

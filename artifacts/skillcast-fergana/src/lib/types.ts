@@ -1,7 +1,8 @@
 import type { FerganaEvidence, FerganaSourceState } from '@workspace/api-client-react';
 // ─── SkillCast shared types ────────────────────────────────────────────────
 
-export type Lang = 'en' | 'uz' | 'ru';
+/** 'uz' is Uzbek in Latin script; 'uz-cyrl' is Uzbek in Cyrillic script. */
+export type Lang = 'en' | 'uz' | 'ru' | 'uz-cyrl';
 export type ScenarioId = 'moderate' | 'accelerated';
 export type Persona = 'working-adult' | 'fresh-grad' | 'switcher' | 'tvet-student';
 export type PathType = 'work-with-ai' | 'pivot' | 'emerging';
