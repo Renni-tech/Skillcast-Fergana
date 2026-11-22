@@ -1,5 +1,12 @@
 'use client';
 
+export interface Reflection { id: string; text: string; createdAt: string }
+function normalizeReflections(input: unknown): Reflection[] {
+  if (!Array.isArray(input)) return [];
+  return input.filter((r): r is Reflection => !!r && typeof r === 'object' && typeof (r as Reflection).id === 'string'
+    && typeof (r as Reflection).text === 'string' && !Number.isNaN(new Date((r as Reflection).createdAt).getTime()))
+    .map((r) => ({ id: r.id, text: r.text.slice(0, 1000), createdAt: r.createdAt })).slice(0, 200);
+}
 import { addItem, newPathId, normalizePaths, setItemStatus, type LearningPath, type PathItemStatus } from './learning-paths';
 import { applyUpdates, revertUpdates, type ProposedUpdate, type SkillUpdate } from './progression';
 import { today, ALL_BADGES, WIND_ROSE_THEMES, type WindRoseTheme } from './achievements';
@@ -102,6 +109,10 @@ interface SkillCastState {
   themesAnnounced: WindRoseTheme[];
   /** Badges the learner has looked at in the collection (for the header's "new" dot). */
   badgesViewed: string[];
+  /** Saved weekly reflections (newest first). The draft lives in profile.weeklyReflection. */
+  reflections: Reflection[];
+  addReflection: (text: string) => string;
+  deleteReflection: (id: string) => void;
   markBadgesViewed: (ids: string[]) => void;
   announceTheme: (theme: WindRoseTheme) => void;
   createPath: (name: string, firstEntryId?: string) => string;
@@ -290,6 +301,13 @@ export const useSkillCast = create<SkillCastState>()(
       focusRose: (skill) => set({ roseFocus: skill }),
       roseThemeChange: null,
       setRoseThemeChange: (change) => set({ roseThemeChange: change }),
+      reflections: [],
+      addReflection: (text) => {
+        const id = `r-${Date.now().toString(36)}`;
+        set((st) => ({ reflections: [{ id, text: text.slice(0, 1000), createdAt: new Date().toISOString() }, ...st.reflections].slice(0, 200), activeDays: withToday(st.activeDays) }));
+        return id;
+      },
+      deleteReflection: (id) => set((st) => ({ reflections: st.reflections.filter((r) => r.id !== id) })),
       badgesViewed: [],
       markBadgesViewed: (ids) => set((st) => (ids.every((id) => st.badgesViewed.includes(id)) ? {} : { badgesViewed: [...new Set([...st.badgesViewed, ...ids])] })),
       themesAnnounced: [],
@@ -353,6 +371,7 @@ export const useSkillCast = create<SkillCastState>()(
           activePathId: null,
           themesAnnounced: [],
           badgesViewed: [],
+          reflections: [],
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -385,6 +404,7 @@ export const useSkillCast = create<SkillCastState>()(
         activePathId: s.activePathId,
         themesAnnounced: s.themesAnnounced,
         badgesViewed: s.badgesViewed,
+        reflections: s.reflections,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -424,6 +444,7 @@ export const useSkillCast = create<SkillCastState>()(
           badgeSound: saved.badgeSound === true,
           windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
           seenTips: strings(saved.seenTips).slice(0, 50),
+          reflections: normalizeReflections(saved.reflections),
           // Older saves have no "viewed" list: treat what was already seen as viewed.
           badgesViewed: Array.isArray(saved.badgesViewed) ? strings(saved.badgesViewed) : strings(saved.badgesSeen),
           themesAnnounced: strings(saved.themesAnnounced).filter((x) => x in WIND_ROSE_THEMES) as WindRoseTheme[],

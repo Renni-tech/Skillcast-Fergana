@@ -1,5 +1,6 @@
 'use client';
 
+import { ReflectionBoard } from './reflection-board';
 import { useMemo } from 'react';
 import { Check, Clock3, ListChecks, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -89,10 +90,7 @@ export function ProgressDashboard({ matches }: { matches: RoleMatch[] }) {
         </Card>
       </div>
 
-      <Card className="border-blue-100 dark:border-slate-700 bg-white">
-        <CardHeader><CardTitle className="text-base text-slate-900">{t('Weekly reflection')}</CardTitle><CardDescription>{t('Save a private note in this browser about what you learned and your next action.')}</CardDescription></CardHeader>
-        <CardContent><Textarea value={profile.weeklyReflection ?? ''} maxLength={1000} onChange={(event) => setProfile({ weeklyReflection: event.target.value })} placeholder={t('What moved forward this week? What will you try next?')} className="min-h-28 border-blue-100 dark:border-slate-700"/><p className="mt-1 text-right text-xs text-slate-500">{(profile.weeklyReflection ?? '').length}/1000</p></CardContent>
-      </Card>
+      <ReflectionBoard />
     </div>
   );
 }
