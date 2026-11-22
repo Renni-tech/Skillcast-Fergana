@@ -60,6 +60,10 @@ async function playNeural(chunks: string[], base: 'uz' | 'ru' | 'en', o: SpeakOp
         body: JSON.stringify({ text, lang: base, voice, rate: o.rate, pitch: o.pitch }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      // A static host without the API (e.g. a plain SPA rewrite) answers with
+      // the HTML page and status 200; that is not speech, so use the device voice.
+      const type = res.headers.get('content-type') ?? '';
+      if (!/^audio\//i.test(type)) throw new Error(`not audio: ${type}`);
       blob = await res.blob();
     } catch {
       if (!started) { neuralDownUntil = Date.now() + 60_000; return false; }

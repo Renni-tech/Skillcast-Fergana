@@ -581,3 +581,22 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 @media (max-width: 639px) {
   :root { --text-sm: 0.9375rem; --text-sm--line-height: 1.5; }
 }
+
+/* Wind Rose "Find courses": same token as the dashed pathway-target line.
+   Dark ink keeps AA contrast on both the light (#0d9488) and dark (#10b981) teal. */
+.wr-target-btn {
+  background-color: var(--wr-target);
+  color: #020617;
+  font-weight: 600;
+}
+.wr-target-btn:hover {
+  background-color: color-mix(in srgb, var(--wr-target) 82%, white);
+}
+.wr-target-btn:focus-visible {
+  outline: 2px solid var(--wr-target);
+  outline-offset: 2px;
+}
+.wr-target-btn:disabled {
+  background-color: var(--wr-target);
+  opacity: 0.5;
+}

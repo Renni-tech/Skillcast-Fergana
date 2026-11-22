@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { create } from 'zustand';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
-  BookOpen, Check, Compass, Flame, Footprints, Lock, Rocket, Sparkles, Target, TrendingUp, Trophy,
+  BookOpen, Check, Compass, Eye, Flame, Footprints, Lock, Rocket, Sparkles, Target, TrendingUp, Trophy,
   Volume2, VolumeX, type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,11 +49,15 @@ const TIER_STYLE: Record<Tier, { face: string; rim: string; edge: string; glow: 
 // ─── UI state shared by header, pathway shelf and the host ────────────────
 interface BadgeUi {
   collectionOpen: boolean; replay: string | null; demo: string | null; nextPrompt: boolean;
+  /** Badge whose details are open in the preview (never awards anything). */
+  preview: string | null;
   setCollection: (open: boolean) => void; setReplay: (id: string | null) => void;
   setDemo: (id: string | null) => void; setNextPrompt: (open: boolean) => void;
+  setPreview: (id: string | null) => void;
 }
 export const useBadgeUi = create<BadgeUi>((set) => ({
-  collectionOpen: false, replay: null, demo: null, nextPrompt: false,
+  collectionOpen: false, replay: null, demo: null, nextPrompt: false, preview: null,
+  setPreview: (id) => set({ preview: id }),
   setCollection: (open) => set({ collectionOpen: open }),
   setReplay: (id) => set({ replay: id }),
   setDemo: (id) => set({ demo: id }),
@@ -69,30 +73,39 @@ export function demoBadge(earned: string[], snapshot: ProgressSnapshot): string 
 }
 
 // ─── Progress snapshot from local state ───────────────────────────────────
+type SnapshotInput = Pick<ReturnType<typeof useSkillCast.getState>, 'profile' | 'chosenRole' | 'completedCourses' | 'skillUpdates' | 'activeDays' | 'learnerOnboarded'>;
+
+/** Pure version of the snapshot, so the demo profile is judged by the same badge rules. */
+export function computeProgressSnapshot(s: SnapshotInput, momentumMap: Record<string, number>): ProgressSnapshot {
+  const { profile, chosenRole, completedCourses, skillUpdates, activeDays, learnerOnboarded } = s;
+  const match = chosenRole ? matchAll(profile, momentumMap).find((m) => m.roleSlug === chosenRole) ?? null : null;
+  const nodes = match ? rolePathway(match, profile, completedCourses) : [];
+  const taught = (set: Set<string>) => completedCourses.filter((slug) => COURSE_MAP[slug]?.skills.some((sk) => set.has(sk))).length;
+  const tasks = profile.completedRoadmapTasks ?? [];
+  const gaps = (match?.gap ?? []).slice(0, 5);
+  return {
+    onboarded: learnerOnboarded,
+    ratedSkills: Object.values(profile.skills ?? {}).filter((v) => Number(v) > 0).length,
+    chosenRole: !!match,
+    readiness: match?.skillReadiness ?? 0,
+    coursesDone: completedCourses.filter((slug) => COURSE_MAP[slug]).length,
+    aiCoursesDone: taught(AI_SKILLS),
+    greenCoursesDone: taught(GREEN_SKILLS),
+    activeDays: activeDays.length,
+    levelUps: skillUpdates.length,
+    milestones: tasks.length,
+    pathway: { done: nodes.filter((n) => completedCourses.includes(n.courseSlug)).length, total: nodes.length },
+    roleMilestones: { done: gaps.filter((g) => tasks.includes(`${chosenRole}:${g.skill}`)).length, total: gaps.length },
+  };
+}
+
 export function useProgressSnapshot(): ProgressSnapshot {
   const { profile, chosenRole, completedCourses, skillUpdates, activeDays, learnerOnboarded } = useSkillCast();
   const { momentumMap } = useSignals();
-  return useMemo(() => {
-    const match = chosenRole ? matchAll(profile, momentumMap).find((m) => m.roleSlug === chosenRole) ?? null : null;
-    const nodes = match ? rolePathway(match, profile, completedCourses) : [];
-    const taught = (set: Set<string>) => completedCourses.filter((slug) => COURSE_MAP[slug]?.skills.some((s) => set.has(s))).length;
-    const tasks = profile.completedRoadmapTasks ?? [];
-    const gaps = (match?.gap ?? []).slice(0, 5);
-    return {
-      onboarded: learnerOnboarded,
-      ratedSkills: Object.values(profile.skills ?? {}).filter((v) => Number(v) > 0).length,
-      chosenRole: !!match,
-      readiness: match?.skillReadiness ?? 0,
-      coursesDone: completedCourses.filter((slug) => COURSE_MAP[slug]).length,
-      aiCoursesDone: taught(AI_SKILLS),
-      greenCoursesDone: taught(GREEN_SKILLS),
-      activeDays: activeDays.length,
-      levelUps: skillUpdates.length,
-      milestones: tasks.length,
-      pathway: { done: nodes.filter((n) => completedCourses.includes(n.courseSlug)).length, total: nodes.length },
-      roleMilestones: { done: gaps.filter((g) => tasks.includes(`${chosenRole}:${g.skill}`)).length, total: gaps.length },
-    };
-  }, [profile, chosenRole, completedCourses, skillUpdates, activeDays, learnerOnboarded, momentumMap]);
+  return useMemo(
+    () => computeProgressSnapshot({ profile, chosenRole, completedCourses, skillUpdates, activeDays, learnerOnboarded }, momentumMap),
+    [profile, chosenRole, completedCourses, skillUpdates, activeDays, learnerOnboarded, momentumMap],
+  );
 }
 
 // ─── Medal ────────────────────────────────────────────────────────────────
@@ -405,7 +418,7 @@ export function CollectionButton({ landing }: { landing: boolean }) {
 export function BadgeCollection() {
   const t = useT();
   const { badges, badgesSeen, badgeSound, setBadgeSound, windRoseTheme, setWindRoseTheme, lang, markBadgesViewed } = useSkillCast();
-  const { collectionOpen, setCollection, setDemo } = useBadgeUi();
+  const { collectionOpen, setCollection, setDemo, setPreview } = useBadgeUi();
   const snapshot = useProgressSnapshot();
   const earned = Object.keys(badges).filter((id) => badgesSeen.includes(id));
   const title = titleFor(earned.length);
@@ -455,24 +468,29 @@ export function BadgeCollection() {
                   const has = earned.includes(id);
                   const prog = badgeProgress(id, snapshot);
                   return has ? (
-                    <TreasureSlot key={tier} id={id} earnedAt={badges[id]} dateFmt={dateFmt} />
+                    <div key={tier} data-badge={id} className="flex min-w-0 flex-col gap-2">
+                      <TreasureSlot id={id} earnedAt={badges[id]} dateFmt={dateFmt} />
+                      <PreviewButton id={id} />
+                    </div>
                   ) : (
-                    <div key={tier} className="flex min-w-0 flex-row items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-100/70 p-2 text-left dark:border-slate-700 dark:bg-slate-950/60 min-[420px]:flex-col min-[420px]:text-center">
-                      <button type="button" className="shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
-                        aria-label={`${t('sb.locked')}: ${t(`ach.tier.${tier}`)}. ${t(`sb.riddle.${cat.id}.${tier}`)}`}
+                    <div key={tier} data-badge={id} className="flex min-w-0 flex-col gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-100/70 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                      <button type="button" onClick={() => setPreview(id)}
+                        className="flex min-w-0 flex-row items-center gap-3 rounded-lg text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500 min-[420px]:flex-col min-[420px]:text-center"
+                        aria-label={`${t('sb.locked')}: ${t(`ach.cat.${cat.id}`)}, ${t(`ach.tier.${tier}`)}. ${t(`sb.riddle.${cat.id}.${tier}`)}`}
                         onMouseEnter={() => badgeSound && playChime('locked', 0.5)}>
                         <ArtifactBadge cat={cat.id} tier={tier} size={64} locked />
+                        <span className="min-w-0">
+                          <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t(`ach.tier.${tier}`)}</span>
+                          <span className="block text-sm italic leading-snug text-slate-700 dark:text-slate-300">“{t(`sb.riddle.${cat.id}.${tier}`)}”</span>
+                          {!(prog.value >= prog.target && TIERS.indexOf(tier) > 0) && prog.target > 1 && (
+                            <span className="mt-1 block text-[11px] font-semibold tabular-nums text-amber-800 dark:text-amber-300">{Math.round(prog.value)} / {prog.target}</span>
+                          )}
+                          {prog.value >= prog.target && TIERS.indexOf(tier) > 0 && (
+                            <span className="mt-1 block text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">{t('ach.afterPrev', { tier: t(`ach.tier.${TIERS[TIERS.indexOf(tier) - 1]}`) })}</span>
+                          )}
+                        </span>
                       </button>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t(`ach.tier.${tier}`)}</p>
-                        <p className="text-sm italic leading-snug text-slate-700 dark:text-slate-300">“{t(`sb.riddle.${cat.id}.${tier}`)}”</p>
-                        {!(prog.value >= prog.target && TIERS.indexOf(tier) > 0) && prog.target > 1 && (
-                          <p className="mt-1 text-[11px] font-semibold tabular-nums text-amber-800 dark:text-amber-300">{Math.round(prog.value)} / {prog.target}</p>
-                        )}
-                        {prog.value >= prog.target && TIERS.indexOf(tier) > 0 && (
-                          <p className="mt-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">{t('ach.afterPrev', { tier: t(`ach.tier.${TIERS[TIERS.indexOf(tier) - 1]}`) })}</p>
-                        )}
-                      </div>
+                      <PreviewButton id={id} />
                     </div>
                   );
                 })}
@@ -480,6 +498,8 @@ export function BadgeCollection() {
             </li>
           ))}
         </ul>
+
+        <BadgePreview />
 
         <fieldset className="rounded-xl border border-amber-200 p-3 dark:border-slate-700">
           <legend className="px-1 text-sm font-semibold">{t('ach.themes')}</legend>
@@ -518,6 +538,117 @@ export function BadgeCollection() {
               <Sparkles className="mr-1.5 h-4 w-4" aria-hidden />{t('sb.demo')}
             </Button>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Opens one badge's own details. Works for locked badges; never awards anything. */
+function PreviewButton({ id }: { id: string }) {
+  const t = useT();
+  const setPreview = useBadgeUi((s) => s.setPreview);
+  const p = parseBadge(id)!;
+  return (
+    <button type="button" data-preview={id} onClick={() => setPreview(id)}
+      aria-label={`${t('sb.preview')}: ${t(`sb.art.${p.cat}.${p.tier}`)}`}
+      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-white/80 px-2 text-xs font-semibold text-amber-900 hover:bg-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500 dark:border-amber-500/40 dark:bg-slate-900 dark:text-amber-200 dark:hover:bg-slate-800">
+      <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden />{t('sb.preview')}
+    </button>
+  );
+}
+
+/** Where to make progress for each badge set. */
+const BADGE_ACTION: Record<CategoryId, { tab: string; label: string }> = {
+  'first-steps': { tab: 'profile', label: 'flow.edit' },
+  'career-explorer': { tab: 'matches', label: 'va.a.matches' },
+  'curious-mind': { tab: 'pathway', label: 'va.a.pathway' },
+  'consistent-learner': { tab: 'progress', label: 'va.a.progress' },
+  'skill-builder': { tab: 'pathway', label: 'va.a.pathway' },
+  'knowledge-seeker': { tab: 'pathway', label: 'va.a.pathway' },
+  'goal-achiever': { tab: 'harada', label: 'va.a.harada' },
+  'future-ready': { tab: 'pathway', label: 'va.a.pathway' },
+};
+
+/** Full details for one badge: name, meaning, riddle explained, how to unlock and progress. */
+function BadgePreview() {
+  const t = useT();
+  const { badges, badgesSeen, lang, setDashTab, setView, setUserType, learnerOnboarded } = useSkillCast();
+  const { preview, setPreview, setCollection, setDemo, setReplay } = useBadgeUi();
+  const snapshot = useProgressSnapshot();
+  const p = preview ? parseBadge(preview) : null;
+  if (!preview || !p) return null;
+  const earnedAt = badgesSeen.includes(preview) ? badges[preview] : undefined;
+  const prog = badgeProgress(preview, snapshot);
+  const tierIndex = TIERS.indexOf(p.tier);
+  const waitingForPrev = !earnedAt && prog.value >= prog.target && tierIndex > 0;
+  const action = BADGE_ACTION[p.cat];
+  const go = () => {
+    setPreview(null); setCollection(false);
+    if (action.tab === 'profile' || !learnerOnboarded) { setUserType('individual'); setView('onboarding'); return; }
+    setView('dashboard'); setDashTab(action.tab);
+  };
+  const dateFmt = dateFormatter(lang);
+  const pct = Math.round((Math.min(prog.value, prog.target) / Math.max(1, prog.target)) * 100);
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) setPreview(null); }}>
+      <DialogContent data-badge-preview={preview} className="max-h-[92vh] overflow-y-auto border-amber-300 bg-[#FFFBEB] text-slate-900 dark:border-amber-500/40 dark:bg-[#0B1120] dark:text-slate-100 sm:max-w-lg">
+        <DialogHeader>
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="relative shrink-0">
+              <ArtifactBadge cat={p.cat} tier={p.tier} size={96} />
+              {!earnedAt && <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 -rotate-3 whitespace-nowrap rounded-md border border-dashed border-amber-500 bg-white px-1.5 text-[10px] font-black uppercase tracking-wide text-amber-700 dark:bg-slate-950 dark:text-amber-300">{t('sb.preview.ribbon')}</span>}
+            </span>
+            <div className="min-w-0 flex-1 basis-48">
+              <DialogTitle className="text-xl leading-snug">{t(`sb.art.${p.cat}.${p.tier}`)}</DialogTitle>
+              <p className="text-sm font-semibold text-teal-800 dark:text-teal-300">{t(`ach.cat.${p.cat}`)} · {t(`ach.tier.${p.tier}`)}</p>
+              <DialogDescription className="mt-1 text-sm text-slate-700 dark:text-slate-300">{t(`ach.why.${p.cat}`)}</DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div role="status" className={`rounded-xl border p-3 text-sm ${earnedAt ? 'border-emerald-300 bg-emerald-50 text-emerald-950 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-50' : 'border-amber-300 bg-white/70 dark:border-amber-500/30 dark:bg-white/5'}`}>
+          {earnedAt ? (
+            <p className="flex items-center gap-2 font-semibold"><Check className="h-4 w-4 shrink-0" aria-hidden />{t('sb.preview.earned', { date: dateFmt.format(new Date(earnedAt)) })}</p>
+          ) : waitingForPrev ? (
+            <p className="font-semibold">{t('ach.afterPrev', { tier: t(`ach.tier.${TIERS[tierIndex - 1]}`) })}</p>
+          ) : (
+            <>
+              <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4 shrink-0" aria-hidden />{t('sb.preview.locked', { value: Math.round(Math.min(prog.value, prog.target)), target: prog.target })}</p>
+              <Progress className="mt-2 [&>div]:bg-amber-500" value={pct} aria-label={t('sb.preview.locked', { value: Math.round(Math.min(prog.value, prog.target)), target: prog.target })} />
+            </>
+          )}
+        </div>
+
+        <dl className="space-y-3 text-sm">
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('sb.preview.riddle')}</dt>
+            <dd className="mt-0.5 italic">“{t(`sb.riddle.${p.cat}.${p.tier}`)}”</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t(earnedAt ? 'ach.how' : 'sb.preview.unlock')}</dt>
+            <dd className="mt-0.5 font-medium">{t(`ach.req.${p.cat}.${p.tier}`)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('sb.preview.lore')}</dt>
+            <dd className="mt-0.5">{t(`sb.lore.${p.cat}.${p.tier}`)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('sb.story')}</dt>
+            <dd className="mt-0.5">{t(`sb.story.${p.cat}`)}</dd>
+          </div>
+        </dl>
+        <p className="text-xs text-slate-600 dark:text-slate-400">{t('sb.preview.note')}</p>
+        <div className="flex flex-wrap gap-2">
+          {!earnedAt && (
+            <Button className="h-auto min-h-11 whitespace-normal bg-amber-400 font-semibold text-slate-950 hover:bg-amber-300 sm:min-h-9" onClick={go} data-preview-go>
+              {t(action.label)}
+            </Button>
+          )}
+          <Button variant="outline" className="h-auto min-h-11 gap-1.5 whitespace-normal sm:min-h-9" data-preview-play
+            onClick={() => { setPreview(null); setCollection(false); if (earnedAt) setReplay(preview); else setDemo(preview); }}>
+            <Sparkles className="h-4 w-4 shrink-0" aria-hidden />{t('sb.preview.play')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

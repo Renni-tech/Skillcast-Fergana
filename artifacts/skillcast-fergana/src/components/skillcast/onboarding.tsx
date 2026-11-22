@@ -35,6 +35,7 @@ import type { CareerStrategy, EmployerObjective, EmploymentStatus, IndividualPro
 import { roleCategory, roleSdgMechanism, roleTagline, roleTitle, skillCategory, skillName, SdgBadge, useSignals, useT } from './shared';
 import { CvStep } from './cv-step';
 import { useReducedMotion } from './a11y';
+import { DemoBanner, TryDemoButton } from './demo-profile';
 
 // ─── Onboarding router: three tracks ────────────────────────────────────────
 
@@ -60,8 +61,16 @@ function StepUserType() {
       <div className="mx-auto max-w-3xl">
         <Card className="border-blue-100 dark:border-slate-700 bg-white shadow-[0_16px_60px_rgba(39,70,130,.08)]">
           <CardHeader>
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-600">{t('hr.onboarding.path.step')}</p>
-            <CardTitle className="text-2xl text-slate-950">{t('hr.onboarding.path.title')}</CardTitle>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1 basis-64">
+                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-600">{t('hr.onboarding.path.step')}</p>
+                <CardTitle className="mt-1.5 text-2xl text-slate-950">{t('hr.onboarding.path.title')}</CardTitle>
+              </div>
+              <div className="flex max-w-full flex-col items-start gap-1 sm:items-end">
+                <TryDemoButton />
+                <p className="max-w-60 text-xs text-slate-500 sm:text-right">{t('demo.try.hint')}</p>
+              </div>
+            </div>
             <CardDescription>{t('hr.onboarding.path.description')}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -125,10 +134,10 @@ function OnboardingShell({
   ];
   return (
     <div className={light ? 'skillcast-onboarding px-4 py-8 sm:py-12' : undefined}>
-      <div className={`mx-auto pb-8 ${light ? 'max-w-6xl px-0 lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start lg:gap-7' : 'max-w-3xl px-4'}`}>
+      <div className={`mx-auto pb-8 ${light ? 'max-w-6xl px-0 lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start lg:gap-x-7 lg:gap-y-0' : 'max-w-3xl px-4'}`}>
         {light ? (
           <>
-            <aside className="mb-4 hidden rounded-2xl border border-blue-100 dark:border-slate-700 bg-white/90 p-4 shadow-sm lg:sticky lg:top-24 lg:col-start-1 lg:row-start-1 lg:block">
+            <aside className="mb-4 hidden rounded-2xl border border-blue-100 dark:border-slate-700 bg-white/90 p-4 shadow-sm lg:sticky lg:top-24 lg:col-start-1 lg:row-span-4 lg:row-start-1 lg:block">
               <p className="px-2 pb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{t('Your progress')}</p>
               <ol aria-label={`${t('onb.step')} ${step} ${t('onb.of')} ${total}`} className="space-y-1">
                 {individualStepTitles.map((label, index) => {
@@ -160,7 +169,16 @@ function OnboardingShell({
           </div>
         )}
 
-        <Card className={`mt-4 border-blue-100 dark:border-slate-700 bg-white shadow-[0_16px_60px_rgba(39,70,130,.08)] ${light ? 'lg:col-start-2 lg:row-start-1' : 'border-border bg-card shadow-none'}`}>
+        {light && (
+          <div className="lg:col-start-2 lg:row-start-1">
+            <DemoBanner onboarding />
+            <div className="mt-2 flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+              <p className="min-w-0 text-xs text-slate-500 sm:text-right">{t('demo.try.hint')}</p>
+              <TryDemoButton />
+            </div>
+          </div>
+        )}
+        <Card className={`mt-4 border-blue-100 dark:border-slate-700 bg-white shadow-[0_16px_60px_rgba(39,70,130,.08)] ${light ? 'lg:col-start-2 lg:row-start-2' : 'border-border bg-card shadow-none'}`}>
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${light ? 'text-slate-950' : ''}`}>
               <Icon className={`h-5 w-5 ${light ? 'text-blue-600' : 'text-teal-600 dark:text-teal-400'}`} aria-hidden /> {title}
@@ -170,7 +188,7 @@ function OnboardingShell({
           <CardContent className="space-y-6">{children}</CardContent>
         </Card>
 
-        <div className={`mt-4 flex flex-wrap items-center justify-between gap-2 ${light ? 'lg:col-start-2' : ''}`}>
+        <div className={`mt-4 flex flex-wrap items-center justify-between gap-2 ${light ? 'lg:col-start-2 lg:row-start-3' : ''}`}>
           {onSkip && (
             <Button variant="ghost" onClick={onSkip} className="order-3 w-full text-slate-600 hover:text-blue-800 sm:order-none sm:w-auto">
               {t('Skip for now')}
@@ -194,7 +212,7 @@ function OnboardingShell({
           )}
         </div>
         {privacyNote && (
-          <p className={`mt-2 text-xs text-muted-foreground ${light ? 'text-right lg:col-start-2' : 'text-right'}`}>
+          <p className={`mt-2 text-xs text-muted-foreground ${light ? 'text-right lg:col-start-2 lg:row-start-4' : 'text-right'}`}>
             <ShieldCheck className="mr-1 inline h-3 w-3" aria-hidden />
             {t('onb.privacy.browser')}
           </p>

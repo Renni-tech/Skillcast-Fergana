@@ -23,6 +23,7 @@ import type {
 } from '@/lib/types';
 import { EMPTY_PROFILE, normalizeProfile } from '@/lib/profile';
 import { ROLE_MAP } from '@/data/roles';
+import { DEMO_BACKUP_KEY, type DemoState } from '@/lib/demo-profile';
 export { EMPTY_PROFILE } from '@/lib/profile';
 
 export type View =
@@ -177,6 +178,12 @@ interface SkillCastState {
   ) => void;
   resetDemo: () => void;
   setDashTab: (tab: string) => void;
+  /** True while the synthetic demo learner is loaded (see lib/demo-profile). */
+  demoMode: boolean;
+  /** Loads the demo learner; the learner's own state is kept aside until exitDemo. */
+  loadDemo: (demo: DemoState, earnedBadges: string[], revealOne?: string) => void;
+  /** Leaves the demo: restores the learner's own saved state, or starts fresh. */
+  exitDemo: () => void;
 }
 
 export const EMPTY_EMPLOYER: EmployerProfile = {
@@ -381,8 +388,61 @@ export const useSkillCast = create<SkillCastState>()(
       setDashTab: (tab) =>
         set({ dashTab: tab }),
 
-      resetDemo: () =>
+      demoMode: false,
+      loadDemo: (demo, earnedBadges, revealOne) => {
+        const st = get();
+        // Keep the learner's own saved state once, so leaving the demo restores it.
+        if (!st.demoMode) {
+          try {
+            const own = localStorage.getItem('skillcast-poc');
+            if (own) localStorage.setItem(DEMO_BACKUP_KEY, own);
+            else localStorage.removeItem(DEMO_BACKUP_KEY);
+          } catch { /* storage unavailable: the demo still works, nothing to restore */ }
+        }
+        const at = new Date().toISOString();
         set({
+          demoMode: true,
+          userType: 'individual',
+          onboarded: true,
+          learnerOnboarded: true,
+          view: 'dashboard',
+          dashTab: 'overview',
+          profile: demo.profile,
+          chosenRole: demo.chosenRole,
+          completedCourses: demo.completedCourses,
+          skillUpdates: demo.skillUpdates,
+          activeDays: demo.activeDays,
+          reflections: demo.reflections,
+          learningPaths: [],
+          activePathId: null,
+          // Badges come from the badge rules applied to the demo progress. All but
+          // one are already "seen", so a single reveal shows how unlocking feels.
+          badges: Object.fromEntries(earnedBadges.map((id) => [id, at])),
+          badgesSeen: earnedBadges.filter((id) => id !== revealOne),
+          badgesViewed: earnedBadges.filter((id) => id !== revealOne),
+          themesAnnounced: [...st.themesAnnounced],
+          windRoseTheme: 'classic',
+          seenTips: [],
+        });
+      },
+      exitDemo: () => {
+        let own: string | null = null;
+        try { own = localStorage.getItem(DEMO_BACKUP_KEY); localStorage.removeItem(DEMO_BACKUP_KEY); } catch { /* ignore */ }
+        if (own) {
+          try {
+            const saved = JSON.parse(own) as { state?: Record<string, unknown> };
+            const keepDisplay = { lang: get().lang, a11y: get().a11y };
+            localStorage.setItem('skillcast-poc', JSON.stringify({ ...saved, state: { ...saved.state, demoMode: false } }));
+            void Promise.resolve(useSkillCast.persist.rehydrate()).then(() => set({ ...keepDisplay, demoMode: false, view: 'landing' }));
+            return;
+          } catch { /* unreadable backup: fall through to a clean start */ }
+        }
+        get().resetDemo();
+      },
+
+      resetDemo: () => {
+        set({
+          demoMode: false,
           view: 'landing',
           userType: null,
           profile: EMPTY_PROFILE,
@@ -406,7 +466,8 @@ export const useSkillCast = create<SkillCastState>()(
           learnerOnboarded: false,
           scenario: 'moderate',
           dashTab: 'overview',
-        }),
+        });
+      },
     }),
     {
       name: 'skillcast-poc',
@@ -439,6 +500,7 @@ export const useSkillCast = create<SkillCastState>()(
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
+        demoMode: s.demoMode,
       }),
       // Normalize saved data before the first render, not after consumers
       // have already read nullable arrays or incomplete nested profiles.
@@ -486,6 +548,7 @@ export const useSkillCast = create<SkillCastState>()(
             return { learningPaths, activePathId };
           })(),
           onboarded: saved.onboarded === true,
+          demoMode: saved.demoMode === true,
           learnerOnboarded: typeof saved.learnerOnboarded === 'boolean'
             ? saved.learnerOnboarded : saved.userType === 'individual' && saved.onboarded === true,
         };

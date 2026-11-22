@@ -179,14 +179,14 @@ export function SourceChip({ children, href }: { children: ReactNode; href?: str
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+        className="inline-flex max-w-full items-center gap-1 rounded-lg border border-border bg-muted px-2 py-0.5 text-left text-[11px] leading-snug text-muted-foreground hover:text-foreground"
       >
         {children}
       </a>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+    <span className="inline-flex max-w-full items-center gap-1 rounded-lg border border-border bg-muted px-2 py-0.5 text-left text-[11px] leading-snug text-muted-foreground">
       {children}
     </span>
   );

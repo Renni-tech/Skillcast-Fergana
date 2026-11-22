@@ -50,12 +50,13 @@ function wrapLabel(text: string, max: number, maxLines = 3): string[] {
 
 export function WindRose({ compact = false }: { compact?: boolean }) {
   const t = useT();
-  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip, roseFocus, focusRose, roseThemeChange, setRoseThemeChange } = useSkillCast();
+  const { profile, chosenRole, setDashTab, setView, setUserType, windRoseTheme, seenTips, dismissTip, roseFocus, focusRose, roseThemeChange, setRoseThemeChange } = useSkillCast();
   const colourName = t(`wr.color.${windRoseTheme}`);
   // "You" colour follows the Wind Rose colour unlocked with badges.
   const COLORS = { ...BASE_COLORS, you: WIND_ROSE_THEMES[windRoseTheme]?.you ?? BASE_COLORS.you };
   const { momentumMap } = useSignals();
   const openVoice = usePanels((s) => s.openVoice);
+  const setRoseCount = usePanels((s) => s.setRoseCount);
   const reduceMotion = useReducedMotion();
   const [showTable, setShowTable] = useState(false);
   const [selected, setSelected] = useState<string | null>(roseFocus);
@@ -72,22 +73,31 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
 
   const rose = useMemo(() => computeWindRose(profile, momentumMap, chosenRole, narrow ? 8 : 10), [profile, momentumMap, chosenRole, narrow]);
   const hasTarget = rose.points.some((p) => p.target !== null);
+  const hasSkills = Object.values(profile.skills ?? {}).some((v) => v > 0);
+  // The assistant explains exactly the spokes shown here.
+  useEffect(() => { setRoseCount(narrow ? 8 : 10); }, [narrow, setRoseCount]);
   const data = rose.points.map((p, i) => ({ ...p, n: i + 1, label: skillName(t, p.slug), targetValue: p.target ?? 0 }));
 
+  // Tapping a number or label on the chart opens that skill. The same choice is
+  // available as keyboard-friendly buttons below, so the SVG targets stay aria-hidden.
+  const pick = (slug: string) => { setSelected((cur) => (cur === slug ? null : slug)); dismissTip('rose-read'); dismissTip('rose-tip'); };
   const Tick = ({ x, y, payload, textAnchor }: { x: number; y: number; payload: { value: string; index: number }; textAnchor: 'start' | 'middle' | 'end' }) => {
     const point = data[payload.index];
     if (!point) return null;
+    const isSel = selected === point.slug;
     if (narrow) {
       return (
-        <g transform={`translate(${x},${y})`}>
-          <circle r={9} fill={point.gap >= 20 ? '#b45309' : 'var(--muted)'} />
-          <text textAnchor="middle" dy={4} fontSize={10} fontWeight={700} fill={point.gap >= 20 ? '#fff' : 'var(--foreground)'}>{point.n}</text>
+        <g transform={`translate(${x},${y})`} onClick={() => pick(point.slug)} style={{ cursor: 'pointer' }} aria-hidden data-spoke={point.slug}>
+          <circle r={16} fill="transparent" />
+          <circle r={isSel ? 11 : 9} fill={isSel ? '#2563eb' : point.gap >= 20 ? '#b45309' : 'var(--muted)'} stroke={isSel ? '#fff' : 'none'} strokeWidth={2} />
+          <text textAnchor="middle" dy={4} fontSize={10} fontWeight={700} fill={isSel || point.gap >= 20 ? '#fff' : 'var(--foreground)'}>{point.n}</text>
         </g>
       );
     }
     const lines = wrapLabel(point.label, 18);
     return (
-      <text x={x} y={y} textAnchor={textAnchor} fontSize={11} fill="var(--muted-foreground)" fontWeight={point.inPathway ? 700 : 400}>
+      <text x={x} y={y} textAnchor={textAnchor} fontSize={11} onClick={() => pick(point.slug)} style={{ cursor: 'pointer' }} aria-hidden data-spoke={point.slug}
+        fill={isSel ? '#2563eb' : 'var(--muted-foreground)'} fontWeight={point.inPathway || isSel ? 700 : 400} textDecoration={isSel ? 'underline' : undefined}>
         {lines.map((line, i) => <tspan key={i} x={x} dy={i === 0 ? 4 - (lines.length - 1) * 6 : 13}>{line}</tspan>)}
       </text>
     );
@@ -127,7 +137,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             <CardTitle className="mt-1 text-lg leading-snug sm:text-xl">{t('wr.title')}</CardTitle>
             <CardDescription className="mt-1">{t('wr.lede')}</CardDescription>
           </div>
-          <Button variant="outline" size="sm" className="h-auto min-h-9 w-full gap-1.5 whitespace-normal text-left sm:w-auto sm:max-w-56" onClick={() => openVoice(t('va.ex.radar'))}>
+          <Button variant="outline" size="sm" className="h-auto min-h-9 w-full gap-1.5 whitespace-normal text-left sm:w-auto sm:max-w-56" data-testid="wr-voice" onClick={() => openVoice(t('va.ex.radar'), 'explain-radar')}>
             <Mic className="h-4 w-4 shrink-0" aria-hidden /> {t('wr.ask')}
           </Button>
         </div>
@@ -157,6 +167,16 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             <span aria-hidden className="mt-0.5 text-lg leading-none">👆</span>
             <p className="flex-1">{t('wr.tip')}</p>
             <button type="button" onClick={() => { dismissTip('rose-tip'); dismissTip('rose-read'); }} className="shrink-0 rounded px-2 py-0.5 text-xs font-semibold underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">{t('wr.tip.ok')}</button>
+          </div>
+        )}
+        {(!hasSkills || !hasTarget) && (
+          <div role="note" data-testid="wr-incomplete" className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-950 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-50">
+            <Compass className="h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
+            <p className="min-w-0 flex-1 basis-56">{t(!hasSkills ? 'wr.incomplete.skills' : 'wr.incomplete.role')}</p>
+            <Button size="sm" variant="outline" className="h-auto min-h-9 whitespace-normal bg-background/80"
+              onClick={() => { if (!hasSkills) { setUserType('individual'); setView('onboarding'); } else { setDashTab('matches'); setView('dashboard'); } }}>
+              {t(!hasSkills ? 'wr.incomplete.skills.go' : 'wr.incomplete.role.go')} <ArrowRight className="ml-1 h-4 w-4 shrink-0" aria-hidden />
+            </Button>
           </div>
         )}
         <div className={`grid gap-4 ${compact ? '' : 'lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'}`}>
@@ -191,7 +211,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             <ol className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
               {data.map((p) => (
                 <li key={p.slug}>
-                  <button type="button" aria-pressed={selected === p.slug} onClick={() => { setSelected(selected === p.slug ? null : p.slug); dismissTip('rose-read'); dismissTip('rose-tip'); }}
+                  <button type="button" aria-pressed={selected === p.slug} onClick={() => pick(p.slug)}
                     className={`flex min-h-8 items-center gap-1.5 rounded-full border px-2 py-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selected === p.slug ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'}`}>
                     <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${selected === p.slug ? 'bg-white/20' : p.gap >= 20 ? 'bg-amber-600 text-white' : 'bg-muted'}`}>{p.n}</span>
                     <span className="min-w-0">{p.label}</span>
@@ -258,7 +278,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
                 </ol>
               ) : <p className="mt-2 text-xs text-muted-foreground">{t('wr.priorities.none')}</p>}
               {rose.priorities.length > 0 && (
-                <Button size="sm" className="mt-3 h-auto min-h-9 w-full gap-1.5 whitespace-normal bg-amber-700 text-white hover:bg-amber-800" onClick={goLearn}>
+                <Button size="sm" data-testid="wr-find-courses" className="wr-target-btn mt-3 h-auto min-h-9 w-full gap-1.5 whitespace-normal" onClick={goLearn}>
                   {t('wr.find')} <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                 </Button>
               )}
@@ -274,9 +294,10 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
           </div>
         </div>
 
-        <div className="grid gap-2 md:grid-cols-2">
-          <Explainer>{t('wr.how')}</Explainer>
-          <Explainer label={t('wr.q.why')}>{t('wr.why.body')}</Explainer>
+        {/* items-start: opening one never stretches the other into an empty-looking box */}
+        <div className="grid items-start gap-2 md:grid-cols-2">
+          <Explainer id="wr-explain-meaning">{t('wr.how')}</Explainer>
+          <Explainer id="wr-explain-why" label={t('wr.q.why')}>{t('wr.why.body')}</Explainer>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">

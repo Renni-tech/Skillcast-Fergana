@@ -43,6 +43,7 @@ import { WindRose } from './wind-rose';
 import { ExportShareButton } from './export-share';
 import { SourceStatusPanel } from './source-status';
 import { GettingStarted } from './getting-started';
+import { DemoBanner } from './demo-profile';
 
 const EMPLOYMENT_STATUS_LABELS = {
   student: 'Student',
@@ -50,6 +51,21 @@ const EMPLOYMENT_STATUS_LABELS = {
   unemployed: 'Unemployed',
   'career-changer': 'Career changer',
 } as const;
+
+/** One personal line from SkillCast, computed from the same match as the rest of the page. */
+function CompanionLine({ matches }: { matches: ReturnType<typeof matchAll> }) {
+  const t = useT();
+  const { chosenRole } = useSkillCast();
+  const match = chosenRole ? matches.find((m) => m.roleSlug === chosenRole) : undefined;
+  const text = !match
+    ? t('buddy.noRole')
+    : match.gap.length === 0
+      ? t('buddy.done', { n: Math.round(match.skillReadiness), role: roleTitle(t, match.roleSlug) })
+      : t(match.skillReadiness >= 80 ? 'buddy.ready' : 'buddy.gap', {
+        n: Math.round(match.skillReadiness), role: roleTitle(t, match.roleSlug), skill: skillName(t, match.gap[0].skill),
+      });
+  return <p data-testid="companion-line" className="mt-1 max-w-3xl text-base font-medium text-blue-800 dark:text-blue-200">{text}</p>;
+}
 
 export function Dashboard() {
   const t = useT();
@@ -60,10 +76,12 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16">
+      <DemoBanner />
       {/* Greeting + scenario toggle */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('dash.hello')}</h1>
+          <CompanionLine matches={matches} />
           <p className="text-sm text-muted-foreground">{t('scenario.note')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -5,6 +5,7 @@ import { SOURCE_COPY } from '../src/lib/signal-source-i18n';
 import { FERGANA_UI_COPY } from '../src/lib/fergana-ui-i18n';
 import { EXPERIENCE_COPY } from '../src/lib/experience-i18n';
 import { QUALITY_COPY } from '../src/lib/quality-i18n';
+import { POLISH_COPY } from '../src/lib/polish-i18n';
 import { APPROVED_SOURCES } from '../src/data/approved-sources';
 
 import { useSkillCast } from '../src/lib/store';
@@ -37,7 +38,7 @@ describe('localization: Uzbek (Latin and Cyrillic), Russian and English', () => 
   });
 
   test('signal-source and Fergana copy tables are complete', () => {
-    for (const table of [SOURCE_COPY, FERGANA_UI_COPY, EXPERIENCE_COPY, QUALITY_COPY]) {
+    for (const table of [SOURCE_COPY, FERGANA_UI_COPY, EXPERIENCE_COPY, QUALITY_COPY, POLISH_COPY]) {
       for (const [key, copy] of Object.entries(table)) {
         for (const lang of LANG_CODES) expect(copy[lang]?.trim(), `${key}.${lang}`).toBeTruthy();
       }

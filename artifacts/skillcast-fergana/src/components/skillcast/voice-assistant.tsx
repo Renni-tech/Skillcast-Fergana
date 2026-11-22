@@ -91,6 +91,36 @@ export function explainMatch(tt: Translate, match: RoleMatch): string {
   }).replace(/\s{2,}/g, ' ');
 }
 
+/**
+ * Plain-language explanation of the learner's Wind Rose from the chart's own
+ * points: what the scale means, how far they are aligned with the market,
+ * their largest gaps with real numbers, their strengths and the next step.
+ */
+export function explainWindRose(
+  tt: Translate, rose: ReturnType<typeof computeWindRose>, roleSlug: string | null, nextCourse?: string,
+): string {
+  const n = rose.points.length;
+  if (!n) return tt('va.r.radar.empty');
+  const aligned = rose.points.filter((p) => p.you >= p.market).length;
+  const hasTarget = rose.points.some((p) => p.target !== null);
+  const parts = [tt(hasTarget && roleSlug ? 'va.r.radar.intro' : 'va.r.radar.intro.noRole', {
+    n, aligned, role: roleSlug ? roleTitle(tt, roleSlug) : '',
+  })];
+  const gaps = rose.priorities.slice(0, 3);
+  if (gaps.length) {
+    parts.push(tt('va.r.radar.gaps', {
+      list: gaps.map((p) => tt(p.target !== null ? 'va.r.radar.item' : 'va.r.radar.item.nt', {
+        skill: skillName(tt, p.slug), you: p.you, target: p.target ?? 0, market: p.market,
+      })).join('; '),
+    }));
+  } else parts.push(tt('va.r.radar.none'));
+  if (rose.strengths.length) parts.push(tt('va.r.radar.strengths', { list: rose.strengths.slice(0, 3).map((p) => skillName(tt, p.slug)).join(', ') }));
+  if (gaps[0]) parts.push(nextCourse
+    ? tt('va.r.radar.next', { skill: skillName(tt, gaps[0].slug), course: nextCourse })
+    : tt('va.r.radar.next.noCourse', { skill: skillName(tt, gaps[0].slug) }));
+  return parts.join(' ');
+}
+
 export function VoiceLauncher() {
   const t = useT();
   const openVoice = usePanels((s) => s.openVoice);
@@ -132,6 +162,7 @@ export function VoiceAssistant() {
   const [recLang, setRecLang] = useState<string | null>(null);
   const [voiceNote, setVoiceNote] = useState<{ lang: Lang; msg: Message } | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const recognitionRef = useRef<Recognition | null>(null);
   const logRef = useRef<HTMLOListElement>(null);
@@ -165,11 +196,19 @@ export function VoiceAssistant() {
   }
 
   async function speakText(text: string, l: Lang): Promise<boolean> {
-    const used = await speakAloud(text, {
-      lang: l, voice: l === lang ? voice.name : 'auto', rate: voice.rate, pitch: voice.pitch,
-      onStart: () => setSpeaking(true),
-      onEnd: () => { setSpeaking(false); afterSpeech.current?.(); afterSpeech.current = null; },
-    });
+    setPreparing(true);
+    let used: Awaited<ReturnType<typeof speakAloud>> = 'none';
+    try {
+      used = await speakAloud(text, {
+        lang: l, voice: l === lang ? voice.name : 'auto', rate: voice.rate, pitch: voice.pitch,
+        onStart: () => { setPreparing(false); setSpeaking(true); },
+        onEnd: () => { setSpeaking(false); afterSpeech.current?.(); afterSpeech.current = null; },
+      });
+    } catch {
+      used = 'none';
+    } finally {
+      setPreparing(false);
+    }
     setEngine(used);
     return used !== 'none';
   }
@@ -336,11 +375,16 @@ export function VoiceAssistant() {
         };
       }
       case 'explain-radar': {
-        const rose = computeWindRose(profile, momentumMap, chosenRole);
+        // The same points the chart is drawing right now (8 spokes on narrow screens, 10 otherwise).
+        const rose = computeWindRose(profile, momentumMap, chosenRole, usePanels.getState().roseCount);
+        const first = rose.priorities[0];
+        const lead = chosenRole ? leadMatch() : undefined;
+        const course = first && lead ? remaining(lead).find((n) => n.skill === first.slug) ?? remaining(lead)[0] : undefined;
         return {
-          ...base, ctx: { ...base.ctx, skill: rose.priorities[0]?.slug ?? c.skill },
-          text: tt('va.r.radar', { gaps: rose.priorities.length ? rose.priorities.map((p) => skillName(tt, p.slug)).join(', ') : tt('va.r.noGaps') }),
-          actions: [{ label: 'va.a.radar', target: 'overview' }], follow: ['va.f.learn', 'va.f.gaps'],
+          ...base, ctx: { ...base.ctx, skill: first?.slug ?? c.skill },
+          text: explainWindRose(tt, rose, chosenRole, course ? courseTitle(tt, course.courseSlug) : undefined),
+          actions: [{ label: 'va.a.radar', target: 'radar' }, ...(first ? [{ label: 'va.a.pathway', target: 'pathway' as NavTarget }] : [])],
+          follow: ['va.f.learn', 'va.f.gaps'],
         };
       }
       case 'read': {
@@ -468,7 +512,7 @@ export function VoiceAssistant() {
     }
   }
 
-  function handle(text: string) {
+  function handle(text: string, forced?: Intent) {
     // Uzbek questions are understood in Latin script, whichever script the learner uses.
     const clean = (lang === 'uz' || lang === 'uz-cyrl' ? uzCyrillicToLatin(text) : text).trim();
     if (!clean) return;
@@ -480,13 +524,14 @@ export function VoiceAssistant() {
       if (cmd.type !== 'stop') say(answerMsg); else afterSpeech.current = null;
       return;
     }
-    const intent = parseIntent(clean, skillIndex);
+    const intent = forced ?? parseIntent(clean, skillIndex);
     const reply = compute(intent, clean, ctx, t);
     setCtx(reply.ctx);
     // Open questions go to the AI agent while it is available; known questions
-    // keep their exact, data-based answers when it is not.
+    // keep their exact, data-based answers when it is not. A button that asks
+    // a specific question (forced) always gets the data-based answer.
     const openQuestion = /\?\s*$/.test(clean) || clean.split(/\s+/).length >= 7;
-    if (intent.kind === 'unknown' || (openQuestion && agentUp.current !== false && intent.kind !== 'navigate')) {
+    if (!forced && (intent.kind === 'unknown' || (openQuestion && agentUp.current !== false && intent.kind !== 'navigate'))) {
       push({ from: 'user', text: clean });
       void askAgent(clean, reply);
       return;
@@ -534,12 +579,14 @@ export function VoiceAssistant() {
   }
 
   // Ask a pending question (e.g. from the Wind Rose button) when the panel opens.
+  // Also runs when the panel is already open and another button asks a question.
+  const pendingPrompt = usePanels((s) => s.voicePrompt);
   useEffect(() => {
-    if (!voiceOpen) return;
-    const prompt = consumePrompt();
-    if (prompt) handle(prompt);
+    if (!voiceOpen || !pendingPrompt) return;
+    const pending = consumePrompt();
+    if (pending) handle(pending.prompt, pending.intent ? { kind: pending.intent } as Intent : undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceOpen]);
+  }, [voiceOpen, pendingPrompt]);
 
   useEffect(() => { logRef.current?.lastElementChild?.scrollIntoView({ block: 'nearest' }); }, [messages]);
 
@@ -684,9 +731,19 @@ export function VoiceAssistant() {
               )}
             </div>
           )}
+          {preparing && !speaking && (
+            <p role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />{t('va.audio.preparing')}
+            </p>
+          )}
+          {speaking && (
+            <p role="status" className="flex items-center gap-1.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+              <Volume2 className="h-3.5 w-3.5 motion-safe:animate-pulse" aria-hidden />{t('va.audio.playing')}
+            </p>
+          )}
           {voiceNote && (
-            <div role="status" className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-              {t('va.noVoice', { lang: t(LANG_NAME_KEY[voiceNote.lang]) })}
+            <div role="status" data-testid="voice-fallback" className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              {t('va.noVoice', { lang: t(LANG_NAME_KEY[voiceNote.lang]) })} {t('va.audio.textFallback')}
               {altVoices.length > 0 && (
                 <span className="mt-1.5 flex flex-wrap gap-1.5">
                   {altVoices.map((l) => (

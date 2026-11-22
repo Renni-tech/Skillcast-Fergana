@@ -424,7 +424,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             <label htmlFor={roleId} className="grid min-w-0 gap-1.5 text-xs font-medium">
               {t('harada.goal.pathway')}
               <Select value={role.slug} onValueChange={(v) => setChosenRole(v)}>
-                <SelectTrigger id={roleId} className="h-11 w-full min-w-0 sm:h-9 [&>span]:truncate"><SelectValue /></SelectTrigger>
+                <SelectTrigger id={roleId} className="h-auto min-h-11 w-full min-w-0 py-2 text-left sm:min-h-9 [&>span]:line-clamp-2 [&>span]:whitespace-normal"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {topRoles.map((m) => <SelectItem key={m.roleSlug} value={m.roleSlug}>{roleTitle(t, m.roleSlug)} · {Math.round(m.score)}%</SelectItem>)}
                 </SelectContent>

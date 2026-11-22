@@ -61,10 +61,11 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
           <CardDescription>{t('sdg.desc', { n: ledger.all.length })}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <dl className="grid grid-cols-3 gap-2 text-center">
+          {/* One row per figure on phones (long Uzbek/Russian labels stay readable), three columns from 420px. */}
+          <dl className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3 min-[420px]:text-center">
             {([[ledger.all.length, 'sdg.more'], [haveSet.size, 'sdg.have'], [learnSet.size, 'sdg.learning']] as const).map(([n, key]) => (
-              <div key={key} className="flex flex-col-reverse rounded-xl border bg-muted/30 p-2.5">
-                <dt className="text-[11px] leading-tight text-muted-foreground">{t(key)}</dt>
+              <div key={key} className="flex flex-row-reverse items-center justify-end gap-3 rounded-xl border bg-muted/30 p-2.5 min-[420px]:flex-col-reverse min-[420px]:items-stretch min-[420px]:justify-end min-[420px]:gap-0.5">
+                <dt className="min-w-0 text-xs leading-snug text-muted-foreground [overflow-wrap:anywhere]">{t(key)}</dt>
                 <dd className="text-2xl font-bold tabular-nums">{n}</dd>
               </div>
             ))}
@@ -113,7 +114,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
                       <div className="mt-2">
                         <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">✓ {t('sdg.have')}</p>
                         <ul className="mt-1 flex flex-wrap gap-1">
-                          {entry.have.map((slug) => <li key={slug}><Badge variant="secondary">{skillName(t, slug)}</Badge></li>)}
+                          {entry.have.map((slug) => <li key={slug}><Badge variant="secondary" className="h-auto max-w-full whitespace-normal text-left">{skillName(t, slug)}</Badge></li>)}
                         </ul>
                       </div>
                     )}
@@ -121,7 +122,7 @@ export function SdgTab({ matches }: { matches: RoleMatch[] }) {
                       <div className="mt-2">
                         <p className="text-xs font-medium text-muted-foreground">→ {t('sdg.learning')}</p>
                         <ul className="mt-1 flex flex-wrap gap-1">
-                          {entry.learning.map((slug) => <li key={slug}><Badge variant="outline">{skillName(t, slug)}</Badge></li>)}
+                          {entry.learning.map((slug) => <li key={slug}><Badge variant="outline" className="h-auto max-w-full whitespace-normal text-left">{skillName(t, slug)}</Badge></li>)}
                         </ul>
                       </div>
                     )}
