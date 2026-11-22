@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { BookAudio, Contrast, Hand, Headphones } from 'lucide-react';
+import { speak, stopSpeaking } from '@/lib/tts-client';
+import { readScreen } from '@/lib/screen-summary';
 import { Accessibility, Mic, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -42,6 +45,25 @@ export function A11yEffects() {
   return null;
 }
 
+/** Screen-reader friendly narration: announce each new tab aloud. */
+export function NarrationEffects() {
+  const t = useT();
+  const { a11y, dashTab, view, lang, voice } = useSkillCast();
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return undefined; }
+    if (!a11y.narrate) return undefined;
+    // Wait for the new screen to render before reading its headings.
+    const id = window.setTimeout(() => {
+      const { place, items } = readScreen(a11y.simpleAudio ? 2 : 4);
+      const text = [t('va.screen.place', { place }), items.length ? t('va.screen.items', { list: items.join('; ') }) : ''].join(' ');
+      void speak(text, { lang, voice: voice.name, rate: voice.rate, pitch: voice.pitch });
+    }, 600);
+    return () => { window.clearTimeout(id); stopSpeaking(); };
+  }, [dashTab, view]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
 export function A11yButton({ landing }: { landing: boolean }) {
   const t = useT();
   const setOpen = usePanels((s) => s.setA11yOpen);
@@ -64,6 +86,20 @@ export function A11yPanel() {
   const a11y = useA11y();
   const setA11y = useSkillCast((s) => s.setA11y);
   const { a11yOpen, setA11yOpen, openVoice } = usePanels();
+  const setAssistantSpeak = useSkillCast((s) => s.setAssistantSpeak);
+  const setVoice = useSkillCast((s) => s.setVoice);
+
+  // One-click presets; each can be switched off again from the same card.
+  const presets: Array<{ id: string; icon: typeof Headphones; on: boolean; apply: (on: boolean) => void }> = [
+    { id: 'narrate', icon: Headphones, on: a11y.narrate,
+      apply: (on) => { setA11y({ narrate: on, underlineLinks: on || a11y.underlineLinks }); if (on) { setAssistantSpeak(true); setVoice({ rate: 0.85 }); } } },
+    { id: 'handsfree', icon: Hand, on: a11y.handsFree,
+      apply: (on) => { setA11y({ handsFree: on }); if (on) { setAssistantSpeak(true); setA11yOpen(false); openVoice(); } } },
+    { id: 'large', icon: Contrast, on: a11y.textScale === 'larger' && a11y.highContrast,
+      apply: (on) => setA11y({ textScale: on ? 'larger' : 'normal', highContrast: on }) },
+    { id: 'simple', icon: BookAudio, on: a11y.simpleAudio,
+      apply: (on) => { setA11y({ simpleAudio: on, narrate: on || a11y.narrate }); if (on) setAssistantSpeak(true); } },
+  ];
 
   const toggles: Array<[keyof A11ySettings, string]> = [
     ['highContrast', t('a11y.contrast')],
@@ -83,6 +119,23 @@ export function A11yPanel() {
           <Button className="h-11 w-full gap-2" onClick={() => openVoice()}>
             <Mic className="h-4 w-4" aria-hidden /> {t('a11y.voice')}
           </Button>
+
+          <fieldset>
+            <legend className="text-sm font-semibold">{t('a11y.presets')}</legend>
+            <div className="mt-2 grid gap-2">
+              {presets.map(({ id, icon: Icon, on, apply }) => (
+                <button key={id} type="button" aria-pressed={on} onClick={() => apply(!on)}
+                  className={`flex min-h-14 items-start gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${on ? 'border-primary bg-primary/10' : 'hover:bg-muted'}`}>
+                  <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">{t(`a11y.p.${id}`)}</span>
+                    <span className="block text-xs text-muted-foreground">{t(`a11y.p.${id}.d`)}</span>
+                  </span>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${on ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{on ? t('a11y.p.on') : t('a11y.p.off')}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
           <fieldset>
             <legend className="text-sm font-semibold">{t('a11y.text')}</legend>

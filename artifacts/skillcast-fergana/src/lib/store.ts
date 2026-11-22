@@ -47,11 +47,34 @@ export interface A11ySettings {
   reduceMotion: boolean;
   underlineLinks: boolean;
   readingSpacing: boolean;
+  /** Assistant reads every answer aloud and announces tab changes. */
+  narrate: boolean;
+  /** Microphone re-opens after each answer, for hands-free navigation. */
+  handsFree: boolean;
+  /** Shorter, simpler spoken summaries. */
+  simpleAudio: boolean;
 }
 
 export const DEFAULT_A11Y: A11ySettings = {
   textScale: 'normal', highContrast: false, reduceMotion: false, underlineLinks: false, readingSpacing: false,
+  narrate: false, handsFree: false, simpleAudio: false,
 };
+
+export interface VoiceSettings {
+  /** 'auto' picks the default neural voice for the language. */
+  name: string;
+  rate: 0.85 | 1 | 1.2;
+  pitch: 0.9 | 1 | 1.1;
+}
+export const DEFAULT_VOICE: VoiceSettings = { name: 'auto', rate: 1, pitch: 1 };
+function normalizeVoice(value: unknown): VoiceSettings {
+  const v = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  return {
+    name: typeof v.name === 'string' && /^(auto|device|[a-z]{2}-[A-Z]{2}-[A-Za-z]+Neural)$/.test(v.name) ? v.name : 'auto',
+    rate: v.rate === 0.85 || v.rate === 1.2 ? v.rate : 1,
+    pitch: v.pitch === 0.9 || v.pitch === 1.1 ? v.pitch : 1,
+  };
+}
 
 export function normalizeA11y(value: unknown): A11ySettings {
   const v = value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -61,6 +84,9 @@ export function normalizeA11y(value: unknown): A11ySettings {
     reduceMotion: v.reduceMotion === true,
     underlineLinks: v.underlineLinks === true,
     readingSpacing: v.readingSpacing === true,
+    narrate: v.narrate === true,
+    handsFree: v.handsFree === true,
+    simpleAudio: v.simpleAudio === true,
   };
 }
 
@@ -78,6 +104,8 @@ interface SkillCastState {
   skillUpdates: SkillUpdate[];
   /** Assistant reads answers aloud (where the browser has a voice). */
   assistantSpeak: boolean;
+  voice: VoiceSettings;
+  setVoice: (patch: Partial<VoiceSettings>) => void;
   setAssistantSpeak: (on: boolean) => void;
   /** Applies user-confirmed level changes for a completed course. */
   confirmSkillUpdates: (courseSlug: string, chosen: ProposedUpdate[]) => SkillUpdate[];
@@ -98,9 +126,9 @@ interface SkillCastState {
   learningPaths: LearningPath[];
   activePathId: string | null;
   /** One-shot hand-offs between tabs (not saved): a catalogue search and a Wind Rose skill to highlight. */
-  catalogFocus: string | null;
+  catalogFocus: { query: string; view: string; topic?: string } | null;
   roseFocus: string | null;
-  focusCatalog: (query: string | null) => void;
+  focusCatalog: (query: string | null, view?: string, topic?: string) => void;
   focusRose: (skill: string | null) => void;
   /** Set when the learner just chose a new Wind Rose colour, so the chart can show the change. */
   roseThemeChange: { from: WindRoseTheme; to: WindRoseTheme } | null;
@@ -265,6 +293,8 @@ export const useSkillCast = create<SkillCastState>()(
 
       skillUpdates: [],
       assistantSpeak: true,
+      voice: DEFAULT_VOICE,
+      setVoice: (patch) => set((st) => ({ voice: normalizeVoice({ ...st.voice, ...patch }) })),
       setAssistantSpeak: (on) => set({ assistantSpeak: on }),
       confirmSkillUpdates: (courseSlug, chosen) => {
         const st = get();
@@ -297,7 +327,7 @@ export const useSkillCast = create<SkillCastState>()(
       activePathId: null,
       catalogFocus: null,
       roseFocus: null,
-      focusCatalog: (query) => set({ catalogFocus: query }),
+      focusCatalog: (query, view = 'all', topic) => set({ catalogFocus: query === null ? null : { query, view, topic } }),
       focusRose: (skill) => set({ roseFocus: skill }),
       roseThemeChange: null,
       setRoseThemeChange: (change) => set({ roseThemeChange: change }),
@@ -392,6 +422,7 @@ export const useSkillCast = create<SkillCastState>()(
         completedCourses: s.completedCourses,
         skillUpdates: s.skillUpdates,
         assistantSpeak: s.assistantSpeak,
+        voice: s.voice,
         dashTab: s.dashTab,
         haradaTaskStatus: s.haradaTaskStatus,
         badges: s.badges,
@@ -433,6 +464,7 @@ export const useSkillCast = create<SkillCastState>()(
               && typeof (u as SkillUpdate).courseSlug === 'string' && typeof (u as SkillUpdate).skill === 'string'
               && Number.isFinite((u as SkillUpdate).from) && Number.isFinite((u as SkillUpdate).to)) : [],
           assistantSpeak: saved.assistantSpeak !== false,
+          voice: normalizeVoice(saved.voice),
           dashTab: typeof saved.dashTab === 'string' ? saved.dashTab as typeof current.dashTab : 'overview',
           haradaTaskStatus: saved.haradaTaskStatus && typeof saved.haradaTaskStatus === 'object'
             ? Object.fromEntries(Object.entries(saved.haradaTaskStatus).filter(([, status]) => ['todo', 'in_progress', 'done'].includes(String(status)))) as Record<string, HaradaTaskStatus> : {},

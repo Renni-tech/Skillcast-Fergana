@@ -38,11 +38,15 @@ export function ResourceFinder({ gaps }: { gaps: string[] }) {
   const t = useT();
   const { lang, profile, catalogFocus, focusCatalog } = useSkillCast();
   const entries = useCatalog();
-  const [filter, setFilter] = useState<CatalogFilter>(() => (catalogFocus ? { ...DEFAULT_FILTER, query: catalogFocus } : DEFAULT_FILTER));
+  const fromFocus = (f: { query: string; view: string; topic?: string }): CatalogFilter => ({
+    ...DEFAULT_FILTER, query: f.query, view: (CATALOG_VIEWS as string[]).includes(f.view) ? f.view as CatalogFilter['view'] : 'all',
+    topic: f.topic && (CATALOG_TOPICS as readonly string[]).includes(f.topic) ? f.topic as CatalogTopic : 'all',
+  });
+  const [filter, setFilter] = useState<CatalogFilter>(() => (catalogFocus ? fromFocus(catalogFocus) : DEFAULT_FILTER));
   // A "Find courses" link elsewhere hands over a search, once.
   useEffect(() => {
     if (catalogFocus === null) return;
-    setFilter({ ...DEFAULT_FILTER, query: catalogFocus });
+    setFilter(fromFocus(catalogFocus));
     focusCatalog(null);
     const id = window.setTimeout(() => document.getElementById('where-to-learn')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
     return () => window.clearTimeout(id);

@@ -11,7 +11,7 @@ import { Dashboard } from '@/components/skillcast/dashboard';
 import { EmployerView } from '@/components/skillcast/employer';
 import { InstitutionView } from '@/components/skillcast/institution';
 import { SignalsView } from '@/components/skillcast/signalsview';
-import { A11yEffects, A11yPanel } from '@/components/skillcast/a11y';
+import { A11yEffects, NarrationEffects, A11yPanel } from '@/components/skillcast/a11y';
 import { AchievementsHost, BadgeCollection } from '@/components/skillcast/achievements';
 import { VoiceAssistant, VoiceLauncher } from '@/components/skillcast/voice-assistant';
 
@@ -43,6 +43,7 @@ function Shell() {
     <div className="skillcast-app flex min-h-screen flex-col">
       <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
       <A11yEffects />
+      <NarrationEffects />
       {mounted && <AchievementsHost />}
       {mounted && <BadgeCollection />}
       <Header />

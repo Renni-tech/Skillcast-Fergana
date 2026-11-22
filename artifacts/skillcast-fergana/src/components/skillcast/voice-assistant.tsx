@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowRight, Loader2, Mic, MicOff, RotateCcw, Send, Sparkles, Square, Volume2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useTheme } from 'next-themes';
+import { ArrowRight, ChevronDown, Loader2, Mic, MicOff, RotateCcw, Send, Settings2, Sparkles, Square, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -21,6 +22,10 @@ import type { Lang, RoleMatch } from '@/lib/types';
 import { usePanels } from '@/lib/ui-panels';
 import { buildSkillIndex, parseIntent, searchCatalogue, uzCyrillicToLatin, type Intent, type NavTarget } from '@/lib/voice-intents';
 import { computeWindRose } from '@/lib/wind-rose';
+import { parseCommand, type Command } from '@/lib/voice-commands';
+import { NEURAL_VOICES, deviceVoiceFor, speak as speakAloud, stopSpeaking } from '@/lib/tts-client';
+import { readScreen } from '@/lib/screen-summary';
+import { switchTheme } from './header';
 import { rolePathway } from './pathway';
 import { courseProvider, courseTitle, roleTitle, skillCategory, skillName, useSignals, useT } from './shared';
 
@@ -107,7 +112,14 @@ export function VoiceAssistant() {
   const {
     lang, profile, chosenRole, completedCourses, learnerOnboarded, setDashTab, setView,
     skillUpdates, activeDays, badges, assistantSpeak, setAssistantSpeak, scenario,
+    a11y, setA11y, voice, setVoice, focusCatalog, addReflection, learningPaths, dashTab, view,
   } = store;
+  const { setTheme } = useTheme();
+  const [engine, setEngine] = useState<'neural' | 'device' | 'none' | null>(null);
+  // Whether the server's AI agent answered recently; after a failure, stop waiting on it this session.
+  const agentUp = useRef<boolean | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const afterSpeech = useRef<(() => void) | null>(null);
   const { momentumMap } = useSignals();
   const { voiceOpen, setVoiceOpen, consumePrompt, setA11yOpen } = usePanels();
 
@@ -126,9 +138,10 @@ export function VoiceAssistant() {
   const [supported, setSupported] = useState({ mic: false, tts: false });
 
   useEffect(() => {
-    const tts = typeof window !== 'undefined' && 'speechSynthesis' in window;
-    setSupported({ mic: recognitionCtor() !== null, tts });
-    if (!tts) return undefined;
+    const device = typeof window !== 'undefined' && 'speechSynthesis' in window;
+    // Natural voices come from the server, so speaking works even without a device voice.
+    setSupported({ mic: recognitionCtor() !== null, tts: typeof Audio !== 'undefined' || device });
+    if (!device) return undefined;
     // Voices load asynchronously in Chrome; asking too early returns none.
     const load = () => setVoices(window.speechSynthesis.getVoices());
     load();
@@ -147,36 +160,34 @@ export function VoiceAssistant() {
     matches.find((m) => m.roleSlug === (roleSlug ?? chosenRole)) ?? (chosenRole ? undefined : matches[0]);
 
   function voiceFor(l: Lang): SpeechSynthesisVoice | null {
-    const prefix = SPEECH_LANG[l].slice(0, 2);
-    const fits = voices.filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith(prefix));
-    return fits.find((v) => v.lang === SPEECH_LANG[l]) ?? fits.find((v) => v.localService) ?? fits[0] ?? null;
+    void voices; // re-evaluated when the device's voice list loads
+    return deviceVoiceFor(l);
   }
 
-  function speakText(text: string, l: Lang) {
-    const voice = voiceFor(l);
-    if (!voice) return false;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = voice;
-    u.lang = voice.lang;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(u);
-    return true;
+  async function speakText(text: string, l: Lang): Promise<boolean> {
+    const used = await speakAloud(text, {
+      lang: l, voice: l === lang ? voice.name : 'auto', rate: voice.rate, pitch: voice.pitch,
+      onStart: () => setSpeaking(true),
+      onEnd: () => { setSpeaking(false); afterSpeech.current?.(); afterSpeech.current = null; },
+    });
+    setEngine(used);
+    return used !== 'none';
   }
 
   function say(msg: Message) {
-    if (!assistantSpeak || !supported.tts) return;
-    if (speakText(msg.text, lang)) { setVoiceNote(null); return; }
-    setVoiceNote({ lang, msg });
+    if (!(assistantSpeak || a11y.narrate)) { afterSpeech.current?.(); afterSpeech.current = null; return; }
+    void speakText(msg.text, lang).then((ok) => {
+      if (ok) { setVoiceNote(null); return; }
+      setVoiceNote({ lang, msg });
+      afterSpeech.current?.(); afterSpeech.current = null;
+    });
   }
 
   /** Same answer in another language, for devices without a voice for this one. */
   function readIn(l: Lang, msg: Message) {
     const tt = makeT(l);
     const text = msg.intent ? compute(msg.intent, msg.raw ?? '', msg.ctx ?? {}, tt).text : msg.text;
-    speakText(text, l);
+    void speakText(text, l);
   }
 
   function remaining(match: RoleMatch) {
@@ -387,14 +398,100 @@ export function VoiceAssistant() {
     return added;
   }
 
+  /** Runs a hands-free command and returns the spoken confirmation. */
+  function runCommand(cmd: Command, tt: Translate): string {
+    switch (cmd.type) {
+      case 'tab': go(cmd.tab as NavTarget); return tt('va.cmd.tab', { tab: tt(TARGET_LABEL[cmd.tab as NavTarget]) });
+      case 'theme': switchTheme(() => setTheme(cmd.value)); return tt(`va.cmd.theme.${cmd.value}`);
+      case 'a11y': {
+        if (cmd.setting === 'largeText') setA11y({ textScale: cmd.value ? 'larger' : 'normal' });
+        else setA11y({ [cmd.setting]: cmd.value });
+        return tt(cmd.value ? 'va.cmd.on' : 'va.cmd.off', { setting: tt(`va.set.${cmd.setting}`) });
+      }
+      case 'filter': {
+        focusCatalog(cmd.query, cmd.view, cmd.topic);
+        go('pathway');
+        const what = [cmd.view !== 'all' ? tt(`cat.view.${cmd.view}`) : '', cmd.topic ? tt(`cat.topic.${cmd.topic}`) : '', cmd.query ? `“${cmd.query}”` : ''].filter(Boolean).join(' · ');
+        return tt('va.cmd.filter', { what: what || tt('cat.view.all') });
+      }
+      case 'reflect': addReflection(cmd.text); return tt('va.cmd.reflect');
+      case 'summarize': return screenSummary(tt);
+      case 'stop': stopSpeaking(); setSpeaking(false); return tt('va.cmd.stop');
+    }
+  }
+
+  function screenSummary(tt: Translate): string {
+    const { place, items } = readScreen(a11y.simpleAudio ? 3 : 6);
+    const parts = [tt('va.screen.place', { place: place || tt('va.r.none') })];
+    parts.push(items.length ? tt('va.screen.items', { list: items.join('; ') }) : tt('va.screen.empty'));
+    return parts.join(' ');
+  }
+
+  function agentContext() {
+    const match = chosenRole ? leadMatch() : undefined;
+    const next = match ? remaining(match)[0] : undefined;
+    const { place, items } = readScreen(6);
+    return {
+      view, tab: dashTab,
+      role: match ? roleTitle(t, match.roleSlug) : undefined,
+      readiness: match ? Math.round(match.skillReadiness) : undefined,
+      gaps: (match?.gap ?? []).slice(0, 5).map((g) => `${skillName(t, g.skill)} (${g.userLevel}/${g.minLevel})`),
+      coursesDone: completedCourses.length,
+      nextStep: next ? courseTitle(t, next.courseSlug) : undefined,
+      paths: learningPaths.slice(0, 12).map((p) => ({ name: p.name, done: p.items.filter((i) => i.status === 'done').length, total: p.items.length })),
+      screen: [place, ...items].join(' | ').slice(0, 1200),
+    };
+  }
+
+  /** Open questions go to the server's AI agent; it may also propose safe UI actions. */
+  async function askAgent(question: string, fallback: Reply) {
+    const [loading] = push({ from: 'assistant', text: t('va.ai.thinking'), status: 'loading' });
+    const replace = (patch: Partial<Message>) => setMessages((prev) => prev.map((m) => (m.id === loading.id ? { ...m, ...patch } : m)));
+    try {
+      const history = messages.filter((m) => !m.status).slice(-6).map((m) => ({ from: m.from, text: m.text.slice(0, 800) }));
+      const res = await fetch('/api/assistant', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang, message: question, history, context: agentContext() }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      agentUp.current = true;
+      const json = (await res.json()) as { reply: string; actions?: Command[] };
+      const done = (json.actions ?? []).map((a) => runCommand(a as Command, t));
+      const text = [json.reply, ...done].join(' ');
+      replace({ text, status: undefined, note: t('va.ai.agentNote') });
+      say({ id: loading.id, from: 'assistant', text });
+    } catch {
+      agentUp.current = false;
+      // No AI model available: answer from SkillCast's own data instead.
+      replace({ text: fallback.text, status: undefined, actions: fallback.actions, follow: fallback.follow });
+      say({ id: loading.id, from: 'assistant', text: fallback.text });
+    }
+  }
+
   function handle(text: string) {
     const clean = (lang === 'uz' ? uzCyrillicToLatin(text) : text).trim();
     if (!clean) return;
+    if (a11y.handsFree && supported.mic) afterSpeech.current = () => { if (usePanels.getState().voiceOpen) toggleMic(); };
+    const cmd = parseCommand(clean);
+    if (cmd) {
+      const reply = runCommand(cmd, t);
+      const [, answerMsg] = push({ from: 'user', text: clean }, { from: 'assistant', text: reply });
+      if (cmd.type !== 'stop') say(answerMsg); else afterSpeech.current = null;
+      return;
+    }
     const intent = parseIntent(clean, skillIndex);
     const reply = compute(intent, clean, ctx, t);
+    setCtx(reply.ctx);
+    // Open questions go to the AI agent while it is available; known questions
+    // keep their exact, data-based answers when it is not.
+    const openQuestion = /\?\s*$/.test(clean) || clean.split(/\s+/).length >= 7;
+    if (intent.kind === 'unknown' || (openQuestion && agentUp.current !== false && intent.kind !== 'navigate')) {
+      push({ from: 'user', text: clean });
+      void askAgent(clean, reply);
+      return;
+    }
     if (reply.nav) go(reply.nav);
     if (reply.a11y) { setVoiceOpen(false); setA11yOpen(true); }
-    setCtx(reply.ctx);
     const [, answerMsg] = push(
       { from: 'user', text: clean },
       { from: 'assistant', text: reply.text, actions: reply.actions, follow: reply.follow, intent, ctx, raw: clean },
@@ -451,8 +548,26 @@ export function VoiceAssistant() {
     recognitionRef.current?.abort();
     setListening(false);
     setInterim('');
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    stopSpeaking();
+    setSpeaking(false);
+    afterSpeech.current = null;
   }, [voiceOpen]);
+
+  // Space bar: talk, or stop speaking — when focus is not in a text field.
+  const spaceKey = useCallback((e: KeyboardEvent) => {
+    if (e.code !== 'Space' || e.repeat) return;
+    const el = e.target as HTMLElement | null;
+    if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(el.tagName) || el.getAttribute('role') === 'switch' || el.getAttribute('role') === 'radio')) return;
+    e.preventDefault();
+    if (speaking) { stopSpeaking(); setSpeaking(false); return; }
+    toggleMic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speaking, listening, lang, recLang]);
+  useEffect(() => {
+    if (!voiceOpen) return undefined;
+    window.addEventListener('keydown', spaceKey);
+    return () => window.removeEventListener('keydown', spaceKey);
+  }, [voiceOpen, spaceKey]);
 
   function toggleMic(langOverride?: string) {
     if (listening) { recognitionRef.current?.stop(); return; }
@@ -489,7 +604,13 @@ export function VoiceAssistant() {
   }
 
   const submit = (e: FormEvent) => { e.preventDefault(); handle(input); setInput(''); };
-  const examples = ['va.ex.next', 'va.f.why', 'va.f.week', 'va.ex.radar', 'va.f.status', 'va.ex.inclusive'];
+  // Suggestions follow the screen the learner is on; any other question can be typed or spoken.
+  const TAB_EXAMPLES: Record<string, string[]> = {
+    overview: ['va.f.why', 'va.f.status'], matches: ['va.f.why', 'va.f.gaps'], radar: ['va.ex.radar', 'va.f.gaps'],
+    pathway: ['va.ex.freeAi', 'va.ex.tailoring'], harada: ['va.f.week', 'va.ex.next'], progress: ['va.ex.reflect', 'va.f.status'],
+    sdg: ['va.ex.open', 'va.ex.next'], demand: ['va.ex.open', 'va.f.gaps'],
+  };
+  const examples = [...new Set(['va.ex.screen', 'va.ex.next', ...(TAB_EXAMPLES[dashTab] ?? []), 'va.ex.contrast', 'va.ex.inclusive'])].slice(0, 6);
   const lastAssistant = [...messages].reverse().find((m) => m.from === 'assistant' && !m.status);
   const altVoices = (['ru', 'en', 'uz'] as Lang[]).filter((l) => l !== lang && voiceFor(l));
 
@@ -596,15 +717,50 @@ export function VoiceAssistant() {
           </form>
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <label className="flex items-center gap-2">
-              <Switch checked={assistantSpeak && supported.tts} onCheckedChange={setAssistantSpeak} disabled={!supported.tts} />
+              <Switch checked={(assistantSpeak || a11y.narrate) && supported.tts} onCheckedChange={setAssistantSpeak} disabled={!supported.tts || a11y.narrate} />
               <Volume2 className="h-4 w-4" aria-hidden /> {supported.tts ? t('va.speak') : t('va.noSpeech')}
             </label>
-            {supported.tts && speaking && (
-              <Button variant="ghost" size="sm" className="gap-1" onClick={() => { window.speechSynthesis.cancel(); setSpeaking(false); }}>
+            <div className="flex items-center gap-1">
+              <Button variant={speaking ? 'destructive' : 'ghost'} size="sm" className="min-h-11 gap-1 sm:min-h-8" disabled={!speaking} onClick={() => { stopSpeaking(); setSpeaking(false); }}>
                 <Square className="h-3.5 w-3.5" aria-hidden /> {t('va.stop')}
               </Button>
-            )}
+              <Button variant="ghost" size="sm" className="min-h-11 gap-1 sm:min-h-8" aria-expanded={showSettings} aria-controls="va-settings" onClick={() => setShowSettings(!showSettings)}>
+                <Settings2 className="h-3.5 w-3.5" aria-hidden />{t('va.voice.title')}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSettings ? 'rotate-180' : ''}`} aria-hidden />
+              </Button>
+            </div>
           </div>
+          {showSettings && (
+            <div id="va-settings" className="space-y-3 rounded-lg border p-3 text-sm">
+              <label className="grid gap-1 text-xs font-medium">
+                {t('va.voice.pick')}
+                <select value={voice.name} onChange={(e) => setVoice({ name: e.target.value })} className="h-11 rounded-md border bg-background px-2 text-sm sm:h-9">
+                  <option value="auto">{t('va.voice.auto')}</option>
+                  {NEURAL_VOICES[lang === 'ru' || lang === 'en' ? lang : 'uz'].map((v) => <option key={v.id} value={v.id}>{v.label} · {t('va.voice.natural')}</option>)}
+                  <option value="device">{t('va.voice.device')}</option>
+                </select>
+              </label>
+              {([['rate', [0.85, 1, 1.2], 'va.speed'], ['pitch', [0.9, 1, 1.1], 'va.pitch']] as const).map(([key, values, label]) => (
+                <fieldset key={key}>
+                  <legend className="text-xs font-medium">{t(label)}</legend>
+                  <div role="radiogroup" aria-label={t(label)} className="mt-1 grid grid-cols-3 gap-1">
+                    {values.map((v, i) => (
+                      <button key={v} type="button" role="radio" aria-checked={voice[key] === v} onClick={() => setVoice({ [key]: v })}
+                        className={`min-h-11 rounded-md border px-2 text-xs sm:min-h-8 ${voice[key] === v ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
+                        {t(`${label}.${i}`)}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+              <Button variant="outline" size="sm" className="min-h-11 w-full gap-1.5 sm:min-h-9" onClick={() => void speakText(t('va.voice.sample'), lang)}>
+                <Volume2 className="h-4 w-4" aria-hidden />{t('va.voice.test')}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                {engine === 'neural' ? t('va.engine.neural') : engine === 'device' ? t('va.engine.device') : engine === 'none' ? t('va.engine.none') : t('va.engine.info')}
+              </p>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">{t('va.space')}</p>
           {!supported.mic && <p className="text-xs text-muted-foreground">{t('va.mic.unsupported')}</p>}
         </div>
       </SheetContent>
