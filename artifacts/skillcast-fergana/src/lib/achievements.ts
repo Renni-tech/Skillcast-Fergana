@@ -174,7 +174,7 @@ export type WindRoseTheme = 'classic' | 'silk' | 'saffron';
 export const WIND_ROSE_THEMES: Record<WindRoseTheme, { you: string; unlock: (earned: string[]) => boolean }> = {
   classic: { you: '#2563eb', unlock: () => true },
   silk: { you: '#0d9488', unlock: (e) => e.length >= 5 },
-  saffron: { you: '#c2410c', unlock: (e) => e.some((id) => id.endsWith(':gold')) },
+  saffron: { you: '#d97706', unlock: (e) => e.some((id) => id.endsWith(':gold')) },
 };
 
 export function completedSets(earnedIds: string[]): CategoryId[] {

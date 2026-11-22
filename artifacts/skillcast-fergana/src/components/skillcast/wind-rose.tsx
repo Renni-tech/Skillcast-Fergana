@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Compass, Lightbulb, Mic, Table2, TrendingUp, Trophy, X } from 'lucide-react';
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -12,13 +14,15 @@ import { usePanels } from '@/lib/ui-panels';
 import { computeWindRose, type WindRosePoint } from '@/lib/wind-rose';
 import { useReducedMotion } from './a11y';
 import { Explainer } from './explainer';
+import { GraphGuide } from './graph-guide';
+import { roleTitle } from './shared';
 import { skillName, useSignals, useT } from './shared';
 
 // ─── Wind Rose: the learner's career direction map ─────────────────────────
-// Blue filled = you now; violet solid = market direction; amber dashed =
-// pathway target. Line style + legend text + table, never colour alone.
+// Filled area (colour chosen with badges) = you now; violet solid = market
+// direction; teal dashed = pathway target. Line style + legend text + table, never colour alone.
 
-const BASE_COLORS = { you: '#2563eb', market: '#7c3aed', target: '#d97706' };
+const BASE_COLORS = { you: '#2563eb', market: '#7c3aed', target: 'var(--wr-target)' };
 
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -46,7 +50,8 @@ function wrapLabel(text: string, max: number, maxLines = 3): string[] {
 
 export function WindRose({ compact = false }: { compact?: boolean }) {
   const t = useT();
-  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip, roseFocus, focusRose } = useSkillCast();
+  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip, roseFocus, focusRose, roseThemeChange, setRoseThemeChange } = useSkillCast();
+  const colourName = t(`wr.color.${windRoseTheme}`);
   // "You" colour follows the Wind Rose colour unlocked with badges.
   const COLORS = { ...BASE_COLORS, you: WIND_ROSE_THEMES[windRoseTheme]?.you ?? BASE_COLORS.you };
   const { momentumMap } = useSignals();
@@ -75,7 +80,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
     if (narrow) {
       return (
         <g transform={`translate(${x},${y})`}>
-          <circle r={9} fill={point.gap >= 20 ? COLORS.target : 'var(--muted)'} />
+          <circle r={9} fill={point.gap >= 20 ? '#b45309' : 'var(--muted)'} />
           <text textAnchor="middle" dy={4} fontSize={10} fontWeight={700} fill={point.gap >= 20 ? '#fff' : 'var(--foreground)'}>{point.n}</text>
         </g>
       );
@@ -121,14 +126,6 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             </p>
             <CardTitle className="mt-1 text-lg leading-snug sm:text-xl">{t('wr.title')}</CardTitle>
             <CardDescription className="mt-1">{t('wr.lede')}</CardDescription>
-            <ol className="mt-3 grid gap-1.5 text-xs sm:grid-cols-3" aria-label={t('wr.read.title')}>
-              {(['wr.read.1', 'wr.read.2', 'wr.read.3'] as const).map((key, i) => (
-                <li key={key} className="flex items-start gap-2 rounded-lg bg-muted/50 px-2.5 py-1.5">
-                  <span className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${['bg-blue-600', 'bg-violet-600', 'bg-amber-600'][i]}`}>{i + 1}</span>
-                  <span className="min-w-0 leading-snug">{t(key)}</span>
-                </li>
-              ))}
-            </ol>
           </div>
           <Button variant="outline" size="sm" className="h-auto min-h-9 w-full gap-1.5 whitespace-normal text-left sm:w-auto sm:max-w-56" onClick={() => openVoice(t('va.ex.radar'))}>
             <Mic className="h-4 w-4 shrink-0" aria-hidden /> {t('wr.ask')}
@@ -136,6 +133,25 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {roseThemeChange && (
+          <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-teal-500/60 bg-teal-50 px-3 py-2 text-sm text-teal-950 dark:bg-teal-950/40 dark:text-teal-50">
+            <span className="flex items-center gap-1.5" aria-hidden>
+              <span className="h-4 w-4 rounded-full" style={{ background: WIND_ROSE_THEMES[roseThemeChange.from].you }} />
+              <ArrowRight className="h-3.5 w-3.5" />
+              <span className="h-4 w-4 rounded-full ring-2 ring-white" style={{ background: WIND_ROSE_THEMES[roseThemeChange.to].you }} />
+            </span>
+            <p className="min-w-0 flex-1">{t('wr.colour.changed', { from: t(`wr.color.${roseThemeChange.from}`), to: t(`wr.color.${roseThemeChange.to}`) })}</p>
+            <button type="button" onClick={() => setRoseThemeChange(null)} className="min-h-11 shrink-0 rounded px-2 text-xs font-semibold underline-offset-2 hover:underline sm:min-h-0">{t('wr.tip.ok')}</button>
+          </div>
+        )}
+        <GraphGuide id="wr-guide" items={[
+          { key: 'measures', text: t('wr.g.measures') },
+          { key: 'colours', text: t('wr.g.colours', { color: colourName }), swatch: [{ color: COLORS.you, style: 'fill' }, { color: COLORS.market, style: 'solid' }, ...(hasTarget ? [{ color: COLORS.target, style: 'dashed' as const }] : [])] },
+          { key: 'axes', text: t(narrow ? 'wr.g.axes.narrow' : 'wr.g.axes') },
+          { key: 'you', text: t('wr.g.you') },
+          { key: 'target', text: hasTarget && chosenRole ? t('wr.g.target', { role: roleTitle(t, chosenRole) }) : t('wr.g.target.none') },
+          { key: 'todo', text: focus ? t('wr.g.todo', { skill: skillName(t, focus.slug) }) : t('wr.g.todo.none') },
+        ]} />
         {!seenTips.includes('rose-tip') && (
           <div role="note" className="flex items-start gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-sm text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">
             <span aria-hidden className="mt-0.5 text-lg leading-none">👆</span>
@@ -147,7 +163,9 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
           <div className="min-w-0">
             <div
               ref={ref}
-              className="h-[21rem] min-w-0 sm:h-[26rem]"
+              key={roseThemeChange ? `pop-${roseThemeChange.to}` : 'rose'}
+              style={{ '--wr-pop': COLORS.you } as React.CSSProperties}
+              className={`h-[21rem] min-w-0 sm:h-[26rem] ${roseThemeChange ? 'wr-colour-pop' : ''}`}
               role="img"
               aria-label={t('wr.aria', { n: data.length })}
             >
@@ -157,7 +175,7 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
                   <PolarAngleAxis dataKey="label" tick={Tick as never} />
                   <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
                   <Radar name={t('wr.market')} dataKey="market" stroke={COLORS.market} strokeWidth={2} fill={COLORS.market} fillOpacity={0.08} isAnimationActive={!reduceMotion} />
-                  {hasTarget && <Radar name={t('wr.target')} dataKey="targetValue" stroke={COLORS.target} strokeWidth={2} strokeDasharray="6 4" fill="none" isAnimationActive={!reduceMotion} />}
+                  {hasTarget && <Radar name={t('wr.target')} dataKey="targetValue" stroke={COLORS.target} strokeWidth={2.5} strokeDasharray="7 4" dot={{ r: 3, fill: COLORS.target, strokeWidth: 0 }} fill="none" isAnimationActive={!reduceMotion} />}
                   <Radar name={t('wr.you')} dataKey="you" stroke={COLORS.you} strokeWidth={2} fill={COLORS.you} fillOpacity={0.35} isAnimationActive={!reduceMotion} />
                   <Tooltip content={TipContent as never} />
                 </RadarChart>
@@ -165,9 +183,9 @@ export function WindRose({ compact = false }: { compact?: boolean }) {
             </div>
             {/* Legend: colour + line style + words */}
             <ul className="mt-2 grid gap-1.5 text-xs text-muted-foreground sm:grid-cols-3">
-              <li className="flex items-start gap-2"><span aria-hidden className="mt-0.5 h-3 w-5 shrink-0 rounded-sm border-2" style={{ borderColor: COLORS.you, background: `${COLORS.you}59` }} />{t('wr.legend.you')}</li>
+              <li className="flex items-start gap-2"><span aria-hidden className="mt-0.5 h-3 w-5 shrink-0 rounded-sm border-2" style={{ borderColor: COLORS.you, background: `${COLORS.you}59` }} />{t('wr.legend.you2', { color: colourName })}</li>
               <li className="flex items-start gap-2"><span aria-hidden className="mt-1.5 h-0 w-5 shrink-0 border-t-2" style={{ borderColor: COLORS.market }} />{t('wr.legend.market')}</li>
-              {hasTarget && <li className="flex items-start gap-2"><span aria-hidden className="mt-1.5 h-0 w-5 shrink-0 border-t-2 border-dashed" style={{ borderColor: COLORS.target }} />{t('wr.legend.target')}</li>}
+              {hasTarget && <li className="flex items-start gap-2"><span aria-hidden className="mt-1.5 h-0 w-5 shrink-0 border-t-2 border-dashed" style={{ borderColor: COLORS.target }} />{t('wr.legend.target2')}</li>}
             </ul>
             <p className="mt-3 text-xs font-medium text-muted-foreground">{t('wr.select.hint')}</p>
             <ol className="mt-1.5 flex flex-wrap gap-1.5 text-xs">

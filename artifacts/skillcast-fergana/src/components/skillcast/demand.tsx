@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, Table2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { GraphGuide } from './graph-guide';
 import { Explainer } from './explainer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -94,6 +95,14 @@ export function DemandTab({ matches }: { matches: RoleMatch[] }) {
         ))}
       </div>
 
+      <GraphGuide id="demand-guide" items={[
+        { key: 'measures', text: t('dg.measures') },
+        { key: 'colours', text: t('dg.colours'), swatch: [{ color: '#0d9488', style: 'solid' }, { color: '#f59e0b', style: 'solid' }] },
+        { key: 'axes', text: t('dg.axes') },
+        { key: 'you', text: match ? t('dg.you', { score: match.score }) : t('dg.you.none') },
+        { key: 'target', text: t('dg.target') },
+        { key: 'todo', text: t('dg.todo') },
+      ]} />
       <Explainer label={t('demand.how')}>{t('demand.how.body')}</Explainer>
 
       <div className="flex flex-wrap items-center gap-2">

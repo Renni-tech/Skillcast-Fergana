@@ -95,6 +95,12 @@ interface SkillCastState {
   roseFocus: string | null;
   focusCatalog: (query: string | null) => void;
   focusRose: (skill: string | null) => void;
+  /** Set when the learner just chose a new Wind Rose colour, so the chart can show the change. */
+  roseThemeChange: { from: WindRoseTheme; to: WindRoseTheme } | null;
+  setRoseThemeChange: (change: { from: WindRoseTheme; to: WindRoseTheme } | null) => void;
+  /** Wind Rose colours whose unlock has been announced. */
+  themesAnnounced: WindRoseTheme[];
+  announceTheme: (theme: WindRoseTheme) => void;
   createPath: (name: string, firstEntryId?: string) => string;
   renamePath: (id: string, name: string) => void;
   deletePath: (id: string) => void;
@@ -279,6 +285,10 @@ export const useSkillCast = create<SkillCastState>()(
       roseFocus: null,
       focusCatalog: (query) => set({ catalogFocus: query }),
       focusRose: (skill) => set({ roseFocus: skill }),
+      roseThemeChange: null,
+      setRoseThemeChange: (change) => set({ roseThemeChange: change }),
+      themesAnnounced: [],
+      announceTheme: (theme) => set((st) => ({ themesAnnounced: [...new Set([...st.themesAnnounced, theme])] })),
       createPath: (name, firstEntryId) => {
         const st = get();
         const id = newPathId(st.learningPaths);
@@ -336,6 +346,7 @@ export const useSkillCast = create<SkillCastState>()(
           seenTips: [],
           learningPaths: [],
           activePathId: null,
+          themesAnnounced: [],
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -366,6 +377,7 @@ export const useSkillCast = create<SkillCastState>()(
         seenTips: s.seenTips,
         learningPaths: s.learningPaths,
         activePathId: s.activePathId,
+        themesAnnounced: s.themesAnnounced,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -405,6 +417,7 @@ export const useSkillCast = create<SkillCastState>()(
           badgeSound: saved.badgeSound === true,
           windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
           seenTips: strings(saved.seenTips).slice(0, 50),
+          themesAnnounced: strings(saved.themesAnnounced).filter((x) => x in WIND_ROSE_THEMES) as WindRoseTheme[],
           ...(() => {
             const learningPaths = normalizePaths(saved.learningPaths);
             const activePathId = learningPaths.some((p) => p.id === saved.activePathId) ? saved.activePathId as string : (learningPaths[0]?.id ?? null);

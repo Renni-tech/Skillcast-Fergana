@@ -27,6 +27,7 @@ import { useSkillCast } from '@/lib/store';
 import { useReducedMotion } from './a11y';
 import { rolePathway } from './pathway';
 import { useSignals, useT } from './shared';
+import { pendingTheme, ThemeUnlockPrompt } from './theme-unlock';
 
 const ICONS: Record<string, LucideIcon> = {
   footprints: Footprints, compass: Compass, sparkles: Sparkles, flame: Flame,
@@ -262,7 +263,7 @@ function BadgeReveal({ id, remaining, replay, earnedBefore, onDone, onSkipAll }:
 
 // ─── Host: awards newly met badges and plays reveals one at a time ────────
 export function AchievementsHost() {
-  const { view, userType, learnerOnboarded, badges, badgesSeen, awardBadges, markBadgesSeen } = useSkillCast();
+  const { view, userType, learnerOnboarded, badges, badgesSeen, awardBadges, markBadgesSeen, themesAnnounced } = useSkillCast();
   const snapshot = useProgressSnapshot();
   const { replay, setReplay, collectionOpen } = useBadgeUi();
   const active = userType === 'individual' && learnerOnboarded;
@@ -286,11 +287,25 @@ export function AchievementsHost() {
 
   const current = calm ? queue[0] : undefined;
   const earnedBefore = useMemo(() => Object.keys(badges).filter((id) => badgesSeen.includes(id)), [badges, badgesSeen]);
+  // A new Wind Rose colour is offered only after every badge reveal is done.
+  const theme = active && !queue.length && view === 'dashboard' && !collectionOpen && !replay ? pendingTheme(earnedBefore, themesAnnounced) : null;
+  const [themeOpen, setThemeOpen] = useState<string | null>(null);
+  useEffect(() => {
+    if (!theme) return;
+    const id = window.setTimeout(() => {
+      if (!document.querySelector('[role="alertdialog"], [role="dialog"]')) setThemeOpen(theme);
+    }, 900);
+    return () => window.clearTimeout(id);
+  }, [theme]);
 
   if (replay) {
     return <BadgeReveal key={`replay-${replay}`} id={replay} remaining={0} replay earnedBefore={[]} onDone={() => setReplay(null)} onSkipAll={() => setReplay(null)} />;
   }
-  if (!current) return null;
+  if (!current) {
+    return themeOpen && theme === themeOpen
+      ? <ThemeUnlockPrompt theme={theme} onClose={() => setThemeOpen(null)} />
+      : null;
+  }
   return (
     <BadgeReveal key={current} id={current} remaining={queue.length - 1} replay={false} earnedBefore={earnedBefore}
       onDone={() => markBadgesSeen([current])} onSkipAll={() => markBadgesSeen(queue)} />

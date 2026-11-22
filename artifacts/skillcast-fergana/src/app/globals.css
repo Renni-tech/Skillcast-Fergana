@@ -44,6 +44,7 @@
 }
 
 :root {
+  --wr-target: #0d9488;
   color-scheme: light;
   --font-geist-sans: 'Geist', sans-serif;
   --font-geist-mono: 'Geist Mono', monospace;
@@ -82,6 +83,7 @@
 }
 
 .dark {
+  --wr-target: #10b981;
   color-scheme: dark;
   --background: #020617;
   --foreground: #f1f5f9;
@@ -472,3 +474,8 @@ html.a11y-spacing p { margin-bottom: 0.5em; }
 ::view-transition-old(root),
 ::view-transition-new(root) { animation-duration: 100ms; animation-timing-function: ease-out; }
 html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after { transition: none !important; }
+
+/* Wind Rose colour change: a short glow on the chart after a new colour is chosen. */
+@keyframes wr-colour-pop { 0% { transform: scale(0.96); filter: drop-shadow(0 0 0 transparent); } 40% { transform: scale(1.02); filter: drop-shadow(0 0 18px var(--wr-pop, #0d9488)); } 100% { transform: scale(1); filter: none; } }
+.wr-colour-pop { animation: wr-colour-pop 1.2s ease-out 1; }
+@media (prefers-reduced-motion: reduce) { .wr-colour-pop { animation: none; } }
