@@ -46,14 +46,22 @@ function wrapLabel(text: string, max: number, maxLines = 3): string[] {
 
 export function WindRose({ compact = false }: { compact?: boolean }) {
   const t = useT();
-  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip } = useSkillCast();
+  const { profile, chosenRole, setDashTab, setView, windRoseTheme, seenTips, dismissTip, roseFocus, focusRose } = useSkillCast();
   // "You" colour follows the Wind Rose colour unlocked with badges.
   const COLORS = { ...BASE_COLORS, you: WIND_ROSE_THEMES[windRoseTheme]?.you ?? BASE_COLORS.you };
   const { momentumMap } = useSignals();
   const openVoice = usePanels((s) => s.openVoice);
   const reduceMotion = useReducedMotion();
   const [showTable, setShowTable] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(roseFocus);
+  // Opened from the Harada roadmap for one skill: show that spoke, once.
+  useEffect(() => {
+    if (!roseFocus) return;
+    setSelected(roseFocus);
+    focusRose(null);
+    const id = window.setTimeout(() => document.getElementById('wind-rose')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    return () => window.clearTimeout(id);
+  }, [roseFocus, focusRose]);
   const { ref, width } = useWidth<HTMLDivElement>();
   const narrow = width < 560;
 

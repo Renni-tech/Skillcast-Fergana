@@ -1,8 +1,12 @@
 'use client';
 
 import { ChoosePathwayEmpty } from './explainer';
-import { useMemo, useState } from 'react';
-import { BookOpen, Check, Clock3, Compass, Target } from 'lucide-react';
+import { useId, useMemo, useState } from 'react';
+import { ArrowRight, BookOpen, Check, Clock3, Compass, Pencil, Radar as RadarIcon, Search, Target } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { CATALOG_MAP, entryName } from '@/lib/resource-catalog';
+import { rankResources } from '@/lib/resource-match';
+import { ConnectButton } from './resource-finder';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,6 +98,12 @@ const TASKS = [
 type TaskStatus = 'not-started' | 'in-progress' | 'completed';
 export const HARADA_TASK_COUNT = TASKS.length;
 
+/** Subtask fill: from a faint teal at 1/8 to full Silk Road emerald at 8/8. */
+export function haradaFill(done: number): string {
+  const pct = Math.round(12 + (Math.max(0, Math.min(8, done)) / 8) * 43);
+  return done >= 8 ? 'color-mix(in oklab, #10B981 55%, transparent)' : `color-mix(in oklab, #0D9488 ${pct}%, transparent)`;
+}
+
 const STATUS_LABELS: Record<TaskStatus, string> = {
   'not-started': 'Not Started',
   'in-progress': 'In Progress',
@@ -158,7 +168,15 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
     completedCourses,
     setProfile,
     setDashTab,
+    setChosenRole,
+    focusCatalog,
+    focusRose,
+    lang,
   } = useSkillCast();
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalDraft, setGoalDraft] = useState('');
+  const goalId = useId();
+  const roleId = useId();
 
   const { momentumMap } = useSignals();
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
@@ -350,13 +368,21 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
     return <ChoosePathwayEmpty onGo={() => setDashTab('matches')} />;
   }
 
-  const vision = `Build toward ${roleTitle(t, role.slug)} by strengthening ${
-    match.gap.length
-      ? `${match.gap.length} priority skill gaps, starting with ${
-          roadmapSkills[0]?.name ?? 'your role skills'
-        }`
-      : 'the skills required for your selected career'
-  }. At ${weeklyHours} learning hours per week, this Open Window plan has about ${weeksRemaining} weeks remaining based on its task estimates.`;
+  const vision = match.gap.length
+    ? t('harada.vision.gaps', { role: roleTitle(t, role.slug), n: match.gap.length, skill: roadmapSkills[0] ? skillName(t, roadmapSkills[0].skill) : roleTitle(t, role.slug), hours: weeklyHours, weeks: weeksRemaining })
+    : t('harada.vision.ready', { role: roleTitle(t, role.slug), hours: weeklyHours, weeks: weeksRemaining });
+  const goalText = profile.objective || profile.extended?.aiGoal || t('harada.goal.default', { role: roleTitle(t, role.slug) });
+  const saveGoal = () => { setProfile({ objective: goalDraft.trim().slice(0, 200) }); setEditingGoal(false); };
+  const topRoles = [...matches].sort((a, b) => b.score - a.score).slice(0, 8);
+  if (!topRoles.some((m) => m.roleSlug === role.slug)) topRoles.unshift(match);
+  // Real places to learn the selected skill, from the catalogue.
+  const skillResources = selected
+    ? rankResources(profile, { lang, gaps: [selected.skill] })
+      .filter((r) => r.skills.includes(selected.skill) && (r.resource as { catalog?: { availability: string } }).catalog?.availability !== 'closed')
+      .slice(0, 3)
+    : [];
+  const findCourses = (skill: string) => { focusCatalog(skillName(t, skill)); setDashTab('pathway'); };
+  const showOnRose = (skill: string) => { focusRose(skill); setDashTab('radar'); };
 
   const selectedCompleted = selected
     ? TASKS.filter(
@@ -376,12 +402,35 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent>
-            <p className="rounded-xl bg-blue-50/70 p-4 text-sm text-slate-700">
-              {profile.objective ||
-                profile.extended?.aiGoal ||
-                `Develop toward ${roleTitle(t, role.slug)}`}
-            </p>
+          <CardContent className="space-y-3">
+            {editingGoal ? (
+              <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); saveGoal(); }}>
+                <label htmlFor={goalId} className="text-xs font-medium">{t('harada.goal.label')}</label>
+                <Textarea id={goalId} value={goalDraft} onChange={(e) => setGoalDraft(e.target.value)} maxLength={200} rows={3}
+                  placeholder={t('harada.goal.default', { role: roleTitle(t, role.slug) })} className="text-base sm:text-sm" autoFocus />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" size="sm" className="min-h-11 sm:min-h-9">{t('lp.save')}</Button>
+                  <Button type="button" variant="ghost" size="sm" className="min-h-11 sm:min-h-9" onClick={() => setEditingGoal(false)}>{t('lp.cancel')}</Button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex flex-col items-start gap-2 rounded-xl bg-blue-50/70 p-4 dark:bg-blue-950/30 sm:flex-row">
+                <p className="w-full min-w-0 flex-1 break-words text-sm text-slate-700 dark:text-slate-200">{goalText}</p>
+                <Button variant="ghost" size="sm" className="min-h-11 shrink-0 gap-1 sm:min-h-8" onClick={() => { setGoalDraft(profile.objective ?? ''); setEditingGoal(true); }}>
+                  <Pencil className="h-3.5 w-3.5" aria-hidden />{t('harada.goal.edit')}
+                </Button>
+              </div>
+            )}
+            <label htmlFor={roleId} className="grid min-w-0 gap-1.5 text-xs font-medium">
+              {t('harada.goal.pathway')}
+              <Select value={role.slug} onValueChange={(v) => setChosenRole(v)}>
+                <SelectTrigger id={roleId} className="h-11 w-full min-w-0 sm:h-9 [&>span]:truncate"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {topRoles.map((m) => <SelectItem key={m.roleSlug} value={m.roleSlug}>{roleTitle(t, m.roleSlug)} · {Math.round(m.score)}%</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </label>
+            <p className="text-xs text-muted-foreground">{t('harada.goal.updates')}</p>
           </CardContent>
         </Card>
 
@@ -416,6 +465,14 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          <ol aria-label={t('harada.chain.label')} className="flex flex-wrap items-center gap-1.5 text-xs">
+            {(['goal', 'tasks', 'subtasks', 'resources', 'paths'] as const).map((k, i) => (
+              <li key={k} className="flex items-center gap-1.5">
+                {i > 0 && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />}
+                <span className="rounded-full border bg-muted/50 px-2.5 py-1 font-medium">{t(`harada.chain.${k}`)}</span>
+              </li>
+            ))}
+          </ol>
           <p className="text-xs text-slate-500">
             {t('Direct skills use the selected role’s required level. Adjacent supporting skills use a level 2 foundation target unless another role defines a requirement.')}
           </p>
@@ -462,7 +519,7 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
               );
 
               const cellStyle = completed
-                ? 'border-amber-400 bg-amber-50/80 ring-2 ring-amber-300 dark:border-amber-500 dark:bg-amber-950/40'
+                ? 'border-emerald-500 ring-2 ring-emerald-400 dark:border-emerald-400'
                 : active
                   ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100 dark:border-blue-400 dark:bg-blue-950/40 dark:ring-blue-900'
                   : cellIndex % 2
@@ -475,7 +532,8 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   type="button"
                   aria-pressed={active}
                   onClick={() => setSelectedSkill(skill.skill)}
-                  className={`min-h-28 min-w-0 overflow-hidden rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-36 sm:p-4 ${cellStyle}`}
+                  style={done ? { backgroundImage: `linear-gradient(to top, ${haradaFill(done)} 0%, ${haradaFill(done)} ${(done / 8) * 100}%, transparent ${(done / 8) * 100}%)` } : undefined}
+                  className={`relative flex min-h-28 min-w-0 flex-col overflow-hidden rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-36 sm:p-4 ${cellStyle}`}
                 >
                   <span className="line-clamp-2 block text-xs font-semibold leading-5 text-slate-900 sm:text-sm">
                     {skillName(t, skill.skill)}
@@ -483,8 +541,13 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   <span className="mt-2 block text-[11px] text-slate-600 sm:text-xs">
                     {skill.current} → {skill.target}
                   </span>
-                  <span className="mt-1 block text-[11px] text-blue-700 sm:text-xs">
-                    {done}{t('/8 tasks')}
+                  <span className={`mt-1 block text-[11px] font-medium sm:text-xs ${done === 8 ? 'text-emerald-800 dark:text-emerald-200' : 'text-blue-700 dark:text-blue-300'}`}>
+                    {done === 8 && <Check className="mr-0.5 inline h-3 w-3" aria-hidden />}{done}{t('/8 tasks')}
+                  </span>
+                  <span className="mt-auto flex gap-0.5 pt-2" aria-hidden>
+                    {Array.from({ length: 8 }, (_, k) => (
+                      <span key={k} className="h-1.5 flex-1 rounded-full" style={{ background: k < done ? '#0D9488' : 'var(--border)' }} />
+                    ))}
                   </span>
                 </button>
               );
@@ -586,6 +649,41 @@ export function HaradaTab({ matches }: { matches: RoleMatch[] }) {
                   );
                 })}
               </ol>
+            )}
+
+            {selected && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button size="sm" className="min-h-11 gap-1.5 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 sm:min-h-9" onClick={() => setDashTab('pathway')}>
+                  <BookOpen className="h-4 w-4" aria-hidden />{t('harada.learn')}
+                </Button>
+                <Button variant="outline" size="sm" className="min-h-11 gap-1.5 sm:min-h-9" onClick={() => findCourses(selected.skill)}>
+                  <Search className="h-4 w-4" aria-hidden />{t('pws.findCourses')}
+                </Button>
+                <Button variant="outline" size="sm" className="min-h-11 gap-1.5 sm:min-h-9" onClick={() => showOnRose(selected.skill)}>
+                  <RadarIcon className="h-4 w-4" aria-hidden />{t('harada.onRose')}
+                </Button>
+              </div>
+            )}
+
+            {selected && skillResources.length > 0 && (
+              <section className="mt-5 border-t border-blue-100 pt-4 dark:border-slate-700" aria-labelledby="harada-res">
+                <h4 id="harada-res" className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('harada.resources')}</h4>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t('harada.resources.d')}</p>
+                <ul className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {skillResources.map((r) => {
+                    const e = CATALOG_MAP[r.resource.id];
+                    if (!e) return null;
+                    const label = entryName(t, lang, e);
+                    return (
+                      <li key={e.id} className="flex min-w-0 flex-col gap-2 rounded-xl border border-blue-100 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+                        <span className="font-medium text-slate-800 dark:text-slate-100">{label}</span>
+                        <span className="text-xs text-muted-foreground">{e.badge} · {t(`cat.mode.${e.mode}`)} · {t(`cat.cost.${e.cost}`)}</span>
+                        <ConnectButton entryId={e.id} name={label} className="ml-0 mt-auto w-full" />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
             )}
 
             <section className="mt-5 border-t border-blue-100 pt-4 dark:border-slate-700">

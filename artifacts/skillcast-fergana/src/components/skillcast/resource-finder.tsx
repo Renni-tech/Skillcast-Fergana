@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { CalendarDays, Check, Clock, ExternalLink, Globe2, GraduationCap, Landmark, Languages, Mail, MapPin, Phone, Plus, Search, ShieldCheck, Sparkles, Wallet, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,9 +35,17 @@ function haystack(t: TFn, e: CatalogEntry): string {
 
 export function ResourceFinder({ gaps }: { gaps: string[] }) {
   const t = useT();
-  const { lang, profile } = useSkillCast();
+  const { lang, profile, catalogFocus, focusCatalog } = useSkillCast();
   const entries = useCatalog();
-  const [filter, setFilter] = useState<CatalogFilter>(DEFAULT_FILTER);
+  const [filter, setFilter] = useState<CatalogFilter>(() => (catalogFocus ? { ...DEFAULT_FILTER, query: catalogFocus } : DEFAULT_FILTER));
+  // A "Find courses" link elsewhere hands over a search, once.
+  useEffect(() => {
+    if (catalogFocus === null) return;
+    setFilter({ ...DEFAULT_FILTER, query: catalogFocus });
+    focusCatalog(null);
+    const id = window.setTimeout(() => document.getElementById('where-to-learn')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    return () => window.clearTimeout(id);
+  }, [catalogFocus, focusCatalog]);
   const [shown, setShown] = useState(PAGE);
   const home = homeArea(profile);
   const searchId = useId();

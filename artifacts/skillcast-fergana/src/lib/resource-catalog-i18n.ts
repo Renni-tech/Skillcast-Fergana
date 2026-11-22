@@ -125,7 +125,25 @@ export const RESOURCE_CATALOG_COPY: Record<string, Copy> = {
   'pw.compact.all': c('Show all {n} steps', 'Barcha {n} qadamni ko‘rsatish', 'Показать все шаги ({n})'),
   'pw.compact.less': c('Show only the next step', 'Faqat keyingi qadamni ko‘rsatish', 'Показать только следующий шаг'),
   'pw.roadmap': c('Roadmap for this pathway', 'Bu yo‘l uchun yo‘l xaritasi', 'План для этого пути'),
+  'harada.vision.gaps': c('Build toward {role} by closing {n} priority skill gaps, starting with {skill}. At {hours} learning hours a week, the remaining tasks take about {weeks} weeks.', '{role} sari {n} ta ustuvor ko‘nikma bo‘shlig‘ini yopib boring, {skill}dan boshlang. Haftasiga {hours} soat o‘qisangiz, qolgan vazifalar taxminan {weeks} hafta oladi.', 'Двигайтесь к роли «{role}», закрывая {n} приоритетных пробелов в навыках, начиная с «{skill}». При {hours} ч учёбы в неделю оставшиеся задачи займут около {weeks} нед.'),
+  'harada.vision.ready': c('You meet the mapped levels for {role}. Keep practising: at {hours} hours a week the remaining tasks take about {weeks} weeks.', '{role} uchun belgilangan darajalarga erishgansiz. Mashqni davom ettiring: haftasiga {hours} soatda qolgan vazifalar taxminan {weeks} hafta oladi.', 'Вы соответствуете уровням для роли «{role}». Продолжайте практику: при {hours} ч в неделю оставшиеся задачи займут около {weeks} нед.'),
+  'harada.goal.default': c('Develop toward {role}', '{role} sari rivojlanish', 'Развиваться в направлении роли «{role}»'),
+  'harada.goal.label': c('Your goal, in your own words', 'Maqsadingiz, o‘z so‘zlaringiz bilan', 'Ваша цель — своими словами'),
+  'harada.goal.edit': c('Edit goal', 'Maqsadni o‘zgartirish', 'Изменить цель'),
+  'harada.goal.pathway': c('Target pathway (sets the 8 skills below)', 'Maqsadli yo‘l (quyidagi 8 ko‘nikmani belgilaydi)', 'Целевой путь (задаёт 8 навыков ниже)'),
+  'harada.goal.updates': c('Change the goal or pathway at any time: the skills, tasks, resources, learning plan and Wind Rose update with it. Saved task progress is kept.', 'Maqsad yoki yo‘lni istalgan vaqtda o‘zgartiring: ko‘nikmalar, vazifalar, manbalar, o‘quv reja va Shamol gulining hammasi yangilanadi. Saqlangan yutuqlar o‘chmaydi.', 'Меняйте цель или путь в любой момент: навыки, задачи, ресурсы, учебный план и Роза ветров обновятся. Сохранённый прогресс задач останется.'),
+  'harada.chain.label': c('How the roadmap fits together', 'Yo‘l xaritasi qanday tuzilgan', 'Как устроен план'),
+  'harada.chain.goal': c('Goal', 'Maqsad', 'Цель'),
+  'harada.chain.tasks': c('8 skills (tasks)', '8 ko‘nikma (vazifalar)', '8 навыков (задачи)'),
+  'harada.chain.subtasks': c('8 steps each (subtasks)', 'har biriga 8 qadam (kichik vazifalar)', 'по 8 шагов (подзадачи)'),
+  'harada.chain.resources': c('Resources', 'Manbalar', 'Ресурсы'),
+  'harada.chain.paths': c('Learning paths', 'O‘quv yo‘llari', 'Учебные пути'),
+  'harada.learn': c('Learn this skill', 'Bu ko‘nikmani o‘rganish', 'Изучить этот навык'),
+  'harada.onRose': c('See it on the Wind Rose', 'Shamol gulida ko‘rish', 'Показать на Розе ветров'),
+  'harada.resources': c('Where to learn this skill', 'Bu ko‘nikmani qayerda o‘rganish mumkin', 'Где изучить этот навык'),
+  'harada.resources.d': c('Real places from the catalogue. Connect one to a learning path to track it.', 'Katalogdagi haqiqiy joylar. Kuzatish uchun birini o‘quv yo‘liga ulang.', 'Реальные места из каталога. Добавьте одно в учебный путь, чтобы отслеживать.'),
 };
+
 
 export const TOPIC_COPY: Record<string, Copy> = {
   ai: c('Artificial intelligence', 'Sun’iy intellekt', 'Искусственный интеллект'),

@@ -90,6 +90,11 @@ interface SkillCastState {
   /** Learner-made learning paths (see lib/learning-paths). */
   learningPaths: LearningPath[];
   activePathId: string | null;
+  /** One-shot hand-offs between tabs (not saved): a catalogue search and a Wind Rose skill to highlight. */
+  catalogFocus: string | null;
+  roseFocus: string | null;
+  focusCatalog: (query: string | null) => void;
+  focusRose: (skill: string | null) => void;
   createPath: (name: string, firstEntryId?: string) => string;
   renamePath: (id: string, name: string) => void;
   deletePath: (id: string) => void;
@@ -270,6 +275,10 @@ export const useSkillCast = create<SkillCastState>()(
       dismissTip: (id) => set((st) => ({ seenTips: [...new Set([...st.seenTips, id])] })),
       learningPaths: [],
       activePathId: null,
+      catalogFocus: null,
+      roseFocus: null,
+      focusCatalog: (query) => set({ catalogFocus: query }),
+      focusRose: (skill) => set({ roseFocus: skill }),
       createPath: (name, firstEntryId) => {
         const st = get();
         const id = newPathId(st.learningPaths);
