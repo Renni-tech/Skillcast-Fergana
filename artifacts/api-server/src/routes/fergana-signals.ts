@@ -12,7 +12,7 @@ router.route('/fergana/signals').get(async (req, res) => {
   }
 }).post(async (req, res) => {
   try {
-    res.set('Cache-Control', 'no-store').json(GetFerganaSignalsResponse.parse(await ferganaSignals.get()));
+    res.set('Cache-Control', 'no-store').json(GetFerganaSignalsResponse.parse(await ferganaSignals.refresh()));
   } catch (error) {
     req.log.error({ err: error }, 'Fergana source refresh failed');
     res.status(503).json({ error: 'fergana_sources_unavailable' });

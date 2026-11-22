@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { FerganaEvidenceMode } from './ferganaEvidenceMode';
+import type { FerganaRefresh } from './ferganaRefresh';
 import type { FerganaSourceState } from './ferganaSourceState';
 
 export interface FerganaEvidence {
@@ -14,4 +15,5 @@ export interface FerganaEvidence {
   refreshLimited: boolean;
   skillSourceIds: string[];
   sources: FerganaSourceState[];
+  refresh?: FerganaRefresh;
 }

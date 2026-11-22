@@ -173,7 +173,7 @@ export const getRefreshFerganaSignalsUrl = () => {
 }
 
 /**
- * @summary Check approved sources while respecting each source's refresh interval
+ * @summary Refresh approved sources now, within each source's minimum interval
  */
 export const refreshFerganaSignals = async ( options?: Parameters<typeof customFetch>[1]): Promise<FerganaSignals> => {
 
@@ -225,7 +225,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
     /**
- * @summary Check approved sources while respecting each source's refresh interval
+ * @summary Refresh approved sources now, within each source's minimum interval
  */
 export const useRefreshFerganaSignals = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshFerganaSignals>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}

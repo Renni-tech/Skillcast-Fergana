@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import type { FerganaEvidence, FerganaObservation, FerganaSourceState, SkillSnapshot } from '@workspace/api-zod';
+import type { FerganaEvidence, FerganaObservation, FerganaRefreshResult, FerganaSourceState, SkillSnapshot } from '@workspace/api-zod';
 import { computeMomentum, type Posting } from './momentum';
 import { SKILLS } from '../data/skills';
 import { logger } from '../../lib/logger';
@@ -12,6 +12,11 @@ export const FERGANA_ENDPOINTS = {
   remotive: 'https://remotive.com/api/remote-jobs',
 } as const;
 type SourceId = keyof typeof FERGANA_ENDPOINTS;
+// Minimum time between manual refreshes of one source. Remotive's API terms
+// allow at most four requests a day, so it keeps six hours even when a
+// learner presses "Refresh". SIAT and the World Bank publish rarely; ten
+// minutes stops repeated clicks from hammering them.
+export const MANUAL_MIN_INTERVAL: Record<SourceId, number> = { siat: 10 * 60 * 1000, worldbank: 10 * 60 * 1000, remotive: 6 * 60 * 60 * 1000 };
 type History = {
   id: string; createdAt: string; version: string; live: boolean; summary: string;
   details: { movers: Array<{ skill: string; delta: number; momentum: number }>; postings: number; sources: FerganaSourceState[]; mode: FerganaEvidence['mode'] };
@@ -75,6 +80,7 @@ export function createFerganaSignalsService(options: {
   const clock = options.clock ?? Date.now;
   let cache: Cache | undefined;
   let pending: Promise<ReturnType<typeof payload>> | undefined;
+  let pendingRefresh: Promise<ReturnType<typeof payload>> | undefined;
   const json = async (url: string) => {
     const response = await fetcher(url, { signal: AbortSignal.timeout(12000), headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -86,7 +92,7 @@ export function createFerganaSignalsService(options: {
   }));
   const mode = (): FerganaEvidence['mode'] => !cache?.snapshots.length || !cache.count ? 'demo'
     : cache.sources.remotive?.status === 'cached' ? 'cached' : 'periodic';
-  function payload(limited: boolean) {
+  function payload(limited: boolean, refresh?: { requestedAt: string; results: FerganaRefreshResult[] }) {
     const state = cache!;
     const remote = state.sources.remotive;
     return {
@@ -99,10 +105,11 @@ export function createFerganaSignalsService(options: {
         mode: mode(), calculatedAt: state.calculatedAt, refreshLimited: limited,
         skillSourceIds: mode() === 'demo' ? ['wef'] : ['remotive', 'wef'],
         sources: Object.values(state.sources),
+        ...(refresh ? { refresh } : {}),
       } satisfies FerganaEvidence,
     };
   }
-  async function run() {
+  async function run(force = false) {
     if (!cache) {
       try {
         const disk = JSON.parse(await readFile(cachePath, 'utf8')) as Cache;
@@ -114,9 +121,18 @@ export function createFerganaSignalsService(options: {
     const before = new Map(state.snapshots.map((item) => [item.skillSlug, item.momentum]));
     const ids: SourceId[] = ['siat', 'worldbank', 'remotive'];
     let attempted = false;
+    const requestedAt = new Date(clock()).toISOString();
+    const results: FerganaRefreshResult[] = [];
     await Promise.all(ids.map(async (id) => {
       const old = state.sources[id];
-      if (old && Date.parse(old.nextCheckAt) > clock()) return;
+      if (force) {
+        // After a failed attempt, official statistics may be retried after a
+        // minute; Remotive's limit counts every request, so it never shortens.
+        const failedLast = !!old && old.fetchedAt !== old.checkedAt;
+        const wait = failedLast && id !== 'remotive' ? 60 * 1000 : MANUAL_MIN_INTERVAL[id];
+        const allowedAt = old ? Date.parse(old.checkedAt) + wait : 0;
+        if (allowedAt > clock()) { results.push({ id, outcome: 'rate-limited', nextAllowedAt: new Date(allowedAt).toISOString() }); return; }
+      } else if (old && Date.parse(old.nextCheckAt) > clock()) return;
       attempted = true;
       const checkedAt = new Date(clock()).toISOString();
       // SIAT is annual; weekly checks suffice. Remotive explicitly permits
@@ -149,7 +165,9 @@ export function createFerganaSignalsService(options: {
           state.snapshots = postings.length ? computeMomentum(postings).map(({ samples: _samples, ...snapshot }) => snapshot) : [];
         }
         state.sources[id] = { id, status: 'periodic', checkedAt, fetchedAt: checkedAt, sourceUpdatedAt, nextCheckAt, period, observations };
+        if (force) results.push({ id, outcome: 'refreshed', nextAllowedAt: new Date(clock() + MANUAL_MIN_INTERVAL[id]).toISOString() });
       } catch (error) {
+        if (force) results.push({ id, outcome: 'failed', nextAllowedAt: new Date(clock() + (id === 'remotive' ? MANUAL_MIN_INTERVAL[id] : 60 * 1000)).toISOString(), error: error instanceof Error ? error.message.slice(0, 120) : 'error' });
         logger.warn({ err: error, source: id }, 'Approved Fergana source unavailable');
         state.sources[id] = {
           id, status: old?.fetchedAt ? 'cached' : 'unavailable', checkedAt,
@@ -171,12 +189,18 @@ export function createFerganaSignalsService(options: {
       await writeFile(`${cachePath}.tmp`, JSON.stringify(state), 'utf8');
       await rename(`${cachePath}.tmp`, cachePath);
     }
-    return payload(!attempted);
+    const order = (a: FerganaRefreshResult) => ids.indexOf(a.id as SourceId);
+    return payload(!attempted, force ? { requestedAt, results: results.sort((a, b) => order(a) - order(b)) } : undefined);
   }
   return {
     get: () => {
       pending ??= run().finally(() => { pending = undefined; });
       return pending;
+    },
+    /** Manual refresh: fetch every source whose minimum interval has passed. */
+    refresh: () => {
+      pendingRefresh ??= (pending ?? Promise.resolve()).then(() => run(true)).finally(() => { pendingRefresh = undefined; });
+      return pendingRefresh;
     },
   };
 }

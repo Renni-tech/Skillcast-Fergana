@@ -18,7 +18,12 @@ interface SignalsCtx {
   error: string | null;
   refresh: () => Promise<void>;
   momentumMap: Record<string, number>;
+  /** Report from the last "Refresh live sources" press in this session. */
+  lastRefresh: LastRefresh | null;
 }
+export type LastRefresh =
+  | { ok: true; at: string; results: NonNullable<NonNullable<SignalsPayload['provenance']>['refresh']>['results'] }
+  | { ok: false; at: string };
 
 const Ctx = createContext<SignalsCtx>({
   data: null,
@@ -27,6 +32,7 @@ const Ctx = createContext<SignalsCtx>({
   error: null,
   refresh: async () => {},
   momentumMap: {},
+  lastRefresh: null,
 });
 
 export function SignalsProvider({ children }: { children: ReactNode }) {
@@ -34,6 +40,7 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<LastRefresh | null>(null);
 
   const load = async (method: 'GET' | 'POST') => {
     if (method === 'POST') setRefreshing(true);
@@ -43,6 +50,7 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
       const json = parseFerganaSignals(await res.json());
       setData(json);
       setError(null);
+      if (method === 'POST') setLastRefresh({ ok: true, at: new Date().toISOString(), results: json.provenance?.refresh?.results ?? [] });
       try { localStorage.setItem(SIGNALS_CACHE_KEY, JSON.stringify(json)); } catch { /* Source caching is optional; learner storage is unchanged. */ }
     } catch {
       let saved: SignalsPayload | null = null;
@@ -52,6 +60,7 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
       } catch { /* Corrupt source cache is discarded, never interpreted as live data. */ }
       setData((previous) => previous ? cachedFerganaSignals(previous) : saved);
       setError('evidence.error');
+      if (method === 'POST') setLastRefresh({ ok: false, at: new Date().toISOString() });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -70,7 +79,7 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ data, loading, refreshing, error, refresh: () => load('POST'), momentumMap }}
+      value={{ data, loading, refreshing, error, refresh: () => load('POST'), momentumMap, lastRefresh }}
     >
       {children}
     </Ctx.Provider>

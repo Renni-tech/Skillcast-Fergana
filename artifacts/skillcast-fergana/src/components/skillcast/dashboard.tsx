@@ -41,6 +41,7 @@ import { FutureRadarStep } from './onboarding';
 import { ProgressDashboard } from './progress-dashboard';
 import { WindRose } from './wind-rose';
 import { ExportShareButton } from './export-share';
+import { SourceStatusPanel } from './source-status';
 import { GettingStarted } from './getting-started';
 
 const EMPLOYMENT_STATUS_LABELS = {
@@ -205,18 +206,15 @@ function OverviewTab({ matches }: { matches: ReturnType<typeof matchAll> }) {
 
       {/* Forecast status: real mode and posting count, never labelled live */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-3">
-          <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
-          <span className="text-sm text-muted-foreground">
-            {postingLine(st, mode, data?.totalPostings ?? 0)}
-            {data?.provenance?.calculatedAt ? ` · ${st('src.f.calculated')}: ${fmt(data.provenance.calculatedAt)}` : ''}
-          </span>
-          <div className="ml-auto flex flex-wrap gap-2">
-            <Button onClick={() => void refresh()} disabled={refreshing} variant="outline" className="gap-2">
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
-              {refreshing ? t('ov.refreshing') : t('ov.refresh')}
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={() => setEmailOpen(true)}>
+        <CardContent className="space-y-3 pt-6">
+          <SourceStatusPanel compact />
+          <div className="flex flex-wrap items-center gap-2 border-t pt-3 text-sm">
+            <StatusBadge status={mode ?? 'demo'} label={st(`src.mode.${mode ?? 'demo'}`)} />
+            <span className="min-w-0 flex-1 text-muted-foreground">
+              {postingLine(st, mode, data?.totalPostings ?? 0)}
+              {data?.provenance?.calculatedAt ? ` · ${st('src.f.calculated')}: ${fmt(data.provenance.calculatedAt)}` : ''}
+            </span>
+            <Button variant="outline" className="min-h-11 gap-2" onClick={() => setEmailOpen(true)}>
               <Mail className="h-4 w-4" aria-hidden /> {t('ov.email.btn')}
             </Button>
           </div>

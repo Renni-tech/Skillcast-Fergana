@@ -8,7 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node ./prepare-db.mjs && node --enable-source-maps --disable-warning=ExperimentalWarning ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test --experimental-strip-types --disable-warning=ExperimentalWarning src/skillcast/lib/db.test.ts"
+    "test": "node --test --experimental-strip-types --disable-warning=ExperimentalWarning src/skillcast/lib/db.test.ts && bun test src/skillcast/lib/fergana-signals.test.ts"
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",

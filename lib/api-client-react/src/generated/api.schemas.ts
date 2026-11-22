@@ -55,12 +55,37 @@ export const FerganaEvidenceMode = {
   demo: 'demo',
 } as const;
 
+export type FerganaRefreshResultOutcome = typeof FerganaRefreshResultOutcome[keyof typeof FerganaRefreshResultOutcome];
+
+
+export const FerganaRefreshResultOutcome = {
+  refreshed: 'refreshed',
+  'rate-limited': 'rate-limited',
+  failed: 'failed',
+} as const;
+
+export interface FerganaRefreshResult {
+  id: string;
+  outcome: FerganaRefreshResultOutcome;
+  nextAllowedAt: string;
+  error?: string;
+}
+
+/**
+ * Result of a manual refresh (POST only)
+ */
+export interface FerganaRefresh {
+  requestedAt: string;
+  results: FerganaRefreshResult[];
+}
+
 export interface FerganaEvidence {
   mode: FerganaEvidenceMode;
   calculatedAt: string;
   refreshLimited: boolean;
   skillSourceIds: string[];
   sources: FerganaSourceState[];
+  refresh?: FerganaRefresh;
 }
 
 export type SignalsConfidence = typeof SignalsConfidence[keyof typeof SignalsConfidence];

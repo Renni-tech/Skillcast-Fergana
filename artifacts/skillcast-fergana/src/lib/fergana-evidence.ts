@@ -29,6 +29,14 @@ const payload = z.object({
   provenance: z.object({
     mode: z.enum(['periodic', 'cached', 'demo']), calculatedAt: timestamp,
     refreshLimited: z.boolean(), skillSourceIds: z.array(z.string()), sources: z.array(source),
+    refresh: z.object({
+      requestedAt: timestamp,
+      results: z.array(z.object({
+        id: z.enum(['siat', 'worldbank', 'remotive']),
+        outcome: z.enum(['refreshed', 'rate-limited', 'failed']),
+        nextAllowedAt: timestamp, error: z.string().optional(),
+      })),
+    }).optional(),
   }),
   changelog: z.array(z.object({
     id: z.string(), createdAt: timestamp, version: z.string(), live: z.literal(false),

@@ -23,7 +23,7 @@ paths:
               schema: { $ref: "#/components/schemas/FerganaSignals" }
     post:
       operationId: refreshFerganaSignals
-      summary: Check approved sources while respecting each source's refresh interval
+      summary: Refresh approved sources now, within each source's minimum interval
       responses:
         "200":
           description: Sources checked or retained during their cache interval
@@ -180,6 +180,24 @@ components:
         sources:
           type: array
           items: { $ref: "#/components/schemas/FerganaSourceState" }
+        refresh: { $ref: "#/components/schemas/FerganaRefresh" }
+    FerganaRefresh:
+      type: object
+      description: Result of a manual refresh (POST only)
+      required: [requestedAt, results]
+      properties:
+        requestedAt: { type: string }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/FerganaRefreshResult" }
+    FerganaRefreshResult:
+      type: object
+      required: [id, outcome, nextAllowedAt]
+      properties:
+        id: { type: string }
+        outcome: { type: string, enum: [refreshed, rate-limited, failed] }
+        nextAllowedAt: { type: string }
+        error: { type: string }
     FerganaSignals:
       allOf:
         - $ref: "#/components/schemas/Signals"

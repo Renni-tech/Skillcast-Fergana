@@ -15,6 +15,7 @@ import {
 import { useSourceT, type SourceT } from '@/lib/signal-source-i18n';
 import { useSkillCast } from '@/lib/store';
 import { skillName, useSignals, useT } from './shared';
+import { SourceStatusPanel } from './source-status';
 
 // ─── Signal sources: provenance for every number SkillCast shows ───────────
 // Only the approved catalogue is rendered. Three sources are retrieved on a
@@ -101,12 +102,8 @@ export function SignalsView() {
           </h1>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{st('src.page.lede')}</p>
         </div>
-        <Button onClick={() => void refresh()} disabled={refreshing} className="gap-2 bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800">
-          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
-          {refreshing ? st('src.refreshing') : st('src.refresh')}
-        </Button>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{st('src.refreshLimited')}</p>
+      <Card className="mt-4"><CardContent className="pt-6"><SourceStatusPanel /></CardContent></Card>
 
       {/* API failure: page keeps working from the static catalogue and last good cache */}
       {error && (

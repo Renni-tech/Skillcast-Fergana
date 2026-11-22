@@ -66,13 +66,22 @@ export const GetFerganaSignalsResponse = zod.object({
   "unit": zod.string(),
   "sourceUrl": zod.string()
 }))
+})),
+  "refresh": zod.object({
+  "requestedAt": zod.string(),
+  "results": zod.array(zod.object({
+  "id": zod.string(),
+  "outcome": zod.enum(['refreshed', 'rate-limited', 'failed']),
+  "nextAllowedAt": zod.string(),
+  "error": zod.string().optional()
 }))
+}).optional().describe('Result of a manual refresh (POST only)')
 })
 }))
 
 
 /**
- * @summary Check approved sources while respecting each source's refresh interval
+ * @summary Refresh approved sources now, within each source's minimum interval
  */
 export const RefreshFerganaSignalsResponse = zod.object({
   "runId": zod.string(),
@@ -129,7 +138,16 @@ export const RefreshFerganaSignalsResponse = zod.object({
   "unit": zod.string(),
   "sourceUrl": zod.string()
 }))
+})),
+  "refresh": zod.object({
+  "requestedAt": zod.string(),
+  "results": zod.array(zod.object({
+  "id": zod.string(),
+  "outcome": zod.enum(['refreshed', 'rate-limited', 'failed']),
+  "nextAllowedAt": zod.string(),
+  "error": zod.string().optional()
 }))
+}).optional().describe('Result of a manual refresh (POST only)')
 })
 }))
 
