@@ -100,6 +100,9 @@ interface SkillCastState {
   setRoseThemeChange: (change: { from: WindRoseTheme; to: WindRoseTheme } | null) => void;
   /** Wind Rose colours whose unlock has been announced. */
   themesAnnounced: WindRoseTheme[];
+  /** Badges the learner has looked at in the collection (for the header's "new" dot). */
+  badgesViewed: string[];
+  markBadgesViewed: (ids: string[]) => void;
   announceTheme: (theme: WindRoseTheme) => void;
   createPath: (name: string, firstEntryId?: string) => string;
   renamePath: (id: string, name: string) => void;
@@ -287,6 +290,8 @@ export const useSkillCast = create<SkillCastState>()(
       focusRose: (skill) => set({ roseFocus: skill }),
       roseThemeChange: null,
       setRoseThemeChange: (change) => set({ roseThemeChange: change }),
+      badgesViewed: [],
+      markBadgesViewed: (ids) => set((st) => (ids.every((id) => st.badgesViewed.includes(id)) ? {} : { badgesViewed: [...new Set([...st.badgesViewed, ...ids])] })),
       themesAnnounced: [],
       announceTheme: (theme) => set((st) => ({ themesAnnounced: [...new Set([...st.themesAnnounced, theme])] })),
       createPath: (name, firstEntryId) => {
@@ -347,6 +352,7 @@ export const useSkillCast = create<SkillCastState>()(
           learningPaths: [],
           activePathId: null,
           themesAnnounced: [],
+          badgesViewed: [],
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -378,6 +384,7 @@ export const useSkillCast = create<SkillCastState>()(
         learningPaths: s.learningPaths,
         activePathId: s.activePathId,
         themesAnnounced: s.themesAnnounced,
+        badgesViewed: s.badgesViewed,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -417,6 +424,8 @@ export const useSkillCast = create<SkillCastState>()(
           badgeSound: saved.badgeSound === true,
           windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
           seenTips: strings(saved.seenTips).slice(0, 50),
+          // Older saves have no "viewed" list: treat what was already seen as viewed.
+          badgesViewed: Array.isArray(saved.badgesViewed) ? strings(saved.badgesViewed) : strings(saved.badgesSeen),
           themesAnnounced: strings(saved.themesAnnounced).filter((x) => x in WIND_ROSE_THEMES) as WindRoseTheme[],
           ...(() => {
             const learningPaths = normalizePaths(saved.learningPaths);

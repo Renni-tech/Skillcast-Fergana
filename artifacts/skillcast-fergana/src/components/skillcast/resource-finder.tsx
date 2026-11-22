@@ -17,6 +17,7 @@ import { homeArea, rankResources, RANKABLE, type RankedResource } from '@/lib/re
 import { useSkillCast } from '@/lib/store';
 import type { Lang } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
+import { formatDate } from '@/lib/dates';
 import { skillName, useT } from './shared';
 
 // ─── Where to learn: the full learning catalogue ───────────────────────────
@@ -165,9 +166,7 @@ const AVAIL_STYLE: Record<CatalogEntry['availability'], string> = {
 };
 
 function fmtDate(lang: Lang, iso: string): string {
-  try {
-    return new Intl.DateTimeFormat(lang === 'uz' ? 'uz-Latn-UZ' : lang === 'ru' ? 'ru-RU' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T12:00:00`));
-  } catch { return iso; }
+  return formatDate(lang, iso, { short: true });
 }
 
 function CatalogCard({ entry: e, lang, rank, top }: { entry: CatalogEntry; lang: Lang; rank?: RankedResource; top: boolean }) {

@@ -70,7 +70,7 @@ export function playChime(kind: SoundKind, volume = 1): void {
     out.gain.value = 0.9 * volume;
     out.connect(ac.destination);
     switch (kind) {
-      case 'first-steps': // two soft steps in sand, then a sparkle
+      case 'first-steps': // sand chime: two soft steps in sand, then a sparkle
         noise(ac, out, 0, 0.12, 900, 0.8, 0.15); tone(ac, out, { f: 196, at: 0, dur: 0.18, gain: 0.12 });
         noise(ac, out, 0.22, 0.12, 1100, 0.8, 0.15); tone(ac, out, { f: 247, at: 0.22, dur: 0.18, gain: 0.12 });
         SPARKLE(0.45).forEach((n) => tone(ac, out, n));
@@ -79,13 +79,16 @@ export function playChime(kind: SoundKind, volume = 1): void {
         [0, 0.07, 0.14].forEach((at) => noise(ac, out, at, 0.03, 4000, 6, 0.08));
         [523, 659, 784, 1047].forEach((f, i) => tone(ac, out, { f, at: 0.22 + i * 0.09, dur: 0.35, type: 'triangle', gain: 0.12 }));
         break;
-      case 'curious-mind': // the lamp’s genie: a shimmering glide upwards
-        tone(ac, out, { f: 392, to: 1568, at: 0, dur: 0.9, vibrato: 7, gain: 0.1 });
-        SPARKLE(0.5).forEach((n) => tone(ac, out, n)); SPARKLE(0.75).forEach((n) => tone(ac, out, { ...n, f: n.f * 1.25 }));
+      case 'curious-mind': // the lamp: a quick harp shimmer rising from the spout
+        [392, 440, 523, 587, 659, 784, 880, 1047, 1175].forEach((f, i) => tone(ac, out, { f, at: i * 0.045, dur: 0.6, type: 'triangle', gain: 0.07 }));
+        SPARKLE(0.5).forEach((n) => tone(ac, out, n));
         break;
-      case 'consistent-learner': // a pentatonic bell bloom, like opening petals
-        [523, 587, 659, 784, 880].forEach((f, i) => tone(ac, out, { f, at: i * 0.07, dur: 1.1, gain: 0.07 }));
-        tone(ac, out, { f: 1047, at: 0.35, dur: 1.2, gain: 0.05, type: 'triangle' });
+      case 'consistent-learner': // the pomegranate: water drops on a marimba
+        [659, 784, 587, 880, 1047].forEach((f, i) => {
+          tone(ac, out, { f: f * 1.5, to: f, at: i * 0.11, dur: 0.08, gain: 0.08 });
+          tone(ac, out, { f, at: i * 0.11 + 0.01, dur: 0.45, gain: 0.12 });
+          tone(ac, out, { f: f * 4, at: i * 0.11 + 0.01, dur: 0.12, gain: 0.02 });
+        });
         break;
       case 'skill-builder': // a bright metallic ping from the workshop
         tone(ac, out, { f: 1320, at: 0, dur: 0.6, type: 'square', gain: 0.04 });
@@ -101,10 +104,13 @@ export function playChime(kind: SoundKind, volume = 1): void {
         tone(ac, out, { f: 587, at: 0.32, dur: 0.7, vibrato: 9, gain: 0.1 });
         tone(ac, out, { f: 880, at: 0.42, dur: 0.8, vibrato: 9, gain: 0.08 });
         break;
-      case 'future-ready': // the Humo bird: a fluttering trill and a golden halo
-        for (let i = 0; i < 8; i++) tone(ac, out, { f: i % 2 ? 1760 : 1568, at: i * 0.045, dur: 0.08, gain: 0.06 });
-        [523, 659, 784, 1047].forEach((f) => tone(ac, out, { f, at: 0.4, dur: 1.2, gain: 0.05 }));
-        SPARKLE(0.9).forEach((n) => tone(ac, out, n));
+      case 'future-ready': // the Humo bird: a plucked dutar-like fanfare, then a golden halo
+        [[392, 0], [392, 0.12], [523, 0.24], [659, 0.4], [784, 0.56]].forEach(([f, at]) => {
+          tone(ac, out, { f, at, dur: 0.35, type: 'sawtooth', gain: 0.035 });
+          tone(ac, out, { f: f * 2, at, dur: 0.25, type: 'triangle', gain: 0.05 });
+        });
+        [523, 659, 784, 1047].forEach((f) => tone(ac, out, { f, at: 0.75, dur: 1.1, gain: 0.05 }));
+        SPARKLE(1.0).forEach((n) => tone(ac, out, n));
         break;
       case 'theme':
         [784, 988, 1175, 1568].forEach((f, i) => tone(ac, out, { f, at: i * 0.08, dur: 0.5, type: 'triangle', gain: 0.1 }));

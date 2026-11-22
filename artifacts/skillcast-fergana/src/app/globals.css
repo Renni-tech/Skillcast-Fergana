@@ -479,3 +479,54 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 @keyframes wr-colour-pop { 0% { transform: scale(0.96); filter: drop-shadow(0 0 0 transparent); } 40% { transform: scale(1.02); filter: drop-shadow(0 0 18px var(--wr-pop, #0d9488)); } 100% { transform: scale(1); filter: none; } }
 .wr-colour-pop { animation: wr-colour-pop 1.2s ease-out 1; }
 @media (prefers-reduced-motion: reduce) { .wr-colour-pop { animation: none; } }
+
+/* ─── Silk Road badge artifacts (components/skillcast/silk-artifacts.tsx) ─── */
+.sa-badge g { transform-box: fill-box; }
+.sa-animate .sa-bounce { animation: sa-bounce 1.4s ease-in-out infinite; transform-origin: 50% 100%; }
+.sa-animate .sa-sand circle { animation: sa-rise 1.6s ease-out infinite; opacity: 0; }
+.sa-animate .sa-needle { animation: sa-needle 2.6s cubic-bezier(.5,1.6,.4,1) infinite; transform-origin: center; }
+.sa-animate .sa-needle-sweep { animation: sa-sweep 3s ease-in-out infinite; transform-origin: 0% 0%; }
+.sa-animate .sa-ring { animation: sa-spin 6s steps(12) infinite; transform-origin: center; }
+.sa-animate .sa-ring-rev { animation: sa-spin 4s linear infinite reverse; transform-origin: center; }
+.sa-animate .sa-stars path { animation: sa-rise 1.8s ease-out infinite; opacity: 0; }
+.sa-animate .sa-bloom { animation: sa-bloom 2.4s ease-in-out infinite; transform-origin: 50% 80%; }
+.sa-animate .sa-wheel { animation: sa-spin 8s linear infinite; transform-origin: center; }
+.sa-animate .sa-shine { animation: sa-shine 2.8s ease-in-out infinite; }
+.sa-animate .sa-letters path, .sa-animate .sa-letters { animation: sa-glow 2.4s ease-in-out infinite; }
+.sa-animate .sa-page { animation: sa-page 3s ease-in-out infinite; transform-origin: 0% 50%; }
+.sa-animate .sa-arrow { animation: sa-arrow 2.2s ease-in-out infinite; }
+.sa-animate .sa-levitate { animation: sa-levitate 2.6s ease-in-out infinite; }
+.sa-animate .sa-tassel { animation: sa-tassel 1.3s ease-in-out infinite alternate; transform-origin: top; }
+.sa-animate .sa-wing { animation: sa-wing 2s ease-in-out infinite; transform-origin: center bottom; }
+.sa-animate .sa-halo { animation: sa-halo 3s ease-in-out infinite; transform-origin: center; }
+.sa-animate .sa-glint { animation: sa-glint 3.2s ease-in-out infinite; }
+.sa-locked .sa-q { animation: sa-q 2.2s ease-in-out infinite; transform-origin: center; }
+.sa-locked:hover, button:hover > .sa-locked, button:focus-visible > .sa-locked { animation: sa-wobble 0.7s ease-in-out; filter: drop-shadow(0 0 6px rgb(245 158 11 / .55)); }
+@keyframes sa-bounce { 0%,100% { transform: translateY(0) } 30% { transform: translateY(-6px) rotate(-4deg) } 55% { transform: translateY(0) } 70% { transform: translateY(-2px) } }
+@keyframes sa-rise { 0% { opacity: 0; transform: translateY(4px) } 30% { opacity: 1 } 100% { opacity: 0; transform: translateY(-14px) } }
+@keyframes sa-needle { 0% { transform: rotate(0) } 40% { transform: rotate(250deg) } 60% { transform: rotate(350deg) } 100% { transform: rotate(360deg) } }
+@keyframes sa-sweep { 0%,100% { transform: rotate(-8deg) } 50% { transform: rotate(10deg) } }
+@keyframes sa-spin { to { transform: rotate(360deg) } }
+@keyframes sa-bloom { 0%,100% { transform: scale(1) } 50% { transform: scale(1.08) } }
+@keyframes sa-shine { 0%,100% { opacity: 0 } 50% { opacity: .45 } }
+@keyframes sa-glow { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+@keyframes sa-page { 0%,60%,100% { transform: scaleX(1) } 80% { transform: scaleX(-.2) } }
+@keyframes sa-arrow { 0%,100% { transform: translateX(0) } 50% { transform: translateX(4px) } }
+@keyframes sa-levitate { 0%,100% { transform: translateY(2px) } 50% { transform: translateY(-5px) } }
+@keyframes sa-tassel { from { transform: rotate(-10deg) } to { transform: rotate(10deg) } }
+@keyframes sa-wing { 0%,100% { transform: scaleY(1); filter: brightness(1) } 50% { transform: scaleY(.9); filter: brightness(1.35) } }
+@keyframes sa-halo { 0%,100% { opacity: .5; transform: scale(1) rotate(0) } 50% { opacity: 1; transform: scale(1.06) rotate(20deg) } }
+@keyframes sa-glint { 0%,80%,100% { opacity: 0 } 88% { opacity: .8 } }
+@keyframes sa-q { 0%,100% { transform: scale(1); opacity: .85 } 50% { transform: scale(1.1); opacity: 1 } }
+@keyframes sa-wobble { 0%,100% { transform: rotate(0) } 20% { transform: rotate(-7deg) } 40% { transform: rotate(6deg) } 60% { transform: rotate(-4deg) } 80% { transform: rotate(2deg) } }
+
+/* Header treasure chest */
+.chest-lid { transform-box: fill-box; transform-origin: 0% 100%; transition: transform .25s ease; }
+.chest-btn:hover .chest-lid, .chest-btn:focus-visible .chest-lid { transform: rotate(-22deg) translateY(-1px); }
+.chest-btn::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(110deg, transparent 30%, rgb(253 230 138 / .45) 50%, transparent 70%); background-size: 250% 100%; background-position: 120% 0; opacity: 0; pointer-events: none; }
+.chest-btn:hover::after { opacity: 1; animation: chest-shimmer .9s ease-out; }
+@keyframes chest-shimmer { from { background-position: 120% 0 } to { background-position: -40% 0 } }
+@media (prefers-reduced-motion: reduce) {
+  .sa-badge *, .sa-locked, .chest-lid, .chest-btn::after { animation: none !important; transition: none !important; }
+  .sa-animate .sa-sand circle, .sa-animate .sa-stars path { opacity: 1; }
+}
