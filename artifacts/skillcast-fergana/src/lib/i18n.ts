@@ -1077,6 +1077,12 @@ for (const [key, copy] of Object.entries(QUALITY_COPY)) {
   for (const lang of ['en', 'uz', 'ru'] as const) DICTS[lang][key] = copy[lang];
 }
 
+// Uzbek abbreviates Sustainable Development Goals as BRM (Barqaror
+// rivojlanish maqsadlari), never SDG. "SDG Academy" is a provider's name.
+for (const key of Object.keys(DICTS.uz)) {
+  DICTS.uz[key] = DICTS.uz[key].replace(/SDG(?! Academy)/g, 'BRM');
+}
+
 const referenceKeys = Object.keys(DICTS.en).sort();
 for (const code of Object.keys(DICTS) as Lang[]) {
   const keys = Object.keys(DICTS[code]).sort();

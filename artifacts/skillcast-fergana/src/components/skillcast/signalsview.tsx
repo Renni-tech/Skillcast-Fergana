@@ -260,7 +260,6 @@ export function SignalsView() {
           </div>
         </section>
       ))}
-      <p className="mt-6 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">{st('src.excluded')}</p>
     </div>
   );
 }

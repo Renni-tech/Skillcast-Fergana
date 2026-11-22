@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
       <TooltipProvider>
         <Home />
         <Toaster />

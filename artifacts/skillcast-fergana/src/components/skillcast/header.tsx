@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
+import { flushSync } from 'react-dom';
 import { CloudSun, Languages, Moon, RotateCcw, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +37,23 @@ function useMounted() {
     () => true,
     () => false,
   );
+}
+
+/**
+ * Switch theme in about 0.1 s. Element transitions are suspended during the
+ * swap (next-themes disableTransitionOnChange), and where the browser
+ * supports view transitions the whole page cross-fades in 100 ms.
+ */
+export function switchTheme(apply: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  const reduce = document.documentElement.classList.contains('a11y-reduce-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  root.classList.add('theme-switching');
+  const done = () => requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-switching')));
+  if (doc.startViewTransition && !reduce) {
+    const vt = doc.startViewTransition(() => { flushSync(apply); }) as { finished?: Promise<unknown> };
+    void (vt.finished ?? Promise.resolve()).finally(done);
+  } else { flushSync(apply); done(); }
 }
 
 export function Header() {
@@ -109,7 +127,7 @@ export function Header() {
                   size="icon"
                   className={`h-8 w-8 ${landing ? 'text-blue-100/75 hover:bg-white/10 hover:text-white' : ''}`}
                   aria-label={t('nav.theme')}
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  onClick={() => switchTheme(() => setTheme(theme === 'dark' ? 'light' : 'dark'))}
                 >
                   {mounted && theme === 'light' ? (
                     <Moon className="h-4 w-4" aria-hidden />

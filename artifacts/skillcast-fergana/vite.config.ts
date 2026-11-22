@@ -1,7 +1,7 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
@@ -32,12 +32,63 @@ if (!basePath) {
   );
 }
 
+// ─── Content-Security-Policy ───────────────────────────────────────────────
+// Development: Vite's client, React Refresh and the Replit dev plugins need
+// inline and eval'd scripts plus a WebSocket for hot reload, so the dev
+// server sends a relaxed policy as a header. Production builds get a strict
+// policy as a <meta> tag: no 'unsafe-eval', no inline scripts.
+const FONTS = 'https://fonts.googleapis.com';
+const FONT_FILES = 'https://fonts.gstatic.com';
+const DEV_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com",
+  `style-src 'self' 'unsafe-inline' ${FONTS}`,
+  `font-src 'self' data: ${FONT_FILES}`,
+  "img-src 'self' data: blob: https:",
+  "connect-src 'self' ws: wss: http://localhost:* http://127.0.0.1:* https:",
+  "media-src 'self' blob: data:",
+  "worker-src 'self' blob:",
+].join('; ');
+export const PROD_CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  `style-src 'self' 'unsafe-inline' ${FONTS}`,
+  `font-src 'self' data: ${FONT_FILES}`,
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "media-src 'self' blob: data:",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'skillcast-csp',
+    configureServer(server) {
+      server.middlewares.use((_req, res, next) => {
+        res.setHeader('Content-Security-Policy', DEV_CSP);
+        next();
+      });
+    },
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, ctx) {
+        if (ctx.server) return html; // dev: header above
+        return html.replace('<head>', `<head>\n    <meta http-equiv="Content-Security-Policy" content="${PROD_CSP}" />`);
+      },
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    contentSecurityPolicy(),
     ...(process.env.NODE_ENV !== 'production' &&
     process.env.REPL_ID !== undefined
       ? [

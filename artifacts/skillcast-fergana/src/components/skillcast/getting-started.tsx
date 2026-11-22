@@ -52,7 +52,7 @@ export function GettingStarted() {
         <Progress value={(doneCount / steps.length) * 100} aria-label={t('gs.lede', { n: doneCount, total: steps.length })} className="mt-2" />
       </CardHeader>
       <CardContent>
-        <ol className="grid gap-2 md:grid-cols-5">
+        <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {steps.map((s, i) => {
             const isCurrent = s === current;
             return (
@@ -68,7 +68,7 @@ export function GettingStarted() {
                 {isCurrent && (
                   <>
                     <span className="mt-1.5 text-xs text-muted-foreground">{t(`gs.${s.id}.d`)}</span>
-                    <Button size="sm" className="mt-2 w-fit gap-1" onClick={() => go(s)}>{t(`gs.${s.id}.go`)}<ArrowRight className="h-3.5 w-3.5" aria-hidden /></Button>
+                    <Button size="sm" className="mt-2 h-auto min-h-9 w-full max-w-full justify-between gap-1 whitespace-normal py-1.5 text-left leading-snug" onClick={() => go(s)}><span className="min-w-0">{t(`gs.${s.id}.go`)}</span><ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden /></Button>
                   </>
                 )}
               </li>

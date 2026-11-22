@@ -466,3 +466,9 @@ html.a11y-spacing p { margin-bottom: 0.5em; }
 @media (prefers-reduced-motion: reduce) {
   .bc-spin .bc-coin, .bc-glow, .bc-rays, .bc-particle, .bc-pop, .bc-landed { animation: none !important; }
 }
+
+/* Theme switch: a 100 ms cross-fade instead of every element animating. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 100ms; animation-timing-function: ease-out; }
+html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after { transition: none !important; }

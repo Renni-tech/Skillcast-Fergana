@@ -589,7 +589,7 @@ export function FutureRadarStep({ details, onScenario }: { details: IndividualPr
                 {['Lower', 'Moderate', 'Higher'].map((label, index) => <div key={label} className={`h-3 rounded-full ${index < exposureSegments ? 'bg-blue-600' : 'bg-blue-100 dark:bg-slate-700'}`} />)}
               </div>
               <div className="mt-2 flex justify-between text-[11px] text-slate-500"><span>{t('Lower')}</span><span>{t('Moderate')}</span><span>{t('Higher')}</span></div>
-              <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-slate-600">{t('Task exposure describes how work tasks may be affected by AI. It is')} <strong>{t('not')}</strong> {t('the probability that your job will be replaced.')}</p>
+              <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-slate-600">{t('exp.d1')} <strong>{t('exp.d2')}</strong></p>
             </> : <p className="py-8 text-center text-sm text-slate-500">{t('Exposure insights will appear when matching pathways are available.')}</p>}
           </CardContent>
         </Card>
@@ -1524,43 +1524,6 @@ function StepSkills() {
 
   return (
     <div className="space-y-7">
-      <section aria-labelledby="your-skills-heading" className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-          <h3 id="your-skills-heading" className="text-base font-semibold text-slate-900">{t('Your Skills')}</h3>
-            <p className="mt-1 text-sm text-slate-500">{t('Set your current proficiency from 1 to 5.')}</p>
-          </div>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{entries.length} {t('selected')}</span>
-        </div>
-        {entries.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-sm text-slate-600">{t('onb.skills.none')} {t('Search below to add your skills.')}</p>
-        ) : null}
-        <ul className="space-y-2">
-        {entries.map(([slug, level]) => (
-          <li key={slug} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-white px-4 py-3 shadow-sm">
-            <span className="min-w-0 flex-1 text-sm font-medium text-slate-900">{skillName(t, slug)}<span className="mt-0.5 block text-xs font-normal text-slate-500">{skillCategory(t, SKILL_MAP[slug]?.category ?? 'Skill')}</span></span>
-            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
-              <span className="sr-only">{skillName(t, slug)} {t('proficiency')}</span>
-              <Select value={String(level)} onValueChange={(value) => setSkillLevel(slug, Number(value))}>
-                <SelectTrigger className="h-11 w-44 rounded-xl border-blue-100 dark:border-slate-700 bg-white text-sm text-slate-900 shadow-sm hover:border-blue-200 focus:ring-2 focus:ring-blue-100"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">{t('0 · Remove')}</SelectItem>
-                  <SelectItem value="1">{t('1 · Beginner')}</SelectItem>
-                  <SelectItem value="2">{t('2 · Developing')}</SelectItem>
-                  <SelectItem value="3">{t('3 · Intermediate')}</SelectItem>
-                  <SelectItem value="4">{t('4 · Proficient')}</SelectItem>
-                  <SelectItem value="5">{t('5 · Advanced')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </label>
-            <button type="button" onClick={() => setSkillLevel(slug, 0)} aria-label={`${t('Remove')} ${skillName(t, slug)}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          </li>
-        ))}
-        </ul>
-      </section>
-
       <section aria-labelledby="find-skills-heading" className="space-y-3">
         <div>
           <h3 id="find-skills-heading" className="text-base font-semibold text-slate-900">{t('Find Skills to Add')}</h3>
@@ -1606,6 +1569,43 @@ function StepSkills() {
           <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-6 text-center text-sm text-slate-600">{normalizedQuery ? t('No skills match your search. Try another skill name or category.') : t('All available skills have been added.')}</p>
         )}
         {results.length < filtered.length && <p className="text-xs text-slate-500">{t('Showing up to 12 matches. Refine your search to find more.')}</p>}
+      </section>
+
+      <section aria-labelledby="your-skills-heading" className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 id="your-skills-heading" className="text-base font-semibold text-slate-900">{t('Your Skills')}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t('Set your current proficiency from 1 to 5.')}</p>
+          </div>
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{entries.length} {t('selected')}</span>
+        </div>
+        {entries.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-sm text-slate-600">{t('onb.skills.none')} {t('skills.addAbove')}</p>
+        ) : null}
+        <ul className="grid gap-2 sm:grid-cols-2">
+        {entries.map(([slug, level]) => (
+          <li key={slug} className="flex min-w-0 flex-col gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2.5 shadow-sm dark:border-slate-700">
+            <div className="flex items-start justify-between gap-2">
+              <span className="min-w-0 text-[15px] font-medium leading-snug text-slate-900">{skillName(t, slug)}<span className="mt-0.5 block text-xs font-normal text-slate-500">{skillCategory(t, SKILL_MAP[slug]?.category ?? 'Skill')}</span></span>
+              <button type="button" onClick={() => setSkillLevel(slug, 0)} aria-label={`${t('Remove')} ${skillName(t, slug)}`} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:h-9 sm:w-9">
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div role="radiogroup" aria-label={`${skillName(t, slug)} ${t('proficiency')}`} className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" role="radio" aria-checked={level === n} onClick={() => setSkillLevel(slug, n)}
+                    aria-label={t(['', '1 · Beginner', '2 · Developing', '3 · Intermediate', '4 · Proficient', '5 · Advanced'][n])}
+                    className={`h-11 w-11 rounded-lg border text-sm font-semibold tabular-nums transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:h-9 sm:w-9 ${n <= level ? 'border-blue-600 bg-blue-600 text-white' : 'border-blue-100 bg-white text-slate-600 hover:border-blue-300 dark:border-slate-600'}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs font-medium text-slate-600">{t(['', '1 · Beginner', '2 · Developing', '3 · Intermediate', '4 · Proficient', '5 · Advanced'][level] ?? '1 · Beginner').replace(/^\d · /, '')}</span>
+            </div>
+          </li>
+        ))}
+        </ul>
       </section>
     </div>
   );
