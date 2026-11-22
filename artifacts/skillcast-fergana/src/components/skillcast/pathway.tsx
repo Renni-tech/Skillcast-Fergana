@@ -16,6 +16,8 @@ import type { RoleMatch } from '@/lib/types';
 import { useSkillCast } from '@/lib/store';
 import { courseOutcome, courseProvider, courseTitle, roleSignals, roleTitle, SdgBadge, skillName, useSignals, useT } from './shared';
 import { ResourceFinder } from './resource-finder';
+import { LearningPaths } from './learning-paths';
+import { CATALOG_MAP, entryName } from '@/lib/resource-catalog';
 import { bestForSkill } from '@/lib/resource-match';
 import { ChoosePathwayEmpty } from './explainer';
 import { SkillUpdateBanner, SkillUpdateDialog } from './skill-progress';
@@ -95,6 +97,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
   const { chosenRole, profile, completedCourses, toggleCourse, setDashTab, confirmSkillUpdates, lang } = useSkillCast();
   const [pending, setPending] = useState<{ slug: string; proposals: ProposedUpdate[] } | null>(null);
   const [lastUpdate, setLastUpdate] = useState<{ log: SkillUpdate[]; before: number } | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const markCourse = (slug: string) => {
     const finishing = !completedCourses.includes(slug);
     toggleCourse(slug);
@@ -128,10 +131,18 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
     .filter(([k, v]) => v && k !== 'none')
     .map(([k]) => t(`inclusion.${k}`));
 
+  const nextNode = firstIncomplete >= 0 ? nodes[firstIncomplete] : null;
+  const focusSkill = nextNode?.skill ?? match.gap[0]?.skill ?? null;
+  const nextAlt = focusSkill ? bestForSkill(profile, focusSkill, lang) : null;
+  const goNext = () => {
+    if (!nextNode) { document.getElementById(nodes.length ? 'my-learning-paths' : 'where-to-learn')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    document.getElementById(`learning-${nextNode.courseSlug}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold">{t('pw.title')}</h2>
           <p className="text-sm text-muted-foreground">
             {roleTitle(t, role.slug)} · {t('pw.subtitle')}
@@ -143,6 +154,16 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </Badge>
       </div>
 
+      <PathwaySummary
+        score={match.score} role={roleTitle(t, role.slug)} gaps={match.gap.length}
+        firstSkill={match.gap[0] ? skillName(t, match.gap[0].skill) : null}
+        where={nextAlt && CATALOG_MAP[nextAlt.resource.id] ? entryName(t, lang, CATALOG_MAP[nextAlt.resource.id]) : nextNode ? courseProvider(t, nextNode.courseSlug) : null}
+        next={nextNode ? courseTitle(t, nextNode.courseSlug) : nodes.length ? t('pws.allDone') : t('pws.noSteps')}
+        done={doneCount} total={nodes.length} onNext={goNext}
+      />
+
+      <section aria-labelledby="pw-s-what" className="space-y-3">
+        <h3 id="pw-s-what" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('pw.s.what')}</h3>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t('Skills to Build')}</CardTitle>
@@ -167,7 +188,11 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                       <a className="min-w-0 break-words font-medium text-blue-700 underline-offset-2 hover:underline dark:text-blue-300 md:text-right" href={`#learning-${mapped.courseSlug}`}>
                         {courseTitle(t, mapped.courseSlug)} →
                       </a>
-                    ) : <span className="text-xs text-muted-foreground md:text-right">{t('flow.noCourse')}</span>}
+                    ) : (
+                      <a className="min-w-0 text-xs font-medium text-teal-800 underline-offset-2 hover:underline dark:text-teal-300 md:text-right" href="#where-to-learn">
+                        {t('flow.noCourse')} · {t('pws.findCourses')} →
+                      </a>
+                    )}
                   </li>
                 );
               })}
@@ -176,41 +201,46 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
         </CardContent>
       </Card>
 
-      {/* Progress + badges: motivating, never colour-only (icon + text state) */}
-      {lastUpdate && (
-        <SkillUpdateBanner log={lastUpdate.log} before={lastUpdate.before} after={match.score}
-          roleLabel={roleTitle(t, role.slug)} onDismiss={() => setLastUpdate(null)} />
-      )}
-      <SkillUpdateDialog courseSlug={pending?.slug ?? null} proposals={pending?.proposals ?? []}
-        onClose={() => setPending(null)}
-        onConfirm={(chosen) => {
-          if (!pending) return;
-          const before = match.score;
-          const log = confirmSkillUpdates(pending.slug, chosen);
-          setPending(null);
-          setLastUpdate({ log, before });
-          toast({
-            title: t('prog.done.title'),
-            description: log.map((u) => `${skillName(t, u.skill)} ${u.from}→${u.to}`).join(' · '),
-          });
-        }} />
-      <BadgeShelf done={doneCount} total={nodes.length} />
-      {inclusionNeeds.length > 0 && (
-        <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
-          {t('pw.access.note', { needs: inclusionNeeds.join(' · ') })}
-        </p>
-      )}
+      </section>
 
-      {/* Step-by-step learning path */}
-      <div className="relative mx-auto max-w-xl">
-        <div className="absolute bottom-8 left-1/2 top-8 w-1 -translate-x-1/2 rounded bg-gradient-to-b from-teal-300 via-teal-200 to-emerald-200 dark:from-teal-800 dark:via-teal-900 dark:to-emerald-900" aria-hidden />
-        <ol className="relative space-y-4">
+      <section aria-labelledby="pw-s-where" className="space-y-3">
+        <h3 id="pw-s-where" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('pw.s.where')}</h3>
+        <ResourceFinder gaps={match.gap.map((g) => g.skill)} />
+      </section>
+
+      <section aria-labelledby="pw-s-path" className="space-y-3">
+        <h3 id="pw-s-path" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('pw.s.path')}</h3>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">{t('pw.roadmap')}</CardTitle>
+            <CardDescription>{roleTitle(t, role.slug)}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative mx-auto max-w-xl">
+              <div className="absolute bottom-4 left-1/2 top-4 w-1 -translate-x-1/2 rounded bg-gradient-to-b from-teal-300 via-teal-200 to-emerald-200 dark:from-teal-800 dark:via-teal-900 dark:to-emerald-900" aria-hidden />
+              {nodes.length === 0 && <p className="relative mb-3 rounded-lg border border-dashed bg-card p-3 text-center text-sm text-muted-foreground">{t('pws.noSteps')}</p>}
+              <ol className="relative space-y-2">
           {nodes.map((n, i) => {
             const course = COURSE_MAP[n.courseSlug];
             const done = completedCourses.includes(n.courseSlug);
             const next = i === firstIncomplete;
             const locked = !done && !next;
             const state = done ? 'done' : next ? 'next' : 'locked';
+            if (!showAll && !next) {
+              return (
+                <li id={`learning-${n.courseSlug}`} key={n.courseSlug} className="flex scroll-mt-24 justify-center">
+                  <button type="button" onClick={() => setShowAll(true)}
+                    className={`flex min-h-11 w-full max-w-md items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-left text-sm ${state === 'done' ? 'border-emerald-400' : 'border-dashed text-muted-foreground'}`}>
+                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${state === 'done' ? 'bg-emerald-700 text-white' : 'bg-muted'}`}>
+                      {state === 'done' ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Lock className="h-3 w-3" aria-hidden />}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{courseTitle(t, course.slug)}</span>
+                    <span className="sr-only">{state === 'done' ? t('pw.done') : t('pw.locked')}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{t('pw.week', { n: n.startWeek })}</span>
+                  </button>
+                </li>
+              );
+            }
             return (
               <li id={`learning-${n.courseSlug}`} key={n.courseSlug} className="flex scroll-mt-24 justify-center">
                 <Card
@@ -255,7 +285,7 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
                       return alt ? (
                         <p className="text-xs text-muted-foreground">
                           <a href="#where-to-learn" className="font-medium text-teal-700 hover:underline dark:text-teal-400">
-                            {t('lr.step', { name: t(`${alt.resource.copy}.${alt.resource.id}.name`) })}
+                            {t('lr.step', { name: CATALOG_MAP[alt.resource.id] ? entryName(t, lang, CATALOG_MAP[alt.resource.id]) : alt.resource.provider })}
                           </a>
                           {' '}({t(`lr.area.${alt.resource.area}`)} · {t(`lr.format.${alt.resource.format}`)})
                         </p>
@@ -319,14 +349,92 @@ export function PathwayTab({ matches }: { matches: RoleMatch[] }) {
               </Card>
             </li>
           )}
-        </ol>
-      </div>
+              </ol>
+            </div>
+            {nodes.length > 1 && (
+              <div className="mt-3 flex justify-center">
+                <Button variant="ghost" size="sm" className="min-h-11 sm:min-h-9" aria-expanded={showAll} onClick={() => setShowAll(!showAll)}>
+                  {showAll ? t('pw.compact.less') : t('pw.compact.all', { n: nodes.length })}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <LearningPaths />
+      </section>
 
-      <ResourceFinder gaps={match.gap.map((g) => g.skill)} />
+      <section aria-labelledby="pw-s-progress" className="space-y-3">
+        <h3 id="pw-s-progress" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('pw.s.progress')}</h3>
+      {/* Progress + badges: motivating, never colour-only (icon + text state) */}
+      {lastUpdate && (
+        <SkillUpdateBanner log={lastUpdate.log} before={lastUpdate.before} after={match.score}
+          roleLabel={roleTitle(t, role.slug)} onDismiss={() => setLastUpdate(null)} />
+      )}
+      <SkillUpdateDialog courseSlug={pending?.slug ?? null} proposals={pending?.proposals ?? []}
+        onClose={() => setPending(null)}
+        onConfirm={(chosen) => {
+          if (!pending) return;
+          const before = match.score;
+          const log = confirmSkillUpdates(pending.slug, chosen);
+          setPending(null);
+          setLastUpdate({ log, before });
+          toast({
+            title: t('prog.done.title'),
+            description: log.map((u) => `${skillName(t, u.skill)} ${u.from}→${u.to}`).join(' · '),
+          });
+        }} />
+      <BadgeShelf done={doneCount} total={nodes.length} />
+      {inclusionNeeds.length > 0 && (
+        <p className="break-words rounded-lg bg-violet-50 px-3 py-2 text-xs leading-relaxed text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
+          {t('pw.access.note', { needs: inclusionNeeds.join(' · ') })}
+        </p>
+      )}
+
+      </section>
     </div>
   );
 }
 
+/** Where am I → where am I going → what gap → what to learn → where → next action. */
+function PathwaySummary({ score, role, gaps, firstSkill, where, next, done, total, onNext }: {
+  score: number; role: string; gaps: number; firstSkill: string | null; where: string | null; next: string;
+  done: number; total: number; onNext: () => void;
+}) {
+  const t = useT();
+  const steps: Array<[string, string]> = [
+    [t('pws.now'), t('pws.now.v', { score: Math.round(score), role })],
+    [t('pws.goal'), role],
+    [t('pws.gap'), gaps ? t('pws.gap.v', { n: gaps }) : t('pws.gap.none')],
+    [t('pws.learn'), firstSkill ?? '—'],
+    [t('pws.where'), where ?? '—'],
+    [t('pws.next'), next ?? '—'],
+  ];
+  return (
+    <Card className="border-teal-600/40 bg-gradient-to-br from-teal-50/70 to-background dark:from-teal-950/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{t('pws.title')}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {steps.map(([label, value], i) => (
+            <li key={label} className="flex min-w-0 items-start gap-2 rounded-lg border bg-card p-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xs font-bold text-white" aria-hidden>{i + 1}</span>
+              <span className="min-w-0">
+                <span className="block text-xs text-muted-foreground">{label}</span>
+                <span className="block break-words text-sm font-medium">{value}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <div className="flex flex-wrap items-center gap-3">
+          <Progress value={total ? (done / total) * 100 : 0} className="h-2.5 min-w-0 flex-1 [&>div]:bg-emerald-600" aria-label={t('nb.courses', { done, total })} />
+          <span className="text-xs tabular-nums text-muted-foreground">{t('nb.courses', { done, total })}</span>
+          <Button size="sm" className="min-h-11 w-full bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 sm:min-h-9 sm:w-auto" onClick={onNext}>{t('pws.start')} →</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 /** Small SVG progress ring; the number in the middle carries the meaning. */
 function ProgressRing({ value, label }: { value: number; label: string }) {

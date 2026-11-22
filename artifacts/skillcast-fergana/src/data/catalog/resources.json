@@ -1,0 +1,673 @@
+{
+  "$comment": "SkillCast learning catalogue. Add entries here; the UI reads this file and needs no code change. Every entry must cite evidence. See src/data/catalog/README.md for the rules.",
+  "checked": "2026-11-22",
+  "entries": [
+    {
+      "id": "aileaders-5m", "provider": "Ministry of Digital Technologies", "badge": "5M AI Leaders",
+      "url": "https://aileaders.uz", "evidence": ["https://gov.uz/en/digital/news/view/160753", "https://gov.uz/en/digital/news/view/115807"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ai", "programming", "data", "digital"],
+      "skills": ["prompt-engineering", "machine-learning", "data-analysis", "python", "digital-literacy", "responsible-ai"],
+      "mode": "online", "area": "uzbekistan", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz", "en"], "verification": "verified",
+      "text": {
+        "name": { "en": "5 Million AI Leaders", "uz": "5 million AI yetakchilari", "ru": "5 миллионов AI-лидеров" },
+        "d": { "en": "National free platform with online AI and IT courses from Coursera, Oracle, Huawei and others, many translated into Uzbek.", "uz": "Coursera, Oracle, Huawei va boshqalarning sun’iy intellekt va IT bo‘yicha onlayn kurslari jamlangan bepul milliy platforma; ko‘p kurslar o‘zbek tiliga tarjima qilingan.", "ru": "Национальная бесплатная платформа с онлайн-курсами по ИИ и ИТ от Coursera, Oracle, Huawei и других; многие курсы переведены на узбекский." }
+      }
+    },
+    {
+      "id": "coursera-uz", "provider": "Coursera with the Ministry of Digital Technologies", "badge": "Coursera UZ",
+      "url": "https://www.coursera.org", "evidence": ["https://www.coursera.org/enterprise/resources/casestudy/uzbekistan-empowers-digital-growth", "https://gov.uz/en/digital/news/view/101076"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ai", "programming", "data", "business", "digital"],
+      "skills": ["machine-learning", "data-analysis", "python", "cloud", "cybersecurity", "project-management", "business-analysis"],
+      "mode": "online", "area": "uzbekistan", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["en", "uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "Coursera through the national programme", "uz": "Milliy dastur orqali Coursera", "ru": "Coursera по национальной программе" },
+        "d": { "en": "The Ministry of Digital Technologies gives free Coursera access; over 1.5 million people in Uzbekistan have registered. Access goes through the 5 Million AI Leaders platform.", "uz": "Raqamli texnologiyalar vazirligi Coursera’ga bepul kirish imkonini beradi; O‘zbekistonda 1,5 milliondan ortiq kishi ro‘yxatdan o‘tgan. Kirish “5 million AI yetakchilari” platformasi orqali.", "ru": "Министерство цифровых технологий даёт бесплатный доступ к Coursera; в Узбекистане зарегистрировались более 1,5 млн человек. Доступ — через платформу «5 миллионов AI-лидеров»." }
+      }
+    },
+    {
+      "id": "ustoz-ai", "provider": "Youth Affairs Agency", "badge": "Ustoz AI",
+      "url": "https://gov.uz/en/yoshlar/sections/view/28204", "evidence": ["https://gov.uz/en/yoshlar/sections/view/28204", "https://gov.uz/en/yoshlar/news/view/165742", "https://uza.uz/ar/posts/ustoz-ai-ozbekistonda-endi-zamonaviy-kasblarni-toliq-bepulga-orgatadigan-dastur-bor_634011"],
+      "category": "ai-digital", "kind": "programme", "topics": ["digital", "design", "business", "driving"],
+      "skills": ["digital-marketing", "graphic-design", "ai-content-ops", "supply-chain", "digital-literacy"],
+      "mode": "online", "area": "uzbekistan", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "Ustoz AI video courses", "uz": "Ustoz AI video kurslari", "ru": "Видеокурсы Ustoz AI" },
+        "d": { "en": "Free app with video courses in 40+ modern professions such as PR, HR, graphic design, video editing, no-code, logistics and marketing. A driving-theory course was added in May 2026.", "uz": "PR, HR, grafik dizayn, video montaj, no-code, logistika va marketing kabi 40 dan ortiq zamonaviy kasb bo‘yicha bepul video kurslar ilovasi. 2026-yil mayida haydovchilik kursi qo‘shildi.", "ru": "Бесплатное приложение с видеокурсами по 40+ современным профессиям: PR, HR, графический дизайн, видеомонтаж, no-code, логистика, маркетинг. В мае 2026 года добавлен курс вождения." }
+      }
+    },
+    {
+      "id": "smm-ai-savodxon", "provider": "Youth Affairs Agency", "badge": "SMM AI Savodxon",
+      "url": "https://uza.uz/ar/posts/150-ga-yaqin-yoshlar-kursni-tamomlashdi_899331", "evidence": ["https://uza.uz/ar/posts/150-ga-yaqin-yoshlar-kursni-tamomlashdi_899331"],
+      "category": "ai-digital", "kind": "course", "topics": ["ai", "digital", "ecommerce"],
+      "skills": ["digital-marketing", "ai-content-ops", "prompt-engineering"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": true, "availability": "closed",
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "SMM AI Savodxon", "uz": "SMM AI Savodxon", "ru": "SMM AI Savodxon" },
+        "d": { "en": "In-person sessions at youth centres on social media, content and AI tools, with certificates. A group of about 150 young people finished it.", "uz": "Yoshlar markazlarida ijtimoiy tarmoqlar, kontent va AI vositalari bo‘yicha oflayn mashg‘ulotlar, sertifikat bilan. 150 ga yaqin yosh kursni tamomlagan.", "ru": "Очные занятия в молодёжных центрах по соцсетям, контенту и инструментам ИИ, с сертификатом. Курс окончили около 150 молодых людей." },
+        "note": { "en": "Ask your district youth centre about the next group.", "uz": "Keyingi guruh haqida tuman yoshlar markazidan so‘rang.", "ru": "О следующей группе спросите в районном молодёжном центре." }
+      }
+    },
+    {
+      "id": "aistudy", "provider": "Ministry of Digital Technologies", "badge": "aistudy.uz",
+      "url": "https://aistudy.uz", "evidence": ["https://gov.uz/ru/digital/news/view/198667"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ai", "programming", "digital"],
+      "skills": ["prompt-engineering", "python", "digital-literacy"],
+      "mode": "online", "area": "uzbekistan", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "aistudy.uz free IT courses", "uz": "aistudy.uz bepul IT kurslari", "ru": "Бесплатные ИТ-курсы aistudy.uz" },
+        "d": { "en": "State platform with free online courses in IT and AI.", "uz": "IT va sun’iy intellekt bo‘yicha bepul onlayn kurslar beruvchi davlat platformasi.", "ru": "Государственная платформа с бесплатными онлайн-курсами по ИТ и ИИ." }
+      }
+    },
+    {
+      "id": "it-istedod", "provider": "Ministry of Digital Technologies", "badge": "IT Istedod",
+      "url": "https://it-istedod.uz", "evidence": ["https://gov.uz/ru/digital/news/view/198667"],
+      "category": "ai-digital", "kind": "programme", "topics": ["programming", "cybersecurity", "data"],
+      "skills": ["cloud", "cybersecurity", "software-engineering", "data-analysis"],
+      "mode": "online", "area": "uzbekistan", "cost": "grant", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "IT Istedod: certificate cost refunds", "uz": "IT Istedod: sertifikat xarajatlarini qoplash", "ru": "IT Istedod: возмещение расходов на сертификаты" },
+        "d": { "en": "Applies for compensation of the cost of international IT courses and certificates.", "uz": "Xalqaro IT kurslari va sertifikatlari xarajatlarini qoplash uchun ariza berish platformasi.", "ru": "Платформа для заявок на компенсацию стоимости международных ИТ-курсов и сертификатов." }
+      }
+    },
+    {
+      "id": "itpark-advanced-fergana", "provider": "IT Park Uzbekistan", "badge": "Uzbekcoders / IT Park",
+      "url": "https://www.it-park.uz/en/itpark/news/first-stage-of-advanced-it-skills-program-completed-across-four-regions-of-uzbekistan", "evidence": ["https://www.it-park.uz/en/itpark/news/first-stage-of-advanced-it-skills-program-completed-across-four-regions-of-uzbekistan"],
+      "category": "ai-digital", "kind": "course", "topics": ["programming", "design"],
+      "skills": ["software-engineering", "graphic-design"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "unknown", "stateFunded": true, "availability": "closed",
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "Advanced IT Skills: Game Development (Fergana)", "uz": "Advanced IT Skills: o‘yin ishlab chiqish (Farg‘ona)", "ru": "Advanced IT Skills: разработка игр (Фергана)" },
+        "d": { "en": "First stage of IT Park’s advanced programme ran in four regions; in Fergana the track was game development and 75 learners completed it.", "uz": "IT Parkning ilg‘or dasturi birinchi bosqichi to‘rt hududda o‘tdi; Farg‘onada yo‘nalish o‘yin ishlab chiqish bo‘lib, 75 kishi tamomladi.", "ru": "Первый этап продвинутой программы IT Park прошёл в четырёх регионах; в Фергане направлением была разработка игр, курс окончили 75 человек." },
+        "note": { "en": "First stage finished. Ask IT Park Fergana about the next stage.", "uz": "Birinchi bosqich yakunlangan. Keyingi bosqich haqida IT Park Farg‘onadan so‘rang.", "ru": "Первый этап завершён. О следующем этапе спросите в IT Park Фергана." }
+      }
+    },
+    {
+      "id": "ai-leaders-2026", "provider": "IT Park Uzbekistan", "badge": "AI Leaders",
+      "url": "https://www.it-park.uz/en/itpark/news/ai-leaders-2026-largest-ai-program-for-executives-in-central-eurasia-concludes-in-tashkent", "evidence": ["https://www.it-park.uz/en/itpark/news/ai-leaders-2026-largest-ai-program-for-executives-in-central-eurasia-concludes-in-tashkent"],
+      "category": "ai-digital", "kind": "course", "topics": ["ai", "business"],
+      "skills": ["ai-augmented-ops", "leadership", "responsible-ai"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "closed",
+      "languages": ["en", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "AI Leaders 2026 (for executives)", "uz": "AI Leaders 2026 (rahbarlar uchun)", "ru": "AI Leaders 2026 (для руководителей)" },
+        "d": { "en": "IT Park’s AI programme for company executives in Tashkent. The 2026 edition has ended.", "uz": "IT Parkning Toshkentdagi kompaniya rahbarlari uchun AI dasturi. 2026-yilgi mavsum yakunlangan.", "ru": "Программа IT Park по ИИ для руководителей компаний в Ташкенте. Сезон 2026 года завершён." }
+      }
+    },
+    {
+      "id": "uzum-it-academy", "provider": "Uzum", "badge": "Uzum IT Academy",
+      "url": "https://www.spot.uz/ru/2023/07/11/uzum", "evidence": ["https://www.spot.uz/ru/2023/07/11/uzum"],
+      "category": "ai-digital", "kind": "course", "topics": ["programming", "data", "ai"],
+      "skills": ["software-engineering", "data-analysis", "machine-learning"],
+      "mode": "online", "area": "uzbekistan", "cost": "paid", "stateFunded": false, "availability": "unknown",
+      "languages": ["ru"],
+      "duration": { "en": "4–10 months (reported 2023)", "uz": "4–10 oy (2023-yil ma’lumoti)", "ru": "4–10 месяцев (данные 2023 года)" },
+      "verification": "partial",
+      "text": {
+        "name": { "en": "Uzum IT Academy", "uz": "Uzum IT Academy", "ru": "Uzum IT Academy" },
+        "d": { "en": "Evening online courses in Java and Go backend, applied data analysis and machine learning, and helpdesk. In 2023 a course cost 5–10 million UZS.", "uz": "Java va Go backend, amaliy ma’lumotlar tahlili va mashinali o‘qitish hamda helpdesk bo‘yicha kechki onlayn kurslar. 2023-yilda kurs narxi 5–10 mln so‘m edi.", "ru": "Вечерние онлайн-курсы: бэкенд на Java и Go, прикладной анализ данных и машинное обучение, helpdesk. В 2023 году курс стоил 5–10 млн сумов." },
+        "note": { "en": "Figures are from 2023; check current groups and prices with Uzum.", "uz": "Ma’lumotlar 2023-yilga oid; joriy guruh va narxlarni Uzum’dan aniqlang.", "ru": "Данные 2023 года; актуальные группы и цены уточните в Uzum." }
+      }
+    },
+    {
+      "id": "itpark-it-academy", "provider": "IT Park Uzbekistan", "badge": "IT Park Academy",
+      "url": "https://www.it-park.uz/index.php/en/itpark/academy", "evidence": ["https://www.it-park.uz/index.php/en/itpark/academy"],
+      "category": "ai-digital", "kind": "course", "topics": ["programming"],
+      "skills": ["software-engineering", "python"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "address": { "line": "4 Tepamasjid St, Tashkent 100164", "confidence": "official", "source": "https://www.it-park.uz/index.php/en/itpark/academy" },
+      "contact": { "phone": "+998 71 209 11 99" },
+      "duration": { "en": "4 months, twice a week", "uz": "4 oy, haftasiga 2 marta", "ru": "4 месяца, 2 раза в неделю" },
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "IT Park IT Academy: web development", "uz": "IT Park IT Academy: veb-dasturlash", "ru": "IT Park IT Academy: веб-разработка" },
+        "d": { "en": "Web development courses in Python/Django and PHP/Laravel, two hours twice a week.", "uz": "Python/Django va PHP/Laravel bo‘yicha veb-dasturlash kurslari, haftasiga ikki marta ikki soatdan.", "ru": "Курсы веб-разработки на Python/Django и PHP/Laravel, два раза в неделю по два часа." }
+      }
+    },
+    {
+      "id": "uztelecom-lms", "provider": "Uztelecom", "badge": "Uztelecom LMS",
+      "url": "https://lms.uztelecom.uz/en", "evidence": ["https://lms.uztelecom.uz/en"],
+      "category": "ai-digital", "kind": "programme", "topics": ["data", "ai", "programming", "design"],
+      "skills": ["data-analysis", "machine-learning", "python", "graphic-design", "digital-literacy"],
+      "mode": "online", "area": "uzbekistan", "cost": "freemium", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Uztelecom LMS career tracks", "uz": "Uztelecom LMS kasbiy yo‘nalishlari", "ru": "Карьерные треки Uztelecom LMS" },
+        "d": { "en": "Online tracks in data analytics, AI, Python basics, Excel and interface design. A free plan opens 15 basic courses; paid plans start at 23,600 UZS a month.", "uz": "Ma’lumotlar tahlili, AI, Python asoslari, Excel va interfeys dizayni bo‘yicha onlayn yo‘nalishlar. Bepul tarif 15 ta asosiy kursni ochadi; pullik tarif oyiga 23 600 so‘mdan.", "ru": "Онлайн-треки по анализу данных, ИИ, основам Python, Excel и дизайну интерфейсов. Бесплатный тариф открывает 15 базовых курсов; платные — от 23 600 сумов в месяц." }
+      }
+    },
+    {
+      "id": "aws-academy-itpark", "provider": "IT Park Uzbekistan and AWS", "badge": "AWS Academy",
+      "url": "https://www.outsource.gov.uz/media/it-park-uzbekistan-and-aws-to-integrate-aws-academy-programs-at-10-universities", "evidence": ["https://www.outsource.gov.uz/media/it-park-uzbekistan-and-aws-to-integrate-aws-academy-programs-at-10-universities"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ai", "data", "cybersecurity", "programming"],
+      "skills": ["cloud", "machine-learning", "data-engineering", "cybersecurity"],
+      "mode": "hybrid", "area": "uzbekistan", "cost": "free", "stateFunded": false, "availability": "ongoing",
+      "languages": ["en"], "verification": "verified",
+      "text": {
+        "name": { "en": "AWS Academy at partner universities", "uz": "Hamkor universitetlarda AWS Academy", "ru": "AWS Academy в вузах-партнёрах" },
+        "d": { "en": "AWS Academy courses in AI, machine learning, cloud, data and cybersecurity at 10 universities, at no cost to their students.", "uz": "10 ta universitetda AI, mashinali o‘qitish, bulut, ma’lumotlar va kiberxavfsizlik bo‘yicha AWS Academy kurslari, talabalar uchun bepul.", "ru": "Курсы AWS Academy по ИИ, машинному обучению, облаку, данным и кибербезопасности в 10 вузах, бесплатно для их студентов." },
+        "note": { "en": "Only for students of the partner universities.", "uz": "Faqat hamkor universitetlar talabalari uchun.", "ru": "Только для студентов вузов-партнёров." }
+      }
+    },
+    {
+      "id": "najot-fergana", "provider": "Najot Ta’lim", "badge": "Najot Ta’lim",
+      "url": "https://www.it-park.uz/en/itpark/news/najot-ta-lim-branch-opened-in-fergana", "evidence": ["https://www.it-park.uz/en/itpark/news/najot-ta-lim-branch-opened-in-fergana"],
+      "category": "ai-digital", "kind": "provider", "topics": ["programming", "design"],
+      "skills": ["software-engineering", "graphic-design"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz"], "verification": "provider",
+      "text": {
+        "name": { "en": "Najot Ta’lim Fergana branch", "uz": "Najot Ta’lim Farg‘ona filiali", "ru": "Филиал Najot Ta’lim в Фергане" },
+        "d": { "en": "Private IT school (IT Park resident) that opened a 1,500 m² branch in Fergana in April 2023 for programming and design courses.", "uz": "Xususiy IT maktab (IT Park rezidenti) 2023-yil aprelida Farg‘onada dasturlash va dizayn kurslari uchun 1 500 m² filial ochgan.", "ru": "Частная ИТ-школа (резидент IT Park) в апреле 2023 года открыла в Фергане филиал площадью 1 500 м² для курсов программирования и дизайна." },
+        "note": { "en": "Address and prices not confirmed here; contact the school.", "uz": "Manzil va narxlar bu yerda tasdiqlanmagan; maktab bilan bog‘laning.", "ru": "Адрес и цены здесь не подтверждены; свяжитесь со школой." }
+      }
+    },
+    {
+      "id": "itpark-fergana-complex", "provider": "IT Park Uzbekistan", "badge": "IT Park Fergana",
+      "url": "https://gov.uz/en/digital/news/view/158963", "evidence": ["https://gov.uz/en/digital/news/view/158963", "https://daryo.uz/en/2026/04/28/uzbekistan-launches-fergana-it-park-to-train-3000-youth-annually/"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ai", "programming", "design", "digital", "languages"],
+      "skills": ["prompt-engineering", "software-engineering", "graphic-design", "digital-literacy", "english-for-work"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "unknown", "stateFunded": true, "availability": "upcoming",
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "New IT Park complex in Fergana: planned courses", "uz": "Farg‘onadagi yangi IT Park majmuasi: rejalashtirilgan kurslar", "ru": "Новый комплекс IT Park в Фергане: планируемые курсы" },
+        "d": { "en": "The complex shown to the President in April 2026 plans courses in AI, programming, graphic design, computer literacy and English, and aims to train over 3,000 young people a year. An AI hub is planned there.", "uz": "2026-yil aprelida Prezidentga ko‘rsatilgan majmuada AI, dasturlash, grafik dizayn, kompyuter savodxonligi va ingliz tili kurslari rejalashtirilgan; yiliga 3 000 dan ortiq yoshni o‘qitish maqsad qilingan. U yerda AI markazi ham rejalashtirilgan.", "ru": "В комплексе, показанном Президенту в апреле 2026 года, планируются курсы по ИИ, программированию, графическому дизайну, компьютерной грамотности и английскому; цель — обучать более 3 000 молодых людей в год. Там же планируется AI-хаб." }
+      }
+    },
+    {
+      "id": "itpark-university-fergana", "provider": "IT Park University", "badge": "IT Park University",
+      "url": "https://outsource.gov.uz/media/instructions-issued-to-ensure-quality-construction-and-expedite-the-development-of-the-it-park-fargona-complex", "evidence": ["https://outsource.gov.uz/media/instructions-issued-to-ensure-quality-construction-and-expedite-the-development-of-the-it-park-fargona-complex", "https://www.trend.az/business/4179778.html"],
+      "category": "ai-digital", "kind": "degree", "topics": ["ai", "cybersecurity", "programming"],
+      "skills": ["machine-learning", "cybersecurity", "software-engineering"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "grant", "stateFunded": true, "availability": "upcoming",
+      "languages": ["uz", "en"], "verification": "partial",
+      "text": {
+        "name": { "en": "IT Park University in Fergana (planned) and grants", "uz": "Farg‘onada IT Park University (rejada) va grantlar", "ru": "IT Park University в Фергане (в планах) и гранты" },
+        "d": { "en": "Plans include an IT Park University in Fergana teaching AI, cybersecurity and software engineering. In 2025, 100 grants were set aside for applicants from Fergana and Nukus.", "uz": "Farg‘onada AI, kiberxavfsizlik va dasturiy injiniring bo‘yicha IT Park University ochish rejalashtirilgan. 2025-yilda Farg‘ona va Nukuslik abituriyentlar uchun 100 ta grant ajratilgan.", "ru": "В планах — IT Park University в Фергане с направлениями ИИ, кибербезопасность и программная инженерия. В 2025 году для абитуриентов из Ферганы и Нукуса выделили 100 грантов." },
+        "note": { "en": "Opening date not confirmed.", "uz": "Ochilish sanasi tasdiqlanmagan.", "ru": "Дата открытия не подтверждена." }
+      }
+    },
+    {
+      "id": "inha-margilan", "provider": "Inha University in Tashkent", "badge": "INHA",
+      "url": "https://www.trend.az/business/4179778.html", "evidence": ["https://www.trend.az/business/4179778.html"],
+      "category": "ai-digital", "kind": "degree", "topics": ["ai", "cybersecurity", "programming"],
+      "skills": ["machine-learning", "cybersecurity", "software-engineering"],
+      "mode": "offline", "area": "fergana", "city": "Margilan", "cost": "unknown", "stateFunded": false, "availability": "upcoming",
+      "languages": ["en"], "verification": "partial",
+      "text": {
+        "name": { "en": "INHA branch campus in Margilan (planned)", "uz": "Marg‘ilonda INHA filiali (rejada)", "ru": "Филиал INHA в Маргилане (в планах)" },
+        "d": { "en": "A branch of INHA University is planned in Margilan. Together with IT Park University Fergana it is expected to enrol about 1,000 students a year in AI, cybersecurity and software engineering.", "uz": "Marg‘ilonda INHA universiteti filiali ochilishi rejalashtirilgan. IT Park University Farg‘ona bilan birga yiliga 1 000 ga yaqin talabani AI, kiberxavfsizlik va dasturiy injiniringga qabul qilishi kutilmoqda.", "ru": "В Маргилане планируется филиал университета INHA. Вместе с IT Park University Фергана он должен принимать около 1 000 студентов в год на ИИ, кибербезопасность и программную инженерию." },
+        "note": { "en": "Announced plan; no admission dates yet.", "uz": "E’lon qilingan reja; qabul sanalari hali yo‘q.", "ru": "Объявленный план; дат приёма пока нет." }
+      }
+    },
+    {
+      "id": "seoultech-fstu", "provider": "SeoulTech with Fergana State Technical University and Kokand University", "badge": "SeoulTech",
+      "url": "https://www.uzdaily.uz/en/fergana-and-seoultech-to-launch-joint-ai-and-it-degrees/", "evidence": ["https://www.uzdaily.uz/en/fergana-and-seoultech-to-launch-joint-ai-and-it-degrees/", "https://gov.uz/en/ferghana/news/view/176012"],
+      "category": "ai-digital", "kind": "degree", "topics": ["ai", "programming"],
+      "skills": ["machine-learning", "software-engineering"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "unknown", "stateFunded": false, "availability": "upcoming",
+      "languages": ["uz", "en"], "verification": "partial",
+      "text": {
+        "name": { "en": "Joint AI and IT degrees with SeoulTech (planned)", "uz": "SeoulTech bilan qo‘shma AI va IT dasturlari (rejada)", "ru": "Совместные программы по ИИ и ИТ с SeoulTech (в планах)" },
+        "d": { "en": "In June 2026 Fergana region signed a memorandum with Korea’s SeoulTech to launch joint AI and IT programmes with Fergana State Technical University and Kokand University.", "uz": "2026-yil iyunida Farg‘ona viloyati Koreyaning SeoulTech universiteti bilan Farg‘ona davlat texnika universiteti va Qo‘qon universiteti bilan qo‘shma AI va IT dasturlari bo‘yicha memorandum imzoladi.", "ru": "В июне 2026 года Ферганская область подписала меморандум с корейским SeoulTech о совместных программах по ИИ и ИТ с Ферганским государственным техническим университетом и Кокандским университетом." },
+        "note": { "en": "Memorandum stage; programmes not yet open.", "uz": "Memorandum bosqichi; dasturlar hali ochilmagan.", "ru": "Стадия меморандума; программы ещё не открыты." }
+      }
+    },
+    {
+      "id": "fstu-ai-degree", "provider": "Fergana State Technical University", "badge": "FSTU",
+      "url": "https://mentalaba.uz/en/universities/otm-haqida/fargona-davlat-texnika-universiteti", "evidence": ["https://mentalaba.uz/en/universities/otm-haqida/fargona-davlat-texnika-universiteti"],
+      "category": "ai-digital", "kind": "degree", "topics": ["ai", "engineering", "construction"],
+      "skills": ["machine-learning", "python", "electrical-maintenance"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "grant", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "partial",
+      "text": {
+        "name": { "en": "Bachelor’s in Artificial Intelligence (FSTU)", "uz": "Sun’iy intellekt bakalavriati (FarDTU)", "ru": "Бакалавриат «Искусственный интеллект» (ФерГТУ)" },
+        "d": { "en": "Fergana State Technical University (formerly Fergana Polytechnic) lists an Artificial Intelligence bachelor’s programme with state-grant and paid places, alongside engineering and construction programmes.", "uz": "Farg‘ona davlat texnika universiteti (sobiq Farg‘ona politexnika instituti) muhandislik va qurilish yo‘nalishlari bilan birga davlat granti va to‘lov-kontrakt o‘rinlariga ega Sun’iy intellekt bakalavriatini taklif qiladi.", "ru": "Ферганский государственный технический университет (бывший Ферганский политехнический институт) предлагает бакалавриат «Искусственный интеллект» с грантовыми и контрактными местами, а также инженерные и строительные направления." },
+        "note": { "en": "Admission is once a year (in 2026: 5–25 June) through the national system.", "uz": "Qabul yiliga bir marta milliy tizim orqali (2026-yilda: 5–25 iyun).", "ru": "Приём раз в год через национальную систему (в 2026 году: 5–25 июня)." }
+      }
+    },
+    {
+      "id": "fergana-dual-it", "provider": "Fergana regional administration and partners", "badge": "Dual education",
+      "url": "https://gov.uz/en/ferghana/news/view/222903", "evidence": ["https://gov.uz/en/ferghana/news/view/222903"],
+      "category": "ai-digital", "kind": "programme", "topics": ["programming", "ai", "design", "robotics", "cybersecurity"],
+      "skills": ["software-engineering", "machine-learning", "graphic-design", "robotics", "cybersecurity"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "unknown", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "International dual-education IT project, Fergana", "uz": "Xalqaro dual ta’lim IT loyihasi, Farg‘ona", "ru": "Международный проект дуального ИТ-образования, Фергана" },
+        "d": { "en": "Launched in September 2026: study combined with work practice in programming, AI, graphic design, 3D modelling, robotics and cybersecurity.", "uz": "2026-yil sentyabrida boshlandi: dasturlash, AI, grafik dizayn, 3D modellashtirish, robototexnika va kiberxavfsizlik bo‘yicha o‘qish va ish amaliyoti uyg‘unligi.", "ru": "Запущен в сентябре 2026 года: учёба с практикой на производстве по программированию, ИИ, графическому дизайну, 3D-моделированию, робототехнике и кибербезопасности." },
+        "note": { "en": "Ask the regional administration or IT Park Fergana how to join.", "uz": "Qanday qatnashishni viloyat hokimligi yoki IT Park Farg‘onadan so‘rang.", "ru": "Как участвовать — спросите в хокимияте области или IT Park Фергана." }
+      }
+    },
+    {
+      "id": "pdp-academy", "provider": "PDP Academy", "badge": "PDP",
+      "url": "https://www.it-park.uz/en/itpark/news/it-courses-in-uzbek-from-residents-of-it-park-pdp-academy", "evidence": ["https://www.it-park.uz/en/itpark/news/it-courses-in-uzbek-from-residents-of-it-park-pdp-academy", "https://www.spot.uz/ru/2024/03/21/it/"],
+      "category": "ai-digital", "kind": "provider", "topics": ["programming"],
+      "skills": ["software-engineering", "python"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "duration": { "en": "2.5-month foundation, then 9–10 months", "uz": "2,5 oylik poydevor, so‘ng 9–10 oy", "ru": "2,5 месяца базы, затем 9–10 месяцев" },
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "PDP Academy IT courses in Uzbek", "uz": "PDP Academy: o‘zbek tilidagi IT kurslar", "ru": "PDP Academy: ИТ-курсы на узбекском" },
+        "d": { "en": "Tashkent IT school teaching Android, iOS, Flutter, Python and frontend in Uzbek. In 2024 prices were 0.6–2.8 million UZS a month.", "uz": "Toshkentdagi IT maktab: Android, iOS, Flutter, Python va frontend o‘zbek tilida. 2024-yilda narxlar oyiga 0,6–2,8 mln so‘m edi.", "ru": "ИТ-школа в Ташкенте: Android, iOS, Flutter, Python и фронтенд на узбекском. В 2024 году цены были 0,6–2,8 млн сумов в месяц." }
+      }
+    },
+    {
+      "id": "astrum", "provider": "Astrum IT Academy", "badge": "Astrum",
+      "url": "https://astrum.uz/eng/about_us", "evidence": ["https://astrum.uz/eng/about_us"],
+      "category": "ai-digital", "kind": "provider", "topics": ["programming", "cybersecurity"],
+      "skills": ["software-engineering", "cybersecurity"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent region", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "address": { "line": "Central Chirchik district, Tashkent region", "confidence": "approximate", "source": "https://astrum.uz/eng/about_us" },
+      "languages": ["uz", "ru", "en"], "verification": "provider",
+      "text": {
+        "name": { "en": "Astrum IT Academy", "uz": "Astrum IT Academy", "ru": "Astrum IT Academy" },
+        "d": { "en": "Campus open 24/7 with full-stack and cybersecurity tracks and Qwasar certificates.", "uz": "Kampus kecha-kunduz ochiq: full-stack va kiberxavfsizlik yo‘nalishlari, Qwasar sertifikati.", "ru": "Кампус открыт круглосуточно: направления full-stack и кибербезопасность, сертификаты Qwasar." }
+      }
+    },
+    {
+      "id": "uzum-academy", "provider": "Uzum Market", "badge": "Uzum Academy",
+      "url": "https://seller.uzum.uz/", "evidence": ["https://kun.uz/news/2026/07/09/onlayn-savdo-ozbekistonda-kichik-va-orta-biznesni-rivojlantirishning-asosiy-omili-sifatida", "https://www.spot.uz/ru/2025/03/24/uzum-market/"],
+      "category": "ai-digital", "kind": "programme", "topics": ["ecommerce", "business", "digital"],
+      "skills": ["digital-marketing", "entrepreneurship", "sales-negotiation", "customer-experience"],
+      "mode": "hybrid", "area": "uzbekistan", "cost": "free", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Uzum Sellers Academy", "uz": "Uzum sotuvchilar akademiyasi", "ru": "Академия продавцов Uzum" },
+        "d": { "en": "Training for online sellers since 2022 (9,000+ trained), including an “Uzum Market Manager” course and free in-person Seller’s Community lectures every two weeks.", "uz": "2022-yildan onlayn sotuvchilar uchun o‘quv (9 000 dan ortiq kishi), jumladan “Uzum Market Manager” kursi va har ikki haftada bepul oflayn Seller’s Community ma’ruzalari.", "ru": "Обучение онлайн-продавцов с 2022 года (обучено 9 000+), включая курс «Uzum Market Manager» и бесплатные очные лекции Seller’s Community раз в две недели." }
+      }
+    },
+    {
+      "id": "tuit-indian-center", "provider": "Uzbek-Indian IT Centre at TUIT", "badge": "TUIT",
+      "url": "https://tuit.uz/en/post/backend-dasturchi-bolishni-istaysizmi", "evidence": ["https://tuit.uz/en/post/backend-dasturchi-bolishni-istaysizmi"],
+      "category": "ai-digital", "kind": "course", "topics": ["programming"],
+      "skills": ["software-engineering"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "address": { "line": "108 Amir Temur St, Tashkent", "confidence": "official", "source": "https://tuit.uz/en/post/backend-dasturchi-bolishni-istaysizmi" },
+      "languages": ["uz", "en"], "verification": "partial",
+      "text": {
+        "name": { "en": "Backend developer course (Uzbek-Indian IT Centre)", "uz": "Backend dasturchi kursi (O‘zbek-Hind IT markazi)", "ru": "Курс бэкенд-разработчика (Узбекско-индийский ИТ-центр)" },
+        "d": { "en": "Backend programming course announced by the IT centre at Tashkent University of Information Technologies.", "uz": "Toshkent axborot texnologiyalari universitetidagi IT markaz e’lon qilgan backend dasturlash kursi.", "ru": "Курс бэкенд-программирования, объявленный ИТ-центром Ташкентского университета информационных технологий." }
+      }
+    },
+    {
+      "id": "voucher-training", "provider": "Ministry of Employment and Poverty Reduction", "badge": "Ishga Marhamat Monocenter",
+      "url": "https://gov.uz/oz/bv-qashqadaryo/news/view/199102", "evidence": ["https://gov.uz/oz/bv-qashqadaryo/news/view/199102", "https://yuz.uz/uz/news/monomarkaz--kasbga-tayyorlashning-samarali-yoli", "https://www.undp.org/uzbekistan/stories/unfeminine-profession-breaking-stereotypes-path-energy-efficiency"],
+      "category": "practical", "kind": "programme", "topics": ["electrical", "plumbing", "beauty", "sewing", "vocational", "languages"],
+      "skills": ["electrical-maintenance", "textile-production", "english-for-work", "entrepreneurship"],
+      "mode": "offline", "area": "uzbekistan", "cost": "grant", "stateFunded": true, "availability": "ongoing",
+      "duration": { "en": "Usually 1–3 months", "uz": "Odatda 1–3 oy", "ru": "Обычно 1–3 месяца" },
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Free trade training by voucher", "uz": "Vaucher asosida bepul kasbga o‘qitish", "ru": "Бесплатное обучение профессии по ваучеру" },
+        "d": { "en": "Employment centres issue vouchers for free training in trades such as electrician, plumber-fitter, make-up artist, masseur and computer hardware installer, plus foreign languages and entrepreneurship. “Ishga marhamat” certificates count as specialised secondary qualifications.", "uz": "Bandlik markazlari elektrik, santexnik-chilangar, vizajist, massajchi, kompyuter jihozlarini yig‘uvchi kabi kasblarga, shuningdek xorijiy tillar va tadbirkorlikka bepul o‘qish uchun vaucher beradi. “Ishga marhamat” sertifikatlari o‘rta maxsus malakaga tenglashtirilgan.", "ru": "Центры занятости выдают ваучеры на бесплатное обучение профессиям электрика, сантехника-слесаря, визажиста, массажиста, сборщика компьютерной техники, а также иностранным языкам и предпринимательству. Сертификаты «Ишга мархамат» приравнены к средне-специальной квалификации." },
+        "note": { "en": "The list of professions differs by region; ask your local employment centre.", "uz": "Kasblar ro‘yxati hududga qarab farq qiladi; mahalliy bandlik markazidan so‘rang.", "ru": "Список профессий различается по регионам; уточните в местном центре занятости." }
+      }
+    },
+    {
+      "id": "undp-solar", "provider": "UNDP with the Ministry of Employment and Poverty Reduction", "badge": "UNDP · Ishga Marhamat",
+      "url": "https://www.undp.org/node/427566", "evidence": ["https://www.undp.org/node/427566", "https://daryo.uz/en/2024/09/18/undp-boosts-uzbekistans-energy-transition-supporting-16-mono-centers-with-solar-equipment"],
+      "category": "practical", "kind": "course", "topics": ["green", "electrical", "plumbing"],
+      "skills": ["renewable-energy", "energy-efficiency", "electrical-maintenance"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": true, "availability": "unknown",
+      "duration": { "en": "5 days, half practice (instructor course)", "uz": "5 kun, yarmi amaliyot (o‘qituvchilar kursi)", "ru": "5 дней, половина — практика (курс для инструкторов)" },
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Solar panel and solar heater installation", "uz": "Quyosh panellari va quyosh suv isitgichlarini o‘rnatish", "ru": "Монтаж солнечных панелей и солнечных водонагревателей" },
+        "d": { "en": "UNDP trained mono-centre electricians and plumbers to install PV panels and solar collectors, then equipped 16 mono-centres with training models so they can teach local learners.", "uz": "BMTTD monomarkazlar elektrik va santexniklarini fotoelektr panellar va quyosh kollektorlarini o‘rnatishga o‘rgatdi, so‘ng 16 ta monomarkazni o‘quv maketlari bilan jihozladi, ular endi mahalliy tinglovchilarni o‘qitadi.", "ru": "ПРООН обучила электриков и сантехников моноцентров монтажу солнечных панелей и коллекторов, затем оснастила 16 моноцентров учебными макетами, чтобы они обучали местных слушателей." },
+        "note": { "en": "Ask your mono-centre whether a solar group is forming.", "uz": "Monomarkazingizdan quyosh energetikasi guruhi yig‘ilayotganini so‘rang.", "ru": "Спросите в моноцентре, набирается ли группа по солнечной энергетике." }
+      }
+    },
+    {
+      "id": "fergana-special-technikum", "provider": "Fergana specialised technical school", "badge": "Inclusive technikum",
+      "url": "https://uza.uz/ar/posts/ibratli-bilim-va-kasb-maskani_830101", "evidence": ["https://uza.uz/ar/posts/ibratli-bilim-va-kasb-maskani_830101"],
+      "category": "practical", "kind": "provider", "topics": ["sewing", "digital", "vocational"],
+      "skills": ["textile-production", "digital-literacy"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "Fergana technical school for persons with disabilities", "uz": "Nogironligi bor shaxslar uchun Farg‘ona ixtisoslashtirilgan texnikumi", "ru": "Ферганский техникум для людей с инвалидностью" },
+        "d": { "en": "State technical school with about 450 students learning sewing and digital information processing, with dual (study and work) education.", "uz": "450 ga yaqin talaba tikuvchilik va raqamli axborotga ishlov berishni o‘rganadigan davlat texnikumi; dual (o‘qish va ish) ta’limi bor.", "ru": "Государственный техникум, где около 450 студентов учатся шитью и цифровой обработке информации; есть дуальное обучение." }
+      }
+    },
+    {
+      "id": "koica-fergana-shipbuilding", "provider": "Migration Agency with HD Hyundai Heavy Industries", "badge": "KOICA Fergana",
+      "url": "https://gov.uz/en/migration/news/view/229236", "evidence": ["https://gov.uz/en/migration/news/view/229236", "https://gov.uz/en/migration/news/view/119694"],
+      "category": "practical", "kind": "course", "topics": ["engineering", "vocational"],
+      "skills": ["electrical-maintenance", "adaptability"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "dates": { "start": "2026-11-16", "end": "2027-02-05" },
+      "duration": { "en": "About 12 weeks", "uz": "Taxminan 12 hafta", "ru": "Около 12 недель" },
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "Shipbuilding skills course at KOICA Centre, Fergana", "uz": "KOICA markazida kemasozlik kursi, Farg‘ona", "ru": "Курс судостроения в центре KOICA, Фергана" },
+        "d": { "en": "Free training and dormitory at the KOICA Regional Vocational Training Centre in Fergana, preparing workers for HD Hyundai shipyards in Korea. The third 2026 group runs 16 Nov 2026 – 5 Feb 2027.", "uz": "Farg‘onadagi KOICA hududiy kasb-hunar markazida bepul o‘qish va yotoqxona; Koreyadagi HD Hyundai kemasozlik zavodlari uchun ishchilar tayyorlanadi. 2026-yilning uchinchi guruhi: 2026-yil 16-noyabr – 2027-yil 5-fevral.", "ru": "Бесплатное обучение и общежитие в Региональном центре профподготовки KOICA в Фергане; подготовка рабочих для верфей HD Hyundai в Корее. Третья группа 2026 года: 16 ноября 2026 – 5 февраля 2027." },
+        "note": { "en": "For EPS-TOPIK candidates (manufacturing score 80+, or a TOPIK/King Sejong certificate), born after 1 Jan 1992.", "uz": "EPS-TOPIK nomzodlari uchun (ishlab chiqarish bo‘yicha 80+ ball yoki TOPIK/King Sejong sertifikati), 1992-yil 1-yanvardan keyin tug‘ilganlar.", "ru": "Для кандидатов EPS-TOPIK (80+ баллов по производству или сертификат TOPIK/King Sejong), родившихся после 1 января 1992 года." }
+      }
+    },
+    {
+      "id": "eps-topik", "provider": "Migration Agency and HRD Korea", "badge": "EPS-TOPIK",
+      "url": "https://gov.uz/en/migration/news/view/139363", "evidence": ["https://gov.uz/en/migration/news/view/139363", "https://gov.uz/en/migration/news/view/145926"],
+      "category": "practical", "kind": "exam", "topics": ["languages"],
+      "skills": ["communication"],
+      "mode": "offline", "area": "uzbekistan", "cost": "paid", "stateFunded": false, "availability": "closed",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "EPS-TOPIK Korean test for work in Korea", "uz": "Koreyada ishlash uchun EPS-TOPIK koreys tili imtihoni", "ru": "Экзамен EPS-TOPIK по корейскому для работы в Корее" },
+        "d": { "en": "Korean language and skills test for the E-9 work visa. 2026 registration ran 9–12 March; the fee was the equivalent of $28. Passing puts you in the employer database for 2 years.", "uz": "E-9 ish vizasi uchun koreys tili va ko‘nikma imtihoni. 2026-yil ro‘yxati 9–12-mart kunlari bo‘ldi; to‘lov 28 dollar ekvivalenti. O‘tganlar 2 yil davomida ish beruvchilar bazasida bo‘ladi.", "ru": "Экзамен по корейскому языку и навыкам для рабочей визы E-9. Регистрация 2026 года прошла 9–12 марта; сбор — эквивалент $28. Сдавшие 2 года находятся в базе работодателей." },
+        "note": { "en": "Passing does not guarantee a job. Watch the Migration Agency for the next round.", "uz": "O‘tish ishni kafolatlamaydi. Keyingi bosqichni Migratsiya agentligi e’lonlaridan kuzating.", "ru": "Сдача не гарантирует работу. Следите за объявлениями Агентства миграции о следующем туре." }
+      }
+    },
+    {
+      "id": "naqsh-diploma", "provider": "Naqsh School of Crafts (ACDF with the King’s Foundation School of Traditional Arts)", "badge": "Naqsh School of Crafts",
+      "url": "https://acdf.uz/news/naqsh-school-of-crafts-opens-in-tashkent", "evidence": ["https://infoedu.uz/hunarmandlar-endi-ananaviy-kasbni-ikki-yillik-diplom-bilan-organadi", "https://uza.uz/ar/posts/naqsh-maktabida-yangi-avlod-hunarmandlari-tayyorlanadi_917213", "https://schooloftraditionalarts.org/?p=4569"],
+      "category": "practical", "kind": "degree", "topics": ["crafts", "ceramics", "painting"],
+      "skills": ["creative-framing", "entrepreneurship"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "duration": { "en": "2 years, full time", "uz": "2 yil, kunduzgi", "ru": "2 года, очно" },
+      "languages": ["uz", "en"], "verification": "verified",
+      "text": {
+        "name": { "en": "Two-year diploma in traditional crafts", "uz": "An’anaviy hunarmandchilik bo‘yicha ikki yillik diplom", "ru": "Двухлетний диплом по традиционным ремёслам" },
+        "d": { "en": "Full-time diploma at the Centre for Islamic Civilisation in Tashkent: ornament (naqsh), ceramics and woodcarving. The first year started on 5 October 2026.", "uz": "Toshkentdagi Islom sivilizatsiyasi markazida kunduzgi diplom dasturi: naqsh, kulolchilik va yog‘och o‘ymakorligi. Birinchi o‘quv yili 2026-yil 5-oktabrda boshlandi.", "ru": "Очная дипломная программа в Центре исламской цивилизации в Ташкенте: орнамент (накш), керамика и резьба по дереву. Первый учебный год начался 5 октября 2026 года." }
+      }
+    },
+    {
+      "id": "naqsh-modules", "provider": "Naqsh School of Crafts", "badge": "Naqsh School of Crafts",
+      "url": "https://acdf.uz/news/naqsh-school-of-crafts-module-2-introduction-to-geometry-and-ornament", "evidence": ["https://acdf.uz/news/naqsh-school-of-crafts-module-2-introduction-to-geometry-and-ornament", "https://www.uzdaily.uz/en/naqsh-school-launches-third-module-on-proportion-and-design/"],
+      "category": "practical", "kind": "course", "topics": ["crafts", "painting", "calligraphy"],
+      "skills": ["creative-framing", "graphic-design"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "closed",
+      "dates": { "start": "2026-01-26", "end": "2026-03-31" },
+      "languages": ["uz", "en"], "verification": "verified",
+      "text": {
+        "name": { "en": "Short modules: geometry, ornament, proportion", "uz": "Qisqa modullar: geometriya, naqsh, mutanosiblik", "ru": "Короткие модули: геометрия, орнамент, пропорции" },
+        "d": { "en": "Pilot modules held in early 2026, such as Geometry & Ornament (26 Jan – 13 Feb) and Proportion & Composition.", "uz": "2026-yil boshida o‘tgan sinov modullari, masalan “Geometriya va naqsh” (26-yanvar – 13-fevral) va “Mutanosiblik va kompozitsiya”.", "ru": "Пилотные модули начала 2026 года, например «Геометрия и орнамент» (26 января – 13 февраля) и «Пропорция и композиция»." },
+        "note": { "en": "Finished. Follow ACDF news for new modules.", "uz": "Yakunlangan. Yangi modullar uchun ACDF yangiliklarini kuzating.", "ru": "Завершены. Новые модули — в новостях ACDF." }
+      }
+    },
+    {
+      "id": "yodgorlik-silk", "provider": "Yodgorlik silk factory", "badge": "Margilan silk",
+      "url": "https://uzbekistan.travel/en/o/margilan-craft-centers", "evidence": ["https://uzbekistan.travel/en/o/margilan-craft-centers", "https://www.euronews.com/travel/2024/10/25/unraveling-the-art-of-silk-production-in-uzbekistan"],
+      "category": "practical", "kind": "workshop", "topics": ["textile", "crafts"],
+      "skills": ["textile-production"],
+      "mode": "offline", "area": "fergana", "city": "Margilan", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "provider",
+      "text": {
+        "name": { "en": "Yodgorlik silk factory: see hand-made silk", "uz": "“Yodgorlik” ipak fabrikasi: qo‘lda ipak tayyorlashni ko‘ring", "ru": "Шёлковая фабрика «Ёдгорлик»: ручное производство шёлка" },
+        "d": { "en": "Opened in 1972, the only factory in Uzbekistan where the whole silk cycle, from cocoon to ikat fabric, is done by hand. Guided tours show each step.", "uz": "1972-yilda ochilgan, O‘zbekistonda pilladan abr matogacha ipakning butun jarayoni qo‘lda bajariladigan yagona fabrika. Ekskursiyalarda har bir bosqich ko‘rsatiladi.", "ru": "Открыта в 1972 году — единственная в Узбекистане фабрика, где весь цикл шёлка, от кокона до икатной ткани, выполняется вручную. На экскурсиях показывают каждый этап." },
+        "note": { "en": "Tours are confirmed; formal training is not. Ask about apprenticeships.", "uz": "Ekskursiyalar tasdiqlangan; rasmiy o‘qish tasdiqlanmagan. Shogirdlik haqida so‘rang.", "ru": "Экскурсии подтверждены, формальное обучение — нет. Спросите об ученичестве." }
+      }
+    },
+    {
+      "id": "valiev-ikat", "provider": "Nurmuhammad Valiev ikat workshop", "badge": "Margilan ikat",
+      "url": "https://www.advantour.com/uzbekistan/artisans/nurmuhammad-valiev.htm", "evidence": ["https://www.advantour.com/uzbekistan/artisans/nurmuhammad-valiev.htm"],
+      "category": "practical", "kind": "workshop", "topics": ["textile", "crafts"],
+      "skills": ["textile-production"],
+      "mode": "offline", "area": "fergana", "city": "Margilan", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz"], "verification": "provider",
+      "text": {
+        "name": { "en": "Ikat weaving master: Nurmuhammad Valiev", "uz": "Abrbandlik ustasi: Nurmuhammad Valiyev", "ru": "Мастер икатного ткачества Нурмухаммад Валиев" },
+        "d": { "en": "Margilan workshop weaving silk with the ikat technique; the master has trained young weavers since 2012.", "uz": "Marg‘ilondagi ustaxona: ipakni abr usulida to‘qiydi; usta 2012-yildan beri yosh to‘quvchilarni o‘qitadi.", "ru": "Мастерская в Маргилане, где ткут шёлк в технике икат; мастер с 2012 года обучает молодых ткачей." }
+      }
+    },
+    {
+      "id": "nazirov-ceramics", "provider": "Alisher Nazirov ceramics workshop", "badge": "Rishtan ceramics",
+      "url": "https://www.homofaber.com/fr/artisans/alisher_nazirov-ceramics-tashkent", "evidence": ["https://www.homofaber.com/fr/artisans/alisher_nazirov-ceramics-tashkent", "https://www.advantour.com/uzbekistan/artisans.htm"],
+      "category": "practical", "kind": "workshop", "topics": ["ceramics", "crafts", "painting"],
+      "skills": ["creative-framing", "entrepreneurship"],
+      "mode": "offline", "area": "fergana", "city": "Rishton", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz", "ru"], "verification": "provider",
+      "text": {
+        "name": { "en": "Rishtan ceramics school of Alisher Nazirov", "uz": "Alisher Nazirovning Rishton kulolchilik maktabi", "ru": "Риштанская школа керамики Алишера Назирова" },
+        "d": { "en": "Master potter working with Rishtan red clay; his main workshop is in Rishton and he teaches students at a ceramics school he founded.", "uz": "Rishton qizil tuprog‘i bilan ishlaydigan usta kulol; asosiy ustaxonasi Rishtonda, o‘zi asos solgan kulolchilik maktabida shogirdlarga dars beradi.", "ru": "Мастер-керамист, работающий с риштанской красной глиной; основная мастерская — в Риштане, он учит студентов в основанной им школе керамики." }
+      }
+    },
+    {
+      "id": "konigil-meros", "provider": "Meros paper workshop, Konigil", "badge": "Samarkand paper",
+      "url": "https://eurasia.travel/national-crafts-of-uzbekistan/", "evidence": ["https://eurasia.travel/national-crafts-of-uzbekistan/", "https://www.centralasia-travel.com/en/mice/master-class/paper-workshop"],
+      "category": "practical", "kind": "workshop", "topics": ["crafts", "calligraphy"],
+      "skills": ["creative-framing"],
+      "mode": "offline", "area": "uzbekistan", "city": "Samarkand", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru", "en"], "verification": "partial",
+      "text": {
+        "name": { "en": "Samarkand silk-paper masterclass, Konigil", "uz": "Samarqand ipak qog‘ozi mahorat darsi, Konigil", "ru": "Мастер-класс самаркандской шёлковой бумаги, Конигил" },
+        "d": { "en": "Workshop 7 km from Samarkand that revived hand-made mulberry paper in 1995; visitors can join short masterclasses.", "uz": "Samarqanddan 7 km uzoqlikdagi ustaxona 1995-yilda tut po‘stlog‘idan qo‘lda qog‘oz tayyorlashni qayta tikladi; mehmonlar qisqa mahorat darslarida qatnashishi mumkin.", "ru": "Мастерская в 7 км от Самарканда, в 1995 году возродившая ручное производство бумаги из шелковицы; гости могут пройти короткий мастер-класс." }
+      }
+    },
+    {
+      "id": "craft-culture-suzani", "provider": "Craft&Culture", "badge": "Suzani masterclass",
+      "url": "https://www.expedia.ie/things-to-do/legends-and-crafts-suzani-masterclass-cultural-immersion.a52013106.activity-details", "evidence": ["https://www.expedia.ie/things-to-do/legends-and-crafts-suzani-masterclass-cultural-immersion.a52013106.activity-details", "https://www.meganstarr.com/?p=97909"],
+      "category": "practical", "kind": "workshop", "topics": ["embroidery", "crafts"],
+      "skills": ["textile-production"],
+      "mode": "offline", "area": "uzbekistan", "city": "Bukhara, Tashkent", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "duration": { "en": "2.5–3.5 hours", "uz": "2,5–3,5 soat", "ru": "2,5–3,5 часа" },
+      "languages": ["en", "uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "Suzani embroidery masterclass", "uz": "So‘zana kashtachiligi mahorat darsi", "ru": "Мастер-класс вышивки сюзане" },
+        "d": { "en": "Hands-on suzani embroidery class in Bukhara or Tashkent with the story of Silk Road textiles; materials included.", "uz": "Buxoro yoki Toshkentda so‘zana kashtachiligi bo‘yicha amaliy dars va Ipak yo‘li matolari tarixi; materiallar beriladi.", "ru": "Практическое занятие по вышивке сюзане в Бухаре или Ташкенте с рассказом о тканях Шёлкового пути; материалы включены." },
+        "note": { "en": "Price seen only on a booking site (about €77); it may differ.", "uz": "Narx faqat bron saytida ko‘rilgan (taxminan 77 yevro); farq qilishi mumkin.", "ru": "Цена указана только на сайте бронирования (около 77 €); может отличаться." }
+      }
+    },
+    {
+      "id": "uztextile-textima", "provider": "Uztextile Association with Textima (Germany)", "badge": "Uztextileprom",
+      "url": "https://daryo.uz/en/2024/02/08/uztextile-to-collaborate-with-german-company-for-establishingschool-of-textile-equipment-technologists/", "evidence": ["https://daryo.uz/en/2024/02/08/uztextile-to-collaborate-with-german-company-for-establishingschool-of-textile-equipment-technologists/", "https://www.uzdaily.uz/en/school-of-technologists-is-launched-in-cooperation-with-germany/"],
+      "category": "practical", "kind": "programme", "topics": ["textile", "engineering", "sewing"],
+      "skills": ["textile-production", "electrical-maintenance"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz", "ru"], "verification": "provider",
+      "text": {
+        "name": { "en": "School of Textile Equipment Technologists", "uz": "To‘qimachilik uskunalari texnologlari maktabi", "ru": "Школа технологов текстильного оборудования" },
+        "d": { "en": "Training for textile and garment technologists set up by the industry association with Germany’s Textima; sewing-optimisation workshops have included Fergana factories.", "uz": "Soha uyushmasi Germaniyaning Textima kompaniyasi bilan tashkil etgan to‘qimachilik va tikuvchilik texnologlari tayyorlovi; tikuvni optimallashtirish seminarlarida Farg‘ona korxonalari ham qatnashgan.", "ru": "Подготовка технологов текстильной и швейной отрасли, созданная отраслевой ассоциацией с немецкой Textima; в семинарах по оптимизации пошива участвовали и ферганские предприятия." },
+        "note": { "en": "Mainly for people working at member factories; ask your employer.", "uz": "Asosan a’zo korxonalar xodimlari uchun; ish beruvchingizdan so‘rang.", "ru": "В основном для работников предприятий-членов; спросите работодателя." }
+      }
+    },
+    {
+      "id": "tspu-sewing-degree", "provider": "Tashkent State Pedagogical University", "badge": "TSPU",
+      "url": "https://topuniversities.com/universities/tashkent-state-pedagogical-university/undergrad/bachelors-program-professional-education-operation-technology-construction-light", "evidence": ["https://topuniversities.com/universities/tashkent-state-pedagogical-university/undergrad/bachelors-program-professional-education-operation-technology-construction-light"],
+      "category": "practical", "kind": "degree", "topics": ["sewing", "fashion", "education"],
+      "skills": ["textile-production", "teaching-training"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "grant", "stateFunded": true, "availability": "ongoing",
+      "duration": { "en": "4 years", "uz": "4 yil", "ru": "4 года" },
+      "languages": ["uz", "ru"], "verification": "partial",
+      "text": {
+        "name": { "en": "Bachelor’s: teaching sewing-product technology", "uz": "Bakalavriat: tikuv buyumlari texnologiyasini o‘qitish", "ru": "Бакалавриат: преподавание технологии швейных изделий" },
+        "d": { "en": "Four-year degree for future vocational teachers of garment construction and sewing technology.", "uz": "Kiyim konstruksiyasi va tikuvchilik texnologiyasi bo‘yicha bo‘lajak kasb ta’limi o‘qituvchilari uchun to‘rt yillik bakalavriat.", "ru": "Четырёхлетний бакалавриат для будущих преподавателей профобучения по конструированию одежды и технологии шитья." }
+      }
+    },
+    {
+      "id": "vatanparvar-fergana", "provider": "“Vatanparvar” defence-assistance organisation", "badge": "Vatanparvar Autoschool",
+      "url": "https://www.goldenpages.uz/en/company/?Id=47654", "evidence": ["https://www.goldenpages.uz/en/company/?Id=47654", "https://gov.uz/oz/mudofaa/news/view/211600", "https://gov.uz/oz/advice/73/document/138"],
+      "category": "practical", "kind": "provider", "topics": ["driving", "automotive"],
+      "skills": ["adaptability"],
+      "mode": "offline", "area": "fergana", "city": "Fergana", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "address": { "line": "60 Sokhibkiron Temur St, Fergana 150100", "confidence": "directory", "source": "https://www.goldenpages.uz/en/company/?Id=47654" },
+      "languages": ["uz", "ru"], "verification": "partial",
+      "text": {
+        "name": { "en": "Vatanparvar driving school, Fergana", "uz": "“Vatanparvar” avtomaktabi, Farg‘ona", "ru": "Автошкола «Ватанпарвар», Фергана" },
+        "d": { "en": "Driving school of the national “Vatanparvar” organisation, which runs schools and training grounds across the country.", "uz": "Mamlakat bo‘ylab avtomaktab va avtodromlarga ega “Vatanparvar” tashkilotining avtomaktabi.", "ru": "Автошкола организации «Ватанпарвар», у которой есть автошколы и автодромы по всей стране." },
+        "note": { "en": "Pay only through the school’s official contract. Offers of a licence without study are fraud.", "uz": "Faqat maktabning rasmiy shartnomasi orqali to‘lang. O‘qimasdan guvohnoma va’da qilish — firibgarlik.", "ru": "Платите только по официальному договору школы. Предложения «права без учёбы» — мошенничество." }
+      }
+    },
+    {
+      "id": "driving-b", "provider": "Licensed driving schools", "badge": "Driving licence",
+      "url": "https://gov.uz/oz/advice/727/document/3388", "evidence": ["https://gov.uz/oz/advice/727/document/3388", "https://www.spot.uz/oz/2026/11/10/driver-license/", "https://kun.uz/news/2022/12/13/fargona-shahrida-ham-innovatsion-imtihon-markazi-ochildi"],
+      "category": "practical", "kind": "course", "topics": ["driving", "automotive"],
+      "skills": ["adaptability"],
+      "mode": "offline", "area": "uzbekistan", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "duration": { "en": "About 2–2.5 months (Tashkent, Nov 2026)", "uz": "Taxminan 2–2,5 oy (Toshkent, 2026-yil noyabr)", "ru": "Около 2–2,5 месяца (Ташкент, ноябрь 2026)" },
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Category B driving licence course", "uz": "“B” toifali haydovchilik kursi", "ru": "Курс на права категории B" },
+        "d": { "en": "Practical training at a licensed driving school is required. Exams are taken at regional exam centres (Fergana has one since 2022). Reported cost in Tashkent: 6–7 million UZS; the licence is valid 10 years.", "uz": "Litsenziyali avtomaktabda amaliy o‘qish majburiy. Imtihonlar hududiy imtihon markazlarida (Farg‘onada 2022-yildan bor). Toshkentdagi narx: 6–7 mln so‘m; guvohnoma 10 yil amal qiladi.", "ru": "Практическое обучение в лицензированной автошколе обязательно. Экзамены сдаются в региональных экзаменационных центрах (в Фергане — с 2022 года). Цена в Ташкенте: 6–7 млн сумов; права действуют 10 лет." }
+      }
+    },
+    {
+      "id": "knauf-academy", "provider": "Knauf", "badge": "Knauf Academy",
+      "url": "https://knauf.com/uz-UZ/bizning-xizmatlarimiz/akademiya", "evidence": ["https://knauf.com/uz-UZ/bizning-xizmatlarimiz/akademiya"],
+      "category": "practical", "kind": "provider", "topics": ["construction", "vocational"],
+      "skills": ["project-management"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent, Samarkand, Bukhara", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Knauf Academy: drywall and finishing training", "uz": "Knauf akademiyasi: gipsokarton va pardozlash o‘quvi", "ru": "Академия Knauf: обучение монтажу гипсокартона и отделке" },
+        "d": { "en": "Practical courses in building and finishing materials at equipped training centres in Tashkent, Samarkand and Bukhara.", "uz": "Toshkent, Samarqand va Buxorodagi jihozlangan o‘quv markazlarida qurilish va pardozlash materiallari bo‘yicha amaliy kurslar.", "ru": "Практические курсы по строительным и отделочным материалам в оборудованных учебных центрах в Ташкенте, Самарканде и Бухаре." }
+      }
+    },
+    {
+      "id": "fao-ffs-fergana", "provider": "FAO with the European Union", "badge": "FAO Farmer Field School",
+      "url": "https://www.uzdaily.uz/en/fao-eu-promote-sustainable-farming-through-farmer-schools/", "evidence": ["https://www.uzdaily.uz/en/fao-eu-promote-sustainable-farming-through-farmer-schools/", "https://www.fao.org/smart-farming/where-we-work/uzbekistan/en"],
+      "category": "practical", "kind": "programme", "topics": ["agriculture", "green"],
+      "skills": ["smart-agriculture", "energy-efficiency"],
+      "mode": "offline", "area": "fergana", "cost": "free", "stateFunded": false, "availability": "ongoing",
+      "dates": { "start": "2026-04-01", "end": "2026-12-31" },
+      "languages": ["uz"], "verification": "verified",
+      "text": {
+        "name": { "en": "Farmer Field School for greenhouse growers", "uz": "Issiqxonachilar uchun fermerlar dala maktabi", "ru": "Полевая школа фермеров для тепличников" },
+        "d": { "en": "From April to December 2026, one school in Fergana region trains 15 small greenhouse farmers in safe plant protection; earlier FAO projects in the valley taught greenhouse management and water saving.", "uz": "2026-yil aprel–dekabr oylarida Farg‘ona viloyatidagi maktab 15 nafar kichik issiqxona fermerini xavfsiz o‘simlik himoyasiga o‘rgatadi; avvalgi FAO loyihalari vodiyda issiqxona boshqaruvi va suv tejashni o‘rgatgan.", "ru": "С апреля по декабрь 2026 года школа в Ферганской области обучает 15 мелких тепличных фермеров безопасной защите растений; прежние проекты ФАО в долине учили управлению теплицей и экономии воды." }
+      }
+    },
+    {
+      "id": "fao-digital-villages", "provider": "FAO Digital Villages Initiative", "badge": "FAO Digital Villages",
+      "url": "https://www.fao.org/digital-villages-initiative/europe/fergana-villages/digital-villages-in-uzbekistan/", "evidence": ["https://www.fao.org/digital-villages-initiative/europe/fergana-villages/digital-villages-in-uzbekistan/"],
+      "category": "practical", "kind": "programme", "topics": ["agriculture", "digital", "ecommerce"],
+      "skills": ["smart-agriculture", "digital-literacy", "digital-marketing"],
+      "mode": "offline", "area": "fergana", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "Digital skills for farmers (Digital Villages)", "uz": "Fermerlar uchun raqamli ko‘nikmalar (Raqamli qishloqlar)", "ru": "Цифровые навыки для фермеров (Цифровые деревни)" },
+        "d": { "en": "FAO training for villages in the Fergana Valley in digital literacy, social media and e-commerce for farm products.", "uz": "FAO’ning Farg‘ona vodiysi qishloqlari uchun raqamli savodxonlik, ijtimoiy tarmoqlar va qishloq xo‘jaligi mahsulotlari elektron savdosi bo‘yicha o‘quvi.", "ru": "Обучение ФАО для сёл Ферганской долины: цифровая грамотность, соцсети и электронная торговля сельхозпродукцией." }
+      }
+    },
+    {
+      "id": "acca-voucher", "provider": "Ministry of Employment and Poverty Reduction with ACFP and ACCA", "badge": "ACCA voucher",
+      "url": "https://buxgalter.uz/ru/publish/doc/text213841_uchis_seychas_plati_potom_gosudarstvo_finansiruet_podgotovku_buhgalterov", "evidence": ["https://buxgalter.uz/ru/publish/doc/text213841_uchis_seychas_plati_potom_gosudarstvo_finansiruet_podgotovku_buhgalterov"],
+      "category": "practical", "kind": "programme", "topics": ["accounting", "business"],
+      "skills": ["accounting-finance"],
+      "mode": "offline", "area": "uzbekistan", "cost": "grant", "stateFunded": true, "availability": "open",
+      "dates": { "start": "2026-07-01" },
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Accountant training by professional voucher", "uz": "Kasbiy vaucher orqali buxgalterlar tayyorlash", "ru": "Подготовка бухгалтеров по профессиональному ваучеру" },
+        "d": { "en": "Since 1 July 2026, employment centres issue vouchers for accounting training at three levels with ACFP and ACCA standards: free for people in need, or study now and repay after getting a job.", "uz": "2026-yil 1-iyuldan bandlik markazlari ACFP va ACCA standartlari asosidagi uch bosqichli buxgalteriya o‘quvi uchun vaucher beradi: muhtojlar uchun bepul yoki “hozir o‘qi, ishga kirgach to‘la”.", "ru": "С 1 июля 2026 года центры занятости выдают ваучеры на трёхуровневое обучение бухучёту по стандартам ACFP и ACCA: бесплатно для нуждающихся или «учись сейчас, плати после трудоустройства»." }
+      }
+    },
+    {
+      "id": "british-council-ielts", "provider": "British Council Uzbekistan", "badge": "British Council",
+      "url": "https://www.britishcouncil.uz/en/english", "evidence": ["https://www.britishcouncil.uz/en/exam/language-assessment/speakers?page=1"],
+      "category": "practical", "kind": "provider", "topics": ["languages"],
+      "skills": ["english-for-work", "communication"],
+      "mode": "online", "area": "uzbekistan", "cost": "freemium", "stateFunded": false, "availability": "ongoing",
+      "languages": ["en"], "verification": "verified",
+      "text": {
+        "name": { "en": "English Online, IELTS Coach and IELTS exams", "uz": "English Online, IELTS Coach va IELTS imtihonlari", "ru": "English Online, IELTS Coach и экзамены IELTS" },
+        "d": { "en": "Paid online English courses and IELTS preparation, a free EnglishScore level test, and IELTS and ACCA exams in Uzbekistan.", "uz": "Pullik onlayn ingliz tili kurslari va IELTS’ga tayyorgarlik, bepul EnglishScore daraja testi hamda O‘zbekistonda IELTS va ACCA imtihonlari.", "ru": "Платные онлайн-курсы английского и подготовка к IELTS, бесплатный тест уровня EnglishScore, экзамены IELTS и ACCA в Узбекистане." }
+      }
+    },
+    {
+      "id": "youth-business-school", "provider": "Youth Affairs Agency", "badge": "Youth Business School",
+      "url": "https://gov.uz/en/yoshlar/news/view/131185", "evidence": ["https://gov.uz/en/yoshlar/news/view/131185", "https://gov.uz/en/yoshlar/news/view/136796"],
+      "category": "practical", "kind": "programme", "topics": ["entrepreneurship", "business"],
+      "skills": ["entrepreneurship", "accounting-finance", "digital-marketing"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz"], "verification": "partial",
+      "text": {
+        "name": { "en": "Youth Business School", "uz": "Yoshlar biznes maktabi", "ru": "Молодёжная бизнес-школа" },
+        "d": { "en": "Launched in February 2026 to support young entrepreneurs; the same month a “New Generation Entrepreneurs” training with foreign universities began.", "uz": "Yosh tadbirkorlarni qo‘llab-quvvatlash uchun 2026-yil fevralida boshlangan; o‘sha oyda xorijiy universitetlar bilan “Yangi avlod tadbirkorlari” o‘quvi ham start oldi.", "ru": "Запущена в феврале 2026 года для поддержки молодых предпринимателей; в том же месяце стартовало обучение «Предприниматели нового поколения» с зарубежными вузами." },
+        "note": { "en": "Ask your district youth centre how to apply.", "uz": "Qanday ariza berishni tuman yoshlar markazidan so‘rang.", "ru": "Как подать заявку — спросите в районном молодёжном центре." }
+      }
+    },
+    {
+      "id": "sg-founders", "provider": "Startup Garage", "badge": "SG Founders School",
+      "url": "https://www.intellinews.com/ambition-access-and-acceleration-uzbekistan-s-startup-garage-opens-free-academy-for-entrepreneurship-406969", "evidence": ["https://www.intellinews.com/ambition-access-and-acceleration-uzbekistan-s-startup-garage-opens-free-academy-for-entrepreneurship-406969"],
+      "category": "practical", "kind": "programme", "topics": ["entrepreneurship", "business"],
+      "skills": ["entrepreneurship", "product-management"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "free", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz", "ru", "en"], "verification": "partial",
+      "text": {
+        "name": { "en": "SG Founders School", "uz": "SG Founders School", "ru": "SG Founders School" },
+        "d": { "en": "Free entrepreneurship academy run by the Startup Garage community, measured by the startups and investor-ready founders it produces.", "uz": "Startup Garage hamjamiyatining bepul tadbirkorlik akademiyasi; natijasi yaratilgan startaplar va investitsiyaga tayyor asoschilar bilan o‘lchanadi.", "ru": "Бесплатная академия предпринимательства сообщества Startup Garage; результат измеряется созданными стартапами и готовыми к инвестициям основателями." }
+      }
+    },
+    {
+      "id": "hamroh-business", "provider": "HAMROH", "badge": "Hamroh",
+      "url": "https://api.uzcard.uz/en/?p=22770", "evidence": ["https://api.uzcard.uz/en/?p=22770", "https://gov.uz/en/imv/news/view/248971"],
+      "category": "practical", "kind": "programme", "topics": ["entrepreneurship", "accounting"],
+      "skills": ["entrepreneurship", "accounting-finance", "leadership"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": false, "availability": "closed",
+      "languages": ["uz", "ru"], "verification": "partial",
+      "text": {
+        "name": { "en": "Hamroh business school for women", "uz": "Ayollar uchun Hamroh biznes maktabi", "ru": "Бизнес-школа Hamroh для женщин" },
+        "d": { "en": "Training for women entrepreneurs in market analysis, marketing, financial planning and team management. The first cohort has finished; in November 2026 HAMROH co-selected women for a financial-literacy programme in Malaysia.", "uz": "Ayol tadbirkorlar uchun bozor tahlili, marketing, moliyaviy rejalashtirish va jamoa boshqaruvi bo‘yicha o‘quv. Birinchi guruh tamomladi; 2026-yil noyabrida HAMROH Malayziyadagi moliyaviy savodxonlik dasturiga ayollarni saralashda qatnashdi.", "ru": "Обучение женщин-предпринимателей анализу рынка, маркетингу, финансовому планированию и управлению командой. Первый поток завершён; в ноябре 2026 года HAMROH участвовал в отборе женщин на программу финграмотности в Малайзии." }
+      }
+    },
+    {
+      "id": "hei-entrepreneurship", "provider": "Ministry of Higher Education, Science and Innovation", "badge": "All universities",
+      "url": "https://tuit.uz/en/post/barcha-oliygohlarda-tadbirkorlik-asoslari-fani-oqitiladi", "evidence": ["https://tuit.uz/en/post/barcha-oliygohlarda-tadbirkorlik-asoslari-fani-oqitiladi"],
+      "category": "practical", "kind": "course", "topics": ["entrepreneurship", "education"],
+      "skills": ["entrepreneurship"],
+      "mode": "offline", "area": "uzbekistan", "cost": "free", "stateFunded": true, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "“Fundamentals of Entrepreneurship” at every university", "uz": "Barcha oliygohlarda “Tadbirkorlik asoslari” fani", "ru": "«Основы предпринимательства» во всех вузах" },
+        "d": { "en": "From the 2026/2027 academic year this course is taught in all higher education institutions in Uzbekistan.", "uz": "2026/2027-o‘quv yilidan bu fan O‘zbekistonning barcha oliy ta’lim muassasalarida o‘qitiladi.", "ru": "С 2026/2027 учебного года этот курс преподаётся во всех вузах Узбекистана." }
+      }
+    },
+    {
+      "id": "silk-road-univ", "provider": "“Silk Road” International University of Tourism and Cultural Heritage", "badge": "Silk Road University",
+      "url": "https://gov.uz/en/uzbektourism/news/view/72661", "evidence": ["https://gov.uz/en/uzbektourism/news/view/72661", "https://univ-silkroad.uz/en/news/novosti-universiteta/item/1747-university-students-are-preparing-not-only-for-life-but-also-for-family"],
+      "category": "practical", "kind": "degree", "topics": ["hospitality", "tourism", "culinary"],
+      "skills": ["tourism-hospitality", "customer-experience", "english-for-work"],
+      "mode": "offline", "area": "uzbekistan", "city": "Samarkand", "cost": "paid", "stateFunded": false, "availability": "ongoing",
+      "languages": ["en"], "verification": "partial",
+      "text": {
+        "name": { "en": "Tourism, hospitality and HoReCa degrees", "uz": "Turizm, mehmondo‘stlik va HoReCa yo‘nalishlari", "ru": "Направления туризма, гостеприимства и HoReCa" },
+        "d": { "en": "English-medium state university in Samarkand for tourism, cultural heritage and hospitality, with a HoReCa practice department that runs cooking masterclasses.", "uz": "Samarqanddagi ingliz tilida o‘qitiladigan davlat universiteti: turizm, madaniy meros va mehmondo‘stlik; HoReCa amaliyoti kafedrasi pazandalik mahorat darslarini o‘tkazadi.", "ru": "Англоязычный государственный университет в Самарканде: туризм, культурное наследие и гостеприимство; кафедра практики HoReCa проводит кулинарные мастер-классы." }
+      }
+    },
+    {
+      "id": "samarkand-hospitality-academy", "provider": "Samarkand International Academy of Tourism and Hospitality with Les Roches", "badge": "Les Roches · Samarkand",
+      "url": "https://gov.uz/en/uzbektourism/news/view/43277", "evidence": ["https://gov.uz/en/uzbektourism/news/view/43277", "https://traveltomorrow.com/samarkand-international-academy-of-tourism-and-hospitality-to-open-in-april-2025/"],
+      "category": "practical", "kind": "course", "topics": ["hospitality", "tourism"],
+      "skills": ["tourism-hospitality", "customer-experience"],
+      "mode": "offline", "area": "uzbekistan", "city": "Samarkand", "cost": "unknown", "stateFunded": false, "availability": "closed",
+      "dates": { "start": "2025-04-21", "end": "2025-12-21" },
+      "languages": ["en", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Hospitality Management course (with Les Roches)", "uz": "Mehmonxona boshqaruvi kursi (Les Roches bilan)", "ru": "Курс «Управление гостеприимством» (с Les Roches)" },
+        "d": { "en": "The academy’s first course ran 21 April – 21 December 2025 in English with some Russian content, together with Swiss school Les Roches.", "uz": "Akademiyaning birinchi kursi 2025-yil 21-aprel – 21-dekabr kunlari Shveysariyaning Les Roches maktabi bilan ingliz tilida (qisman rus tilida) o‘tdi.", "ru": "Первый курс академии прошёл 21 апреля – 21 декабря 2025 года на английском (частично на русском) вместе со швейцарской школой Les Roches." },
+        "note": { "en": "Finished. Ask the academy about the next intake.", "uz": "Yakunlangan. Keyingi qabul haqida akademiyadan so‘rang.", "ru": "Завершён. О следующем наборе спросите в академии." }
+      }
+    },
+    {
+      "id": "tourism-training-register", "provider": "Tourism Committee", "badge": "Tourism Committee",
+      "url": "https://gov.uz/en/uzbektourism/pages/ta-lim-muassasalari", "evidence": ["https://gov.uz/en/uzbektourism/pages/ta-lim-muassasalari"],
+      "category": "practical", "kind": "provider", "topics": ["tourism", "hospitality", "languages"],
+      "skills": ["tourism-hospitality", "english-for-work"],
+      "mode": "offline", "area": "uzbekistan", "cost": "unknown", "stateFunded": false, "availability": "ongoing",
+      "languages": ["uz", "ru"], "verification": "verified",
+      "text": {
+        "name": { "en": "Register of licensed tourism training centres", "uz": "Litsenziyali turizm o‘quv markazlari ro‘yxati", "ru": "Реестр лицензированных учебных центров туризма" },
+        "d": { "en": "Official list of centres licensed to train tour guides, tour operators and hotel staff, with addresses and phone numbers.", "uz": "Gid, turoperator va mehmonxona xodimlarini o‘qitishga litsenziyasi bor markazlarning manzil va telefonlari bilan rasmiy ro‘yxati.", "ru": "Официальный список центров с лицензией на обучение гидов, туроператоров и персонала гостиниц, с адресами и телефонами." }
+      }
+    },
+    {
+      "id": "calligraphy-schools", "provider": "Centre for Islamic Civilisation and partner institutions", "badge": "Calligraphy",
+      "url": "https://kun.uz/kr/news/2021/01/30/ozbekistondagi-bir-qator-diniy-markaz-va-oliy-maktablar-qoshida-xattotlik-maktablari-ochiladi", "evidence": ["https://kun.uz/kr/news/2021/01/30/ozbekistondagi-bir-qator-diniy-markaz-va-oliy-maktablar-qoshida-xattotlik-maktablari-ochiladi", "https://talimxabarlari.uz/52240/"],
+      "category": "practical", "kind": "provider", "topics": ["calligraphy", "crafts"],
+      "skills": ["creative-framing"],
+      "mode": "offline", "area": "uzbekistan", "city": "Tashkent", "cost": "unknown", "stateFunded": false, "availability": "unknown",
+      "languages": ["uz"], "verification": "provider",
+      "text": {
+        "name": { "en": "Calligraphy (xattotlik) schools", "uz": "Xattotlik maktablari", "ru": "Школы каллиграфии (хаттотлик)" },
+        "d": { "en": "Calligraphy schools were announced in 2021 at religious centres and universities. The King’s Foundation school, partner of Naqsh, teaches calligraphy among traditional arts.", "uz": "2021-yilda diniy markazlar va oliygohlar qoshida xattotlik maktablari ochilishi e’lon qilingan. Naqsh hamkori — Qirollik jamg‘armasi maktabi an’anaviy san’atlar qatori xattotlikni ham o‘rgatadi.", "ru": "В 2021 году объявили о школах каллиграфии при религиозных центрах и вузах. Школа Королевского фонда — партнёр Naqsh — учит каллиграфии среди традиционных искусств." },
+        "note": { "en": "No current course dates confirmed; ask the Centre for Islamic Civilisation.", "uz": "Joriy kurs sanalari tasdiqlanmagan; Islom sivilizatsiyasi markazidan so‘rang.", "ru": "Текущие даты курсов не подтверждены; спросите в Центре исламской цивилизации." }
+      }
+    }
+  ]
+}

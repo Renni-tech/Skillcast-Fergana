@@ -1,0 +1,4 @@
+{
+  "$comment": "Optional extra catalogue entries loaded at runtime (no rebuild needed). Same format as src/data/catalog/resources.json.",
+  "entries": []
+}

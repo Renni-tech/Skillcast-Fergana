@@ -5,7 +5,8 @@
 // languages and their weekly hours. Every point added has a reason that the
 // UI shows, so a recommendation can always be explained.
 
-import { LEARNING_RESOURCES, type LearningResource, type ResourceArea, type ResourceTopic } from '@/data/learning-resources';
+import type { LearningResource, ResourceArea, ResourceTopic } from '@/data/learning-resources';
+import { CATALOG, asLearningResource } from './resource-catalog';
 import { OCCUPATION_MAP, SECTOR_MAP, fold, type SectorId } from '@/data/occupations';
 import { normalizeProfile } from './profile';
 import type { Lang, Profile } from './types';
@@ -21,18 +22,24 @@ export interface RankedResource {
 }
 
 const SECTOR_TOPICS: Record<SectorId, ResourceTopic[]> = {
-  it: ['programming', 'ai', 'digital'], engineering: ['vocational', 'digital'], business: ['business'], health: ['digital'],
-  education: ['languages', 'digital'], agriculture: ['agriculture'], construction: ['vocational', 'design'],
-  creative: ['design', 'painting'], tourism: ['languages', 'business'], trades: ['vocational'],
-  crafts: ['crafts', 'embroidery', 'sewing'], transport: ['vocational'], public: ['business', 'languages'],
-  social: ['languages'], media: ['design', 'digital'], energy: ['vocational'], retail: ['business', 'digital'],
+  it: ['programming', 'ai', 'digital', 'data', 'cybersecurity'], engineering: ['vocational', 'digital', 'engineering', 'robotics'],
+  business: ['business', 'entrepreneurship', 'accounting'], health: ['digital', 'healthcare'],
+  education: ['languages', 'digital', 'education'], agriculture: ['agriculture', 'green'], construction: ['vocational', 'design', 'construction'],
+  creative: ['design', 'painting'], tourism: ['languages', 'business', 'tourism', 'hospitality', 'culinary'],
+  trades: ['vocational', 'electrical', 'plumbing', 'construction', 'beauty'],
+  crafts: ['crafts', 'embroidery', 'sewing', 'textile', 'ceramics', 'calligraphy'], transport: ['vocational', 'driving', 'automotive'],
+  public: ['business', 'languages'], social: ['languages'], media: ['design', 'digital'], energy: ['vocational', 'green', 'electrical'],
+  retail: ['business', 'digital', 'ecommerce'],
 };
 const OCCUPATION_TOPICS: Record<string, ResourceTopic[]> = {
-  embroiderer: ['embroidery', 'crafts'], tailor: ['sewing'], 'sewing-machine-operator': ['sewing', 'vocational'],
-  knitter: ['knitting', 'crafts'], 'silk-weaver': ['crafts'], 'carpet-weaver': ['crafts'], potter: ['crafts', 'painting'],
+  embroiderer: ['embroidery', 'crafts'], tailor: ['sewing', 'textile', 'fashion'], 'sewing-machine-operator': ['sewing', 'vocational'],
+  knitter: ['knitting', 'crafts'], 'silk-weaver': ['crafts', 'textile'], 'carpet-weaver': ['crafts', 'textile'], potter: ['crafts', 'painting', 'ceramics'],
   'miniature-painter': ['painting', 'crafts'], 'visual-artist': ['painting', 'design'], 'fashion-designer': ['sewing', 'design'],
   'graphic-designer': ['design'], 'language-teacher': ['languages'], translator: ['languages'], 'tour-guide': ['languages'],
   sericulturist: ['agriculture', 'crafts'], 'data-scientist': ['ai', 'programming'], 'data-analyst-occ': ['programming', 'ai'],
+  plumber: ['plumbing', 'construction'], electrician: ['electrical', 'green'], chef: ['culinary', 'hospitality'],
+  cook: ['culinary'], baker: ['culinary'], 'auto-mechanic': ['automotive'], hairdresser: ['beauty'],
+  driver: ['driving', 'automotive'], 'truck-driver': ['driving', 'automotive'], 'mechanical-engineer': ['engineering', 'robotics'],
 };
 
 /** Topics implied by the field and the current and target professions. */
@@ -87,7 +94,10 @@ export interface ResourceQuery {
   area?: ResourceArea | 'all';
 }
 
-export function rankResources(profileInput: Profile | Partial<Profile>, query: ResourceQuery, resources = LEARNING_RESOURCES): RankedResource[] {
+/** Every catalogue entry in the shape the ranking reads. */
+export const RANKABLE: LearningResource[] = CATALOG.map(asLearningResource);
+
+export function rankResources(profileInput: Profile | Partial<Profile>, query: ResourceQuery, resources: LearningResource[] = RANKABLE): RankedResource[] {
   const profile = normalizeProfile(profileInput);
   const home = homeArea(profile);
   const topics = profileTopics(profile);
@@ -126,6 +136,16 @@ export function rankResources(profileInput: Profile | Partial<Profile>, query: R
     if (r.cost === 'free') { score += 1; reasons.push('free'); }
     if (beginner && r.beginner) { score += 1; reasons.push('beginner'); }
     if (profile.budget <= 5 && r.format !== 'in-person') { score += 1; reasons.push('flexible'); }
+    // Catalogue facts: a multi-year degree is a big step for one skill gap,
+    // and finished, announced-only or unconfirmed offers rank lower.
+    const cat = (r as { catalog?: { kind: string; availability: string; verification: string } }).catalog;
+    if (cat) {
+      if (cat.kind === 'degree') score -= 1.5;
+      if (cat.availability === 'closed') score -= 3;
+      else if (cat.availability === 'upcoming') score -= 1.5;
+      else if (cat.availability === 'unknown') score -= 0.5;
+      if (cat.verification === 'provider') score -= 0.5;
+    }
     out.push({ resource: r, score: Math.round(score * 10) / 10, reasons, skills });
   }
   return out.sort((a, b) => b.score - a.score || a.resource.id.localeCompare(b.resource.id));
@@ -133,5 +153,7 @@ export function rankResources(profileInput: Profile | Partial<Profile>, query: R
 
 /** Best single resource for one pathway skill, for the roadmap steps. */
 export function bestForSkill(profile: Profile | Partial<Profile>, skill: string, lang: Lang): RankedResource | null {
-  return rankResources(profile, { lang, gaps: [skill] }).find((r) => r.skills.includes(skill)) ?? null;
+  // Finished programmes are not suggested as a next step.
+  const open = RANKABLE.filter((r) => (r as { catalog?: { availability: string } }).catalog?.availability !== 'closed');
+  return rankResources(profile, { lang, gaps: [skill] }, open).find((r) => r.skills.includes(skill)) ?? null;
 }

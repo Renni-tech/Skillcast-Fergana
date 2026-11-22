@@ -1,5 +1,6 @@
 'use client';
 
+import { addItem, newPathId, normalizePaths, setItemStatus, type LearningPath, type PathItemStatus } from './learning-paths';
 import { applyUpdates, revertUpdates, type ProposedUpdate, type SkillUpdate } from './progression';
 import { today, ALL_BADGES, WIND_ROSE_THEMES, type WindRoseTheme } from './achievements';
 import { create } from 'zustand';
@@ -86,6 +87,16 @@ interface SkillCastState {
   /** One-time hints and guides the learner has dismissed. */
   seenTips: string[];
   dismissTip: (id: string) => void;
+  /** Learner-made learning paths (see lib/learning-paths). */
+  learningPaths: LearningPath[];
+  activePathId: string | null;
+  createPath: (name: string, firstEntryId?: string) => string;
+  renamePath: (id: string, name: string) => void;
+  deletePath: (id: string) => void;
+  setActivePath: (id: string | null) => void;
+  addToPath: (pathId: string, entryId: string) => void;
+  removeFromPath: (pathId: string, entryId: string) => void;
+  setPathItemStatus: (pathId: string, entryId: string, status: PathItemStatus) => void;
   awardBadges: (ids: string[]) => void;
   markBadgesSeen: (ids: string[]) => void;
   setBadgeSound: (on: boolean) => void;
@@ -257,6 +268,33 @@ export const useSkillCast = create<SkillCastState>()(
       windRoseTheme: 'classic',
       seenTips: [],
       dismissTip: (id) => set((st) => ({ seenTips: [...new Set([...st.seenTips, id])] })),
+      learningPaths: [],
+      activePathId: null,
+      createPath: (name, firstEntryId) => {
+        const st = get();
+        const id = newPathId(st.learningPaths);
+        const base: LearningPath = { id, name: name.trim().slice(0, 60) || id, createdAt: new Date().toISOString(), items: [] };
+        set({ learningPaths: [...st.learningPaths, firstEntryId ? addItem(base, firstEntryId) : base], activePathId: id });
+        return id;
+      },
+      renamePath: (id, name) => set((st) => ({
+        learningPaths: st.learningPaths.map((p) => (p.id === id && name.trim() ? { ...p, name: name.trim().slice(0, 60) } : p)),
+      })),
+      deletePath: (id) => set((st) => {
+        const learningPaths = st.learningPaths.filter((p) => p.id !== id);
+        return { learningPaths, activePathId: st.activePathId === id ? (learningPaths[0]?.id ?? null) : st.activePathId };
+      }),
+      setActivePath: (id) => set({ activePathId: id }),
+      addToPath: (pathId, entryId) => set((st) => ({
+        learningPaths: st.learningPaths.map((p) => (p.id === pathId ? addItem(p, entryId) : p)),
+      })),
+      removeFromPath: (pathId, entryId) => set((st) => ({
+        learningPaths: st.learningPaths.map((p) => (p.id === pathId ? { ...p, items: p.items.filter((i) => i.entryId !== entryId) } : p)),
+      })),
+      setPathItemStatus: (pathId, entryId, status) => set((st) => ({
+        learningPaths: st.learningPaths.map((p) => (p.id === pathId ? setItemStatus(p, entryId, status) : p)),
+        activeDays: status === 'done' ? withToday(st.activeDays) : st.activeDays,
+      })),
       awardBadges: (ids) => set((st) => {
         const fresh = ids.filter((id) => !st.badges[id]);
         if (!fresh.length) return {};
@@ -287,6 +325,8 @@ export const useSkillCast = create<SkillCastState>()(
           activeDays: [],
           windRoseTheme: 'classic',
           seenTips: [],
+          learningPaths: [],
+          activePathId: null,
           onboarded: false,
           learnerOnboarded: false,
           scenario: 'moderate',
@@ -315,6 +355,8 @@ export const useSkillCast = create<SkillCastState>()(
         badgeSound: s.badgeSound,
         windRoseTheme: s.windRoseTheme,
         seenTips: s.seenTips,
+        learningPaths: s.learningPaths,
+        activePathId: s.activePathId,
         onboarded: s.onboarded,
         learnerOnboarded: s.learnerOnboarded,
         a11y: s.a11y,
@@ -354,6 +396,11 @@ export const useSkillCast = create<SkillCastState>()(
           badgeSound: saved.badgeSound === true,
           windRoseTheme: String(saved.windRoseTheme) in WIND_ROSE_THEMES ? saved.windRoseTheme as WindRoseTheme : 'classic',
           seenTips: strings(saved.seenTips).slice(0, 50),
+          ...(() => {
+            const learningPaths = normalizePaths(saved.learningPaths);
+            const activePathId = learningPaths.some((p) => p.id === saved.activePathId) ? saved.activePathId as string : (learningPaths[0]?.id ?? null);
+            return { learningPaths, activePathId };
+          })(),
           onboarded: saved.onboarded === true,
           learnerOnboarded: typeof saved.learnerOnboarded === 'boolean'
             ? saved.learnerOnboarded : saved.userType === 'individual' && saved.onboarded === true,

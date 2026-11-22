@@ -20,7 +20,11 @@ import { LEARNING_SOURCES } from './learning-sources';
 
 export type ResourceTopic =
   | 'programming' | 'ai' | 'digital' | 'business' | 'languages' | 'design' | 'crafts'
-  | 'embroidery' | 'knitting' | 'sewing' | 'painting' | 'agriculture' | 'vocational';
+  | 'embroidery' | 'knitting' | 'sewing' | 'painting' | 'agriculture' | 'vocational'
+  // Wider catalogue topics (src/lib/resource-catalog.ts)
+  | 'data' | 'cybersecurity' | 'robotics' | 'ecommerce' | 'entrepreneurship' | 'accounting' | 'education'
+  | 'engineering' | 'green' | 'construction' | 'electrical' | 'plumbing' | 'automotive' | 'driving'
+  | 'textile' | 'fashion' | 'calligraphy' | 'ceramics' | 'culinary' | 'hospitality' | 'tourism' | 'beauty' | 'healthcare';
 export const RESOURCE_TOPICS: ResourceTopic[] = [
   'programming', 'ai', 'digital', 'business', 'languages', 'design', 'crafts',
   'embroidery', 'knitting', 'sewing', 'painting', 'agriculture', 'vocational',
