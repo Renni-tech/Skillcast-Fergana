@@ -33,6 +33,7 @@ mock.module('../src/lib/store', () => ({
 const { MatchesTab } = await import('../src/components/skillcast/matches');
 const { Dashboard } = await import('../src/components/skillcast/dashboard');
 const { Onboarding } = await import('../src/components/skillcast/onboarding');
+const { EmployerView } = await import('../src/components/skillcast/employer');
 const { pickCourses } = await import('../src/components/skillcast/pathway');
 const { skillName, skillCategory } = await import('../src/components/skillcast/shared');
 
@@ -150,4 +151,34 @@ describe('real learner screens in every language', () => {
       }
     });
   }
+});
+
+// Regression: commit 87861f6 made OnboardingShell translate `nextLabel` while
+// the employer flow still passed already-translated text, so the whole HR
+// onboarding crashed with `Missing en translation for "Next"`.
+describe('employer (HR) onboarding renders and feeds the HR dashboard', () => {
+  for (const lang of ['en', 'uz', 'uz-cyrl', 'ru'] as Lang[]) {
+    test(`employer onboarding step 1 renders in ${lang}`, () => {
+      useSkillCast.setState({ lang, userType: 'employer' });
+      const html = renderToStaticMarkup(<Onboarding />);
+      expect(html).toContain(makeT(lang)('onb.emp.step1.q'));
+      expect(html).toContain(makeT(lang)('common.next'));
+    });
+  }
+  test('a saved company personalises the HR dashboard', () => {
+    useSkillCast.setState({
+      lang: 'en', userType: 'employer', onboarded: true,
+      employer: { company: 'Margilan Silk Works', industry: 'manufacturing', teamSize: 42, intake: 'template', matrixUrl: '', template: 'production-40', objective: 'transition', timelineMonths: 12, budgetPref: 'free' },
+    });
+    const html = renderToStaticMarkup(<EmployerView />);
+    expect(html).toContain('Margilan Silk Works');
+    expect(html).toContain('42');
+    expect(html).toContain(makeT('en')('emp.edit'));
+    expect(html).not.toContain(makeT('en')('emp.demo.note'));
+  });
+  test('without a company the HR dashboard shows the labelled demo and set-up button', () => {
+    useSkillCast.setState({ lang: 'en', userType: 'employer' });
+    const html = renderToStaticMarkup(<EmployerView />);
+    expect(html).toContain(makeT('en')('emp.setup.cta'));
+  });
 });

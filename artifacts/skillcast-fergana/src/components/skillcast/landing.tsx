@@ -39,14 +39,14 @@ export function Landing() {
         <div className="skillcast-bubble skillcast-bubble--five" aria-hidden="true"><span>+18%<small>{t('Illustrative demo')}</small></span></div>
         <div className="skillcast-bubble skillcast-bubble--six" aria-hidden="true" />
         <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <Badge variant="outline" className="mb-6 gap-1.5 border-indigo-200/25 bg-white/[0.06] px-3 py-1 text-indigo-100 shadow-[0_0_32px_rgba(112,118,255,.15)] backdrop-blur-md">
+          <Badge variant="outline" className="mb-6 gap-1.5 border-indigo-300 bg-white/70 px-3 py-1 text-indigo-800 shadow-[0_0_32px_rgba(112,118,255,.15)] backdrop-blur-md dark:border-indigo-200/25 dark:bg-white/[0.06] dark:text-indigo-100">
             <Sparkles className="h-3 w-3" aria-hidden />
             {t('hero.badge')}
           </Badge>
-          <h1 className="mx-auto max-w-4xl text-[26px] font-semibold leading-[1.15] tracking-[-0.04em] text-balance text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mx-auto max-w-4xl text-[26px] font-semibold leading-[1.15] tracking-[-0.04em] text-balance text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
             {t('hero.title')}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-blue-100/75 sm:mt-6 sm:text-lg sm:leading-8">{t('hero.subtitle')}</p>
+          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-slate-600 dark:text-blue-100/75 sm:mt-6 sm:text-lg sm:leading-8">{t('hero.subtitle')}</p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
               size="lg"
@@ -58,7 +58,7 @@ export function Landing() {
             </Button>
           </div>
           {learnerOnboarded && (
-            <p className="mt-3 text-sm font-medium text-emerald-200" role="status">{t('welcome.back')} {t('welcome.continue')}.</p>
+            <p className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-200" role="status">{t('welcome.back')} {t('welcome.continue')}.</p>
           )}
         </div>
       </section>

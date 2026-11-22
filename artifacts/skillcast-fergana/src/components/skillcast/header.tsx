@@ -62,11 +62,13 @@ export function switchTheme(apply: () => void) {
 export function Header() {
   const t = useT();
   const { view, setView, lang, setLang, learnerOnboarded, setUserType, resetDemo } = useSkillCast();
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [confirmReset, setConfirmReset] = useState(false);
   const mounted = useMounted();
   useEffect(() => { document.documentElement.lang = lang === 'uz-cyrl' ? 'uz-Cyrl' : lang; }, [lang]);
-  const landing = view === 'landing';
+  // The night-sky header only blends with the dark hero; in light mode the
+  // landing uses the regular light header like every other screen.
+  const landing = view === 'landing' && mounted && resolvedTheme === 'dark';
 
   const views: Array<{ id: View; label: string; enabled: boolean }> = [
     { id: 'landing', label: t('nav.home'), enabled: true },

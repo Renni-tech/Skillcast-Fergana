@@ -600,3 +600,33 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
   background-color: var(--wr-target);
   opacity: 0.5;
 }
+
+/* ── Light theme (default) for the landing hero ─────────────────────────────
+   The night-sky hero above is the dark-mode design and is unchanged; in light
+   mode the same layout uses a soft daylight sky with dark ink. */
+:root:not(.dark) .skillcast-hero {
+  background:
+    radial-gradient(ellipse at 50% 62%, rgb(129 140 248 / 22%), transparent 54%),
+    radial-gradient(ellipse at 8% 18%, rgb(96 165 250 / 18%), transparent 35%),
+    linear-gradient(180deg, #f8faff 0%, #eef2ff 100%);
+}
+:root:not(.dark) .skillcast-hero-glow {
+  background: radial-gradient(ellipse, rgb(129 140 248 / 20%), transparent 68%);
+}
+:root:not(.dark) .skillcast-bubble {
+  border-color: rgb(99 102 241 / 25%);
+  background:
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 85%), transparent 20%),
+    radial-gradient(circle at 70% 78%, rgb(165 180 252 / 30%), transparent 45%),
+    linear-gradient(145deg, rgb(224 231 255 / 75%), rgb(199 210 254 / 35%) 55%, rgb(165 180 252 / 25%));
+  box-shadow:
+    inset 9px 10px 24px rgb(255 255 255 / 60%),
+    inset -12px -15px 26px rgb(99 102 241 / 12%),
+    0 18px 45px rgb(79 70 229 / 12%);
+}
+:root:not(.dark) .skillcast-bubble span { color: #312e81; text-shadow: none; }
+:root:not(.dark) .skillcast-bubble small { color: #4f46e5; }
+
+/* Onboarding's light backdrop continues to the footer instead of stopping mid-page. */
+body:has(.skillcast-onboarding) main { background: #f3f7ff; }
+.dark body:has(.skillcast-onboarding) main { background: #020617; }

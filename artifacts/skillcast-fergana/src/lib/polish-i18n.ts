@@ -178,4 +178,7 @@ export const POLISH_COPY: Record<string, Copy> = {
   ),
   'va.examples': c('Ask me anything — for example:', 'Mendan istalgan narsani so‘rang — masalan:', 'Спросите меня о чём угодно — например:'),
   'va.ai.thinking': c('Thinking it over for you…', 'Siz uchun o‘ylab ko‘ryapman…', 'Обдумываю для вас…'),
+
+  // ── HR / employer ───────────────────────────────────────────────────────
+  'emp.edit': c('Edit company profile', 'Kompaniya profilini tahrirlash', 'Изменить профиль компании'),
 };

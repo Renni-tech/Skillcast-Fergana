@@ -1,4 +1,5 @@
-// Demo-day browser check: clicks through what judges will try.
+// Demo-day browser check: clicks through what judges will try (learner demo,
+// badges, Wind Rose, HR onboarding, light/dark themes, 4 languages, mobile).
 //
 //   1. Start the app (pnpm dev, or a production preview).
 //   2. node artifacts/skillcast-fergana/tests/e2e-demo-day.mjs
@@ -25,7 +26,7 @@ const check = async (name, fn) => {
   try { await fn(); results.push(`PASS ${name}`); } catch (e) { results.push(`FAIL ${name}: ${e.message}`); console.log(results.join('\n')); await browser.close(); process.exit(1); }
 };
 
-async function newPage({ width = 1366, lang = 'en' } = {}) {
+async function newPage({ width = 1366, lang = 'en', theme } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -38,12 +39,13 @@ async function newPage({ width = 1366, lang = 'en' } = {}) {
     const line = `${r.status()} ${r.request().method()} ${r.url()}`;
     (new URL(r.url()).pathname.startsWith('/api/') ? apiMisses : errors).push(line);
   });
-  await page.addInitScript((l) => {
+  await page.addInitScript(([l, th]) => {
     if (sessionStorage.getItem('__e2e')) return;
     sessionStorage.setItem('__e2e', '1');
     localStorage.clear();
     localStorage.setItem('skillcast-poc', JSON.stringify({ state: { lang: l }, version: 0 }));
-  }, lang);
+    if (th) localStorage.setItem('theme', th);
+  }, [lang, theme]);
   await page.goto(`${BASE}#/start`);
   await page.waitForTimeout(600);
   return { page, errors };
@@ -68,6 +70,83 @@ await check('favicon is the Cloud & Sun SVG', async () => {
   assert.match(await res.text(), /M13 22H7a5 5 0 1 1 4\.9-6H13a3 3 0 0 1 0 6Z/);
   await page.close();
 });
+
+
+await check('first visit opens in light mode', async () => {
+  const { page: p } = await newPage();
+  await p.goto(`${BASE}#/`);
+  await p.waitForTimeout(500);
+  assert.equal(await p.evaluate(() => localStorage.getItem('theme')), null);
+  assert.equal(await p.evaluate(() => document.documentElement.classList.contains('dark')), false);
+  const bg = await p.evaluate(() => getComputedStyle(document.querySelector('.skillcast-hero')).backgroundImage);
+  assert.match(bg, /248, 250, 255|f8faff/i, 'landing hero uses the light sky');
+  await p.close();
+});
+
+await check('dark mode choice is saved and respected; switching back works', async () => {
+  const { page: p } = await newPage();
+  await p.goto(`${BASE}#/`);
+  await p.waitForTimeout(400);
+  await p.getByRole('button', { name: 'Theme' }).click();
+  await p.waitForTimeout(400);
+  assert.equal(await p.evaluate(() => document.documentElement.classList.contains('dark')), true);
+  await p.reload();
+  await p.waitForTimeout(600);
+  assert.equal(await p.evaluate(() => document.documentElement.classList.contains('dark')), true, 'dark kept after reload');
+  await p.getByRole('button', { name: 'Theme' }).click();
+  await p.waitForTimeout(400);
+  await p.reload();
+  await p.waitForTimeout(600);
+  assert.equal(await p.evaluate(() => document.documentElement.classList.contains('dark')), false, 'light kept after reload');
+  await p.close();
+});
+
+for (const width of [1366, 390]) {
+  await check(`HR onboarding: new and existing profile @ ${width}px`, async () => {
+    const { page: p, errors: e } = await newPage({ width });
+    const next = () => p.locator('main').getByRole('button', { name: /^Next/ });
+    const hr = () => p.evaluate(() => JSON.parse(localStorage.getItem('skillcast-poc')).state.employer);
+    await p.locator('main button').filter({ hasText: /^Employer/ }).first().click();
+    assert.equal(await next().isDisabled(), true, 'step 1 needs company, industry, size');
+    await p.locator('main input').first().fill('Margilan Silk Works');
+    await p.locator('main button').filter({ hasText: /Manufacturing/ }).first().click();
+    await p.locator('main input[type=number]').fill('42');
+    await next().click();
+    assert.equal(await next().isDisabled(), true, 'step 2 needs an intake');
+    await p.locator('main button').filter({ hasText: /template/i }).first().click();
+    await p.locator('main button').filter({ hasText: /Production Team of 40/ }).first().click();
+    await p.locator('main').getByRole('button', { name: /^Back/ }).click();
+    assert.equal(await p.locator('main input').first().inputValue(), 'Margilan Silk Works', 'Back keeps answers');
+    await next().click();
+    await next().click();
+    await p.locator('main button').filter({ hasText: /transition/i }).first().click();
+    await next().click();
+    await p.locator('main button').filter({ hasText: /^1 year/ }).first().click();
+    const submit = p.locator('main').getByRole('button', { name: /Build my forecast/ });
+    assert.equal(await submit.isDisabled(), true, 'submit needs a budget choice');
+    await p.locator('main button').filter({ hasText: /free/i }).first().click();
+    await submit.click();
+    await p.waitForTimeout(600);
+    assert.match(p.url(), /#\/employer$/);
+    assert.deepEqual(await hr(), { company: 'Margilan Silk Works', industry: 'manufacturing', teamSize: 42, intake: 'template', matrixUrl: '', template: 'production-40', objective: 'transition', timelineMonths: 12, budgetPref: 'free' });
+    const dash = await p.locator('main').innerText();
+    assert.ok(dash.includes('Margilan Silk Works') && dash.includes('42'), 'HR dashboard shows the company');
+    // Existing profile: survives a reload, opens pre-filled from "Edit company profile", edits reach the dashboard.
+    await p.reload();
+    await p.waitForTimeout(700);
+    await p.getByTestId('emp-edit').click();
+    assert.equal(await p.locator('main input').first().inputValue(), 'Margilan Silk Works');
+    await p.locator('main input[type=number]').fill('55');
+    for (let i = 0; i < 3; i++) await next().click();
+    await p.locator('main').getByRole('button', { name: /Build my forecast/ }).click();
+    await p.waitForTimeout(500);
+    assert.equal((await hr()).teamSize, 55);
+    assert.ok((await p.locator('main').innerText()).includes('55'));
+    assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('skillcast-poc')).state.learnerOnboarded), false, 'learner data untouched');
+    assert.deepEqual(e, []);
+    await p.close();
+  });
+}
 
 const { page, errors } = await newPage();
 
@@ -156,16 +235,17 @@ await check('no console errors during the journey', async () => {
   assert.deepEqual(errors, []);
 });
 
-for (const lang of ['en', 'ru', 'uz', 'uz-cyrl']) {
+for (const theme of ['light', 'dark']) for (const lang of ['en', 'ru', 'uz', 'uz-cyrl']) {
   for (const width of [1366, 390]) {
-    await check(`no horizontal overflow: ${lang} @ ${width}px`, async () => {
-      const { page: p } = await newPage({ width, lang });
+    await check(`no horizontal overflow: ${lang} @ ${width}px, ${theme}`, async () => {
+      const { page: p } = await newPage({ width, lang, theme });
       await loadDemo(p);
-      for (const tab of ['overview', 'matches', 'radar', 'pathway', 'harada', 'progress', 'sdg', 'demand']) {
-        await p.evaluate((h) => { location.hash = h; }, `#/forecast/${tab}`);
+      assert.equal(await p.evaluate(() => document.documentElement.classList.contains('dark')), theme === 'dark');
+      for (const route of ['#/', '#/employer', ...['overview', 'matches', 'radar', 'pathway', 'harada', 'progress', 'sdg', 'demand'].map((tab) => `#/forecast/${tab}`)]) {
+        await p.evaluate((h) => { location.hash = h; }, route);
         await p.waitForTimeout(500);
         const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        assert.ok(over <= 0, `${tab} overflows by ${over}px`);
+        assert.ok(over <= 0, `${route} overflows by ${over}px`);
       }
       await p.close();
     });

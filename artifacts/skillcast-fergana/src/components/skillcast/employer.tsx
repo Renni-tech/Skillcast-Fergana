@@ -181,11 +181,10 @@ export function EmployerView() {
             )}
           </div>
         </div>
-        {isDemo && (
-          <Button variant="outline" size="sm" onClick={() => { setUserType('employer'); setView('onboarding'); }} className="h-auto max-w-full gap-2 whitespace-normal py-2 text-left">
-            <Building2 className="h-4 w-4" aria-hidden /> {t('emp.setup.cta')}
-          </Button>
-        )}
+        {/* Demo: set up a company. Saved company: edit it (onboarding opens pre-filled). */}
+        <Button variant="outline" size="sm" data-testid={isDemo ? 'emp-setup' : 'emp-edit'} onClick={() => { setUserType('employer'); setView('onboarding'); }} className="h-auto max-w-full gap-2 whitespace-normal py-2 text-left">
+          <Building2 className="h-4 w-4" aria-hidden /> {t(isDemo ? 'emp.setup.cta' : 'emp.edit')}
+        </Button>
       </div>
       {isDemo && <p className="mt-2 text-sm text-muted-foreground">{t('emp.demo.note')}</p>}
       <div className="mt-3 flex items-start gap-1.5 rounded-lg border border-emerald-400 p-3 text-sm text-emerald-800 dark:text-emerald-300">

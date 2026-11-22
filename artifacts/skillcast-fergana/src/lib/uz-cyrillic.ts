@@ -33,7 +33,7 @@ const KEEP = new Set([
   'skillcast', 'coursera', 'python', 'excel', 'google', 'microsoft', 'openai', 'chatgpt', 'linkedin', 'upwork', 'telegram', 'instagram', 'youtube',
   'kaggle', 'alison', 'domestika', 'freecodecamp', 'canva', 'cisco', 'netacad', 'figma', 'django', 'laravel', 'flutter', 'android', 'ios',
   'java', 'javascript', 'typescript', 'html', 'css', 'sql', 'power', 'bi', 'hyundai', 'textima', 'knauf', 'les', 'roches', 'seoultech',
-  'edge', 'neural', 'svetlana', 'ava', 'andrew', 'world', 'bank', 'remotive', 'siat', 'helpdesk', 'no-code', 'mlops',
+  'edge', 'neural', 'svetlana', 'ava', 'andrew', 'world', 'remotive', 'siat', 'helpdesk', 'no-code', 'mlops',
   'runpod', 'deeplearning', 'learnenglish', 'openwho', 'elearning', 'devops', 'genai', 'iot', 'aws', 'academy', 'udemy', 'edx', 'w3c', 'wai', 'qwasar', 'craft&culture', 'homo', 'faber', 'stanford', 'nobleprog',
 ]);
 
@@ -92,7 +92,9 @@ function matchCase(src: string, out: string): string {
 }
 
 // Tokens left untouched: URLs, e-mails, {placeholders}, HTML-like tags.
-const PROTECT = /(https?:\/\/\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.]+|\{[^}]+\}|<[^>]+>|[\w-]+\.(?:uz|com|org|net|ru|io|gov)\S*)/g;
+// Protected as a whole: URLs, e-mails, {placeholders}, tags, domains and the
+// "World Bank" brand (the ordinary word "bank" is still transliterated: банк).
+const PROTECT = /(World Bank(?: Open Learning Campus)?|https?:\/\/\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.]+|\{[^}]+\}|<[^>]+>|[\w-]+\.(?:uz|com|org|net|ru|io|gov)\S*)/g;
 // A word: Latin letters with Uzbek apostrophes inside (o‘zbek, ta’lim, g‘oya).
 const WORD = /[A-Za-z]+(?:[‘’ʻʼ'`][A-Za-z]+)*[‘’ʻʼ'`]?/g;
 

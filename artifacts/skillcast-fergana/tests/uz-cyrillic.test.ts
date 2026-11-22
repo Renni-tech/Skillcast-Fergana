@@ -34,3 +34,11 @@ describe('Uzbek Latin → Cyrillic', () => {
     expect(c('CHAQIRUV')).toBe('ЧАҚИРУВ');
   });
 });
+
+describe('brand names versus ordinary words', () => {
+  test('"World Bank" stays Latin, the word "bank" becomes банк', () => {
+    expect(c('Jahon banki va World Bank maʼlumotlari')).toContain('World Bank');
+    expect(c('Bank ishi/Moliya')).toBe('Банк иши/Молия');
+    expect(c('World Bank Open Learning Campus')).toBe('World Bank Open Learning Campus');
+  });
+});

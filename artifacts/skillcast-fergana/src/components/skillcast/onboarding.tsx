@@ -125,7 +125,9 @@ function OnboardingShell({
 }: {
   step: number; total: number; title: string; desc?: string; icon: typeof User;
   onBack: () => void; onNext: () => void; nextDisabled: boolean; children: React.ReactNode;
-  finish?: () => void; privacyNote?: boolean; light?: boolean; onSkip?: () => void; nextLabel?: string;
+  finish?: () => void; privacyNote?: boolean; light?: boolean; onSkip?: () => void;
+  /** Translation KEY for the next button (translated here; never pass already-translated text). */
+  nextLabel?: string;
 }) {
   const t = useT();
   const individualStepTitles = [
@@ -206,7 +208,8 @@ function OnboardingShell({
               {t(nextLabel)} <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
-            <Button onClick={finish} className={`ml-auto gap-2 ${light ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}>
+            // The last step's own rule applies to submitting too (e.g. the employer budget choice).
+            <Button onClick={finish} disabled={nextDisabled} className={`ml-auto gap-2 ${light ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800'}`}>
               <Rocket className="h-4 w-4" aria-hidden /> {t('onb.finish')}
             </Button>
           )}
@@ -925,7 +928,7 @@ function EmployerOnboarding() {
       nextDisabled={!canNext}
       finish={finish}
       privacyNote={false}
-      nextLabel={t('common.next')}
+      nextLabel="common.next"
     >
       {step === 1 && <EmployerStepOrg />}
       {step === 2 && <EmployerStepIntake />}
