@@ -8,7 +8,7 @@
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test tests/voice.test.ts && bun test tests/uz-cyrillic.test.ts && bun test tests/catalog.test.ts && bun test tests/learner-flow.test.tsx && bun test tests/i18n-parity.test.ts && bun test tests/experience.test.ts && bun test tests/quality.test.ts && bun test tests/demo-day.test.ts",
+    "test": "bun test tests/voice.test.ts && bun test tests/uz-cyrillic.test.ts && bun test tests/catalog.test.ts && bun test tests/learner-flow.test.tsx && bun test tests/i18n-parity.test.ts && bun test tests/experience.test.ts && bun test tests/quality.test.ts && bun test tests/demo-day.test.ts && bun test tests/signal-freshness.test.ts",
     "e2e": "node tests/e2e-demo-day.mjs"
   },
   "devDependencies": {

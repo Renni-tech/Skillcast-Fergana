@@ -65,7 +65,7 @@ Formulas: `artifacts/skillcast-fergana/src/lib/matching.ts`, `artifacts/api-serv
 
 | Pipeline | Sources | Feeds |
 | --- | --- | --- |
-| `/api/fergana/signals` (this app) | SIAT dataset 1311 (employment, Fergana and national), World Bank labour-force participation (Uzbekistan), Remotive remote postings | Local context and skill momentum |
+| `/api/fergana/signals` (this app) | SIAT dataset 1311 (employment, Fergana and national), World Bank labour-force participation (Uzbekistan), Remotive remote postings; checked every 15 min (Remotive every 6 h), each marked LIVE, FALLBACK or ERROR | Local context and skill momentum |
 | `/api/signals` (original app at `/skillcast/`) | Remotive, Arbeitnow, Greenhouse and Ashby job APIs | Momentum, stored in SQLite |
 
 When a source cannot be reached, the app shows the last cached copy or a clearly labelled baseline; it never invents

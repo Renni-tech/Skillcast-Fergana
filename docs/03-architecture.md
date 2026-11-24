@@ -117,8 +117,10 @@ pnpm workspaces (`pnpm-workspace.yaml`), TypeScript project references (`tsconfi
 - **Engine** (pure functions, unit-tested): `matching.ts` (match score), `wind-rose.ts` (spokes and gaps), `harada.ts`
   (roadmap), `progression.ts` (course → level-ups and revert), `achievements.ts` (badge rules), `learning-rank.ts` and
   `resource-match.ts` (where to learn), `cv.ts` (PII scrubber and extractor).
-- **Signals**: `SignalsProvider` in `components/skillcast/shared.tsx` loads `GET /api/fergana/signals` once (30 s timeout),
-  exposes `momentumMap`, and refreshes with `POST`. Skills without a snapshot use their `seedMomentum` baseline,
+- **Signals**: `SignalsProvider` in `components/skillcast/shared.tsx` loads `GET /api/fergana/signals` on open
+  (30 s timeout), again every 10 minutes while the tab is visible and when a hidden tab returns after 10 minutes, and
+  with `POST` from "Refresh signals". Only one request runs at a time; extra clicks join it. If the API cannot be
+  reached, the last copy is shown as fallback, never as live. It exposes `momentumMap`. Skills without a snapshot use their `seedMomentum` baseline,
   labelled in the UI.
 - **i18n**: `src/lib/i18n.ts` builds dictionaries from several copy tables (`*-i18n.ts`, `i18n-uz.ts`, `i18n-inline.ts`).
   Later tables override earlier ones (`polish-i18n.ts` is applied last). Uzbek Cyrillic is generated from Uzbek Latin by
@@ -198,7 +200,7 @@ sequenceDiagram
   participant API as /api/fergana/signals
   U->>UI: profile, skills, interests, strategy
   UI->>S: setProfile(...)
-  UI->>API: GET (once per load)
+  UI->>API: GET (on open, then every 10 min while visible)
   API-->>UI: momentum snapshots (or cached / baseline)
   UI->>E: matchAll(profile, momentumMap)
   E-->>UI: ranked roles, gaps, Wind Rose points, Harada areas
@@ -215,14 +217,14 @@ sequenceDiagram
   participant UI as Signal sources screen
   participant API as POST /api/fergana/signals
   participant C as JSON cache (db/fergana-approved-signals.json)
-  participant X as SIAT · World Bank · Remotive
+  participant X as SIAT · World Bank · Remotive (+ optional job boards)
   UI->>API: refresh
-  API->>C: read state, check per-source TTL
-  alt source due (SIAT 7 d, World Bank 24 h, Remotive 6 h)
-    API->>X: fetch (host- and path-checked)
-    X-->>API: data or error
+  API->>C: read state, check each source's minimum interval
+  alt source may be asked (statistics 2 min, job boards 5 min, Remotive 6 h)
+    API->>X: fetch (10 s timeout, one retry on network error / timeout / 5xx)
+    X-->>API: data, or error
   end
-  API->>C: write state (status periodic / cached / unavailable)
+  API->>C: write state (live / fallback / error, with fetchedAt, recordCount, confidence, error)
   API-->>UI: results per source + provenance
 ```
 
@@ -277,11 +279,16 @@ actions are parsed against an allow-list (`AssistantAction` in `assistant.ts`); 
 
 | Source | Endpoint | Used for | Refresh |
 | --- | --- | --- | --- |
-| Statistics Agency of Uzbekistan (SIAT), dataset 1311 | `api.siat.stat.uz/sdmx/1311/...` | Employment rate, Fergana region and national | weekly TTL |
-| World Bank Indicators | `api.worldbank.org/v2/country/UZB/indicator/SL.TLF.CACT.ZS` | Labour-force participation, Uzbekistan | daily TTL |
-| Remotive | `remotive.com/api/remote-jobs` | Postings for Fergana momentum (global remote sample) | 6 h TTL |
-| Arbeitnow, Greenhouse boards, Ashby boards | public job APIs | Postings for the original app's `/signals` | 6 h staleness |
+| Statistics Agency of Uzbekistan (SIAT), dataset 1311 | `api.siat.stat.uz/sdmx/1311/...` | Employment rate, Fergana region and national | every 15 min |
+| World Bank Indicators | `api.worldbank.org/v2/country/UZB/indicator/SL.TLF.CACT.ZS` | Labour-force participation, Uzbekistan | every 15 min |
+| Remotive | `remotive.com/api/remote-jobs` | Postings for Fergana momentum (global remote sample) | every 6 h (Remotive allows about 4 requests a day) |
+| Arbeitnow, Greenhouse boards, Ashby boards | public job APIs | Postings for the original app's `/signals`; for Fergana only when `FERGANA_EXTRA_SOURCES` names them (they are not on the approved list) | 6 h staleness (`/signals`); every 15 min (Fergana, opt-in) |
 | Research horizon | WEF Future of Jobs 2025, Stanford AI Index (curated in code) | 20% of momentum | static, cited |
+
+Every source in `GET /api/fergana/signals` reports `state` (`live` = last check succeeded, `fallback` = last check
+failed and earlier data is shown, `error` = no data), `fetchedAt` (last success), `checkedAt`, `recordCount`,
+`confidence`, `scopes`, `refreshMinutes` and `error`. The legacy `status` field (`periodic`/`cached`/`unavailable`) is
+kept. Statistics are published yearly, so their values rarely change even though they are checked every 15 minutes.
 
 There is no live Uzbek vacancy feed. The Remotive sample is small and global (16 postings in the latest local run,
 confidence "low"), and the server's skill list covers 40 of the frontend's 50 skills; the other 10 always use the
@@ -318,6 +325,7 @@ Accounts are the main prerequisite for the Telegram stage; see the identity desi
 | `DATABASE_URL` | `lib/db` | unset | Not needed; only the unused Postgres scaffold reads it |
 | `NODE_ENV` | both | — | Production disables Replit dev plugins |
 | `FERGANA_SIGNALS_CACHE` | API | `db/fergana-approved-signals.json` (`/tmp/skillcast/…` on Vercel) | Location of the rebuildable Fergana source cache |
+| `FERGANA_EXTRA_SOURCES` | API | unset | Comma list (`arbeitnow,greenhouse,ashby` or `all`) adding job boards that are not on the approved Fergana list |
 | `VERCEL` | API (set by Vercel) | unset | Switches caches to `/tmp` and enables CDN caching of `GET /api/fergana/signals` |
 
 `.env.example` documents the local variables; it does not yet list the TTS keys.

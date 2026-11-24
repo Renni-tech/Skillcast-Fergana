@@ -53,6 +53,13 @@ export const GetFerganaSignalsResponse = zod.object({
   "sources": zod.array(zod.object({
   "id": zod.string(),
   "status": zod.enum(['periodic', 'cached', 'unavailable']),
+  "state": zod.enum(['live', 'fallback', 'error']),
+  "kind": zod.enum(['statistics', 'postings']),
+  "scopes": zod.array(zod.enum(['region', 'national', 'global', 'remote'])),
+  "recordCount": zod.number().int(),
+  "confidence": zod.enum(['high', 'medium', 'low']),
+  "refreshMinutes": zod.number().int(),
+  "error": zod.string().nullish(),
   "checkedAt": zod.string(),
   "fetchedAt": zod.string().nullable(),
   "sourceUpdatedAt": zod.string().nullable(),
@@ -66,7 +73,7 @@ export const GetFerganaSignalsResponse = zod.object({
   "unit": zod.string(),
   "sourceUrl": zod.string()
 }))
-})),
+}).describe('Freshness of one external source. `state` is the user-facing status: live = the latest check succeeded; fallback = the latest check failed and an earlier successful result is shown; error = failed with nothing to show. `status` is the legacy name of the same thing (periodic/cached/unavailable).\n')),
   "refresh": zod.object({
   "requestedAt": zod.string(),
   "results": zod.array(zod.object({
@@ -125,6 +132,13 @@ export const RefreshFerganaSignalsResponse = zod.object({
   "sources": zod.array(zod.object({
   "id": zod.string(),
   "status": zod.enum(['periodic', 'cached', 'unavailable']),
+  "state": zod.enum(['live', 'fallback', 'error']),
+  "kind": zod.enum(['statistics', 'postings']),
+  "scopes": zod.array(zod.enum(['region', 'national', 'global', 'remote'])),
+  "recordCount": zod.number().int(),
+  "confidence": zod.enum(['high', 'medium', 'low']),
+  "refreshMinutes": zod.number().int(),
+  "error": zod.string().nullish(),
   "checkedAt": zod.string(),
   "fetchedAt": zod.string().nullable(),
   "sourceUpdatedAt": zod.string().nullable(),
@@ -138,7 +152,7 @@ export const RefreshFerganaSignalsResponse = zod.object({
   "unit": zod.string(),
   "sourceUrl": zod.string()
 }))
-})),
+}).describe('Freshness of one external source. `state` is the user-facing status: live = the latest check succeeded; fallback = the latest check failed and an earlier successful result is shown; error = failed with nothing to show. `status` is the legacy name of the same thing (periodic/cached/unavailable).\n')),
   "refresh": zod.object({
   "requestedAt": zod.string(),
   "results": zod.array(zod.object({

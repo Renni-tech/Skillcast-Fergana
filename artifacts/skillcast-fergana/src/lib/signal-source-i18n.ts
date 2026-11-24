@@ -49,9 +49,9 @@ export const SOURCE_COPY: Record<string, Copy> = {
     'Har bir raqam qayerdan olingani, qachon tekshirilgani va u Farg‘ona shahridagi o‘quvchiga nimani ayta olishi va ayta olmasligi.',
     'Откуда взято каждое число, когда оно проверено и что оно может и не может сказать учащемуся в Фергане.',
   ),
-  'src.refresh': c('Refresh live sources', 'Jonli manbalarni yangilash', 'Обновить источники'),
+  'src.refresh': c('Refresh signals', 'Signallarni yangilash', 'Обновить сигналы'),
   'src.refreshing': c('Refreshing sources…', 'Manbalar yangilanmoqda…', 'Обновляю источники…'),
-  'src.refreshLimited': c('Each press asks the sources for new data. Remotive allows a new request every 6 hours; official statistics every 10 minutes. A source that was asked too recently keeps its last result and says when it can be asked again.', 'Har bosishda manbalardan yangi ma’lumot so‘raladi. Remotive’dan har 6 soatda, rasmiy statistikadan har 10 daqiqada so‘rash mumkin. Yaqinda so‘ralgan manba oxirgi natijasini saqlaydi va qachon yana so‘rash mumkinligini ko‘rsatadi.', 'Каждое нажатие запрашивает у источников новые данные. Remotive можно спрашивать раз в 6 часов, официальную статистику — раз в 10 минут. Источник, который спрашивали недавно, сохраняет последний результат и показывает, когда его можно спросить снова.'),
+  'src.refreshLimited': c('"Refresh signals" asks every source for new data. To respect each provider, a source can be asked again after 2 minutes (statistics), 5 minutes (job boards) or 6 hours (Remotive); a source asked too recently keeps its last result and says when it can be asked again.', '"Signallarni yangilash" har bir manbadan yangi ma’lumot so‘raydi. Manbalarni hurmat qilish uchun manbaga qayta 2 daqiqadan (statistika), 5 daqiqadan (vakansiya sahifalari) yoki 6 soatdan (Remotive) keyin murojaat qilinadi; yaqinda so‘ralgan manba oxirgi natijasini saqlaydi va qachon qayta so‘rash mumkinligini ko‘rsatadi.', '«Обновить сигналы» запрашивает новые данные у каждого источника. Чтобы не перегружать поставщиков, повторный запрос возможен через 2 минуты (статистика), 5 минут (карьерные страницы) или 6 часов (Remotive); источник, к которому обращались недавно, сохраняет последний результат и показывает, когда можно спросить снова.'),
   'src.error.title': c('Signal data could not be loaded', 'Signal ma’lumotlarini yuklab bo‘lmadi', 'Не удалось загрузить данные сигналов'),
   'src.error.body': c(
     'The SkillCast API did not respond. Official source links below still work.',
@@ -342,13 +342,46 @@ export const SOURCE_COPY: Record<string, Copy> = {
   'rs.published': c('publisher update {time}', 'nashriyot yangilanishi: {time}', 'обновление издателя: {time}'),
   'rs.done': c('Refresh finished at {time}: {ok} refreshed, {wait} waiting for their interval, {fail} failed.', 'Yangilash {time} da tugadi: {ok} ta yangilandi, {wait} ta navbat kutmoqda, {fail} ta xato.', 'Обновление завершено в {time}: обновлено — {ok}, ждут интервала — {wait}, ошибок — {fail}.'),
   'rs.doneFail': c('Refresh failed at {time}: SkillCast could not reach its API. Showing the last saved copy.', 'Yangilash {time} da amalga oshmadi: SkillCast API’ga ulanib bo‘lmadi. Oxirgi saqlangan nusxa ko‘rsatilmoqda.', 'Обновление не удалось в {time}: SkillCast не смог связаться со своим API. Показана последняя сохранённая копия.'),
-  'rs.honest': c('Nothing here is real-time: sources publish monthly or yearly, and job postings are a periodic sample.', 'Bu yerda hech narsa real vaqtda emas: manbalar oylik yoki yillik e’lon qiladi, ish e’lonlari esa davriy namuna.', 'Здесь ничего не происходит в реальном времени: источники публикуют данные ежемесячно или ежегодно, а вакансии — периодическая выборка.'),
+  'rs.cat.arbeitnow': c('Job postings: European and global vacancies (Arbeitnow)', 'Ish e’lonlari: Yevropa va global vakansiyalar (Arbeitnow)', 'Вакансии: европейские и глобальные (Arbeitnow)'),
+  'rs.cat.greenhouse': c('Job postings: career boards of global tech companies (Greenhouse)', 'Ish e’lonlari: global texnologiya kompaniyalarining vakansiya sahifalari (Greenhouse)', 'Вакансии: карьерные страницы глобальных технологических компаний (Greenhouse)'),
+  'rs.cat.ashby': c('Job postings: career boards of AI and software companies (Ashby)', 'Ish e’lonlari: sun’iy intellekt va dasturiy ta’minot kompaniyalari vakansiyalari (Ashby)', 'Вакансии: карьерные страницы компаний ИИ и ПО (Ashby)'),
+  'rs.state.live': c('LIVE', 'JONLI', 'АКТУАЛЬНО'),
+  'rs.state.fallback': c('FALLBACK', 'ZAXIRA', 'РЕЗЕРВ'),
+  'rs.state.error': c('ERROR', 'XATO', 'ОШИБКА'),
+  'rs.updated': c('Updated {ago}', 'Yangilangan: {ago}', 'Обновлено {ago}'),
+  'rs.lastGood': c('Last successful update: {ago}', 'Oxirgi muvaffaqiyatli yangilanish: {ago}', 'Последнее удачное обновление: {ago}'),
+  'rs.noData': c('No successful update yet', 'Hali muvaffaqiyatli yangilanish yo‘q', 'Удачных обновлений пока нет'),
+  'rs.records': c('{n} records', '{n} ta yozuv', 'записей: {n}'),
+  'rs.every.min': c('checked every {n} min', 'har {n} daqiqada tekshiriladi', 'проверка каждые {n} мин'),
+  'rs.every.h': c('checked every {n} h (provider limit)', 'har {n} soatda tekshiriladi (manba cheklovi)', 'проверка каждые {n} ч (ограничение источника)'),
+  'rs.scope.region': c('Fergana region', 'Farg‘ona viloyati', 'Ферганская область'),
+  'rs.scope.national': c('Uzbekistan', 'O‘zbekiston', 'Узбекистан'),
+  'rs.scope.global': c('Global', 'Global', 'Глобально'),
+  'rs.scope.remote': c('Remote jobs', 'Masofaviy ish', 'Удалённая работа'),
+  'rs.err': c('Last check failed: {msg}', 'Oxirgi tekshiruv muvaffaqiyatsiz: {msg}', 'Последняя проверка не удалась: {msg}'),
+  'rs.auto': c('Updates automatically every 10 minutes while this page is open.', 'Sahifa ochiq turganda har 10 daqiqada avtomatik yangilanadi.', 'Пока страница открыта, данные обновляются автоматически каждые 10 минут.'),
+  'rs.ago.now': c('just now', 'hozirgina', 'только что'),
+  'rs.ago.min': c('{n} min ago', '{n} daqiqa oldin', '{n} мин назад'),
+  'rs.ago.h': c('{n} h ago', '{n} soat oldin', '{n} ч назад'),
+  'rs.ago.d': c('{n} d ago', '{n} kun oldin', '{n} дн назад'),
+  'rs.honest': c('Each source is checked automatically on its own schedule: statistics and job boards every 15 minutes, Remotive every 6 hours (its API allows only a few requests a day). Official statistics are published yearly, so their values change rarely; job postings are a sample, not every vacancy.', 'Har bir manba o‘z jadvali bo‘yicha avtomatik tekshiriladi: statistika va vakansiya sahifalari har 15 daqiqada, Remotive har 6 soatda (uning API’si kuniga bir necha so‘rovga ruxsat beradi). Rasmiy statistika yiliga bir marta e’lon qilinadi, shuning uchun qiymatlar kam o‘zgaradi; ish e’lonlari barcha vakansiyalar emas, balki namunadir.', 'Каждый источник проверяется автоматически по своему графику: статистика и карьерные страницы — каждые 15 минут, Remotive — каждые 6 часов (его API допускает лишь несколько запросов в день). Официальная статистика публикуется раз в год, поэтому её значения меняются редко; вакансии — выборка, а не все объявления.'),
   'src.skills.empty': c('No skill counts in demo baseline mode.', 'Demo rejimida ko‘nikma sonlari yo‘q.', 'В демо-режиме счётчиков навыков нет.'),
 };
 
 const LOCALE: Record<Lang, string> = { en: 'en-GB', uz: 'uz-Latn-UZ', ru: 'ru-RU', 'uz-cyrl': 'uz-Cyrl-UZ' };
 
 export type SourceT = (key: string, vars?: Record<string, string | number>) => string;
+
+/** "just now", "4 min ago", "3 h ago", "2 d ago" relative to `now`; null for a missing date. */
+export function relativeAgo(st: SourceT, iso: string | null | undefined, now: number): string | null {
+  const t = iso ? Date.parse(iso) : NaN;
+  if (!Number.isFinite(t)) return null;
+  const min = Math.max(0, Math.floor((now - t) / 60000));
+  if (min < 1) return st('rs.ago.now');
+  if (min < 60) return st('rs.ago.min', { n: min });
+  const h = Math.floor(min / 60);
+  return h < 48 ? st('rs.ago.h', { n: h }) : st('rs.ago.d', { n: Math.floor(h / 24) });
+}
 
 export function makeSourceT(lang: Lang): SourceT {
   return (key, vars) => {
@@ -378,5 +411,7 @@ export function useSourceT() {
       return d.toISOString().slice(0, withTime ? 16 : 10).replace('T', ' ');
     }
   };
-  return { st: makeSourceT(lang), lang, fmt };
+  const st = makeSourceT(lang);
+  const ago = (iso: string | null | undefined, now = Date.now()) => relativeAgo(st, iso, now);
+  return { st, lang, fmt, ago };
 }

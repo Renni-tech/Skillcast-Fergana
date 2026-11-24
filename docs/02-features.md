@@ -234,7 +234,7 @@ assessment link. Works, but has **no entry point in the menu or the path chooser
 
 - A five-step chain from source to recommendation (labour-market signals → future skills → your gaps → recommendations
   → roadmap).
-- Live status of every retrieved source, with "Refresh live sources" (`POST /api/fergana/signals`).
+- Live status of every retrieved source, with "Refresh signals" (`POST /api/fergana/signals`): each source shows LIVE, FALLBACK or ERROR, when it was last updated ("Updated 2 min ago" / "Last successful update: 18 min ago"), its scope, record count and check interval. The page also refreshes itself every 10 minutes while open.
 - The approved catalogue: 26 sources (3 periodic, 3 needing an API key, 17 reference, 3 planned) with scope, data type,
   update frequency, licence, why it matters, and a dated SkillCast check (17 have one).
 - A forecast changelog of what changed after each refresh. A monthly email digest is shown as a preview only 🧪.

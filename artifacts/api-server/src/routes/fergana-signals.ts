@@ -3,12 +3,14 @@ import { GetFerganaSignalsResponse } from '@workspace/api-zod';
 import { ferganaSignals } from '../skillcast/lib/fergana-signals';
 
 const router: IRouter = Router();
-// On Vercel each serverless instance starts with an empty memory cache, so let
-// the CDN keep a copy for an hour (stale up to a day while it revalidates).
-// That bounds function runs, and the source checks they trigger, to a few per
-// day; the per-source TTLs still apply inside each run. Elsewhere: no-store.
+// On Vercel each serverless instance starts with an empty memory cache, so the
+// CDN may serve a copy for up to 5 minutes (and briefly while revalidating).
+// Freshness is still governed per source inside each run (15 min for most
+// sources, 6 h for Remotive, as its API terms require), and every source in the
+// response carries its own fetchedAt, so an older copy is never shown as new.
+// Elsewhere: no-store.
 export const FERGANA_GET_CACHE = process.env.VERCEL
-  ? 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+  ? 'public, max-age=0, s-maxage=300, stale-while-revalidate=60'
   : 'no-store';
 
 router.route('/fergana/signals').get(async (req, res) => {

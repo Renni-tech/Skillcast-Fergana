@@ -12,9 +12,11 @@
 | Experience (Wind Rose, learning sources, inclusive data, intents) | `tests/experience.test.ts` | Bun | 〃 |
 | Quality (source audit rules, hours, progression, occupations, badges) | `tests/quality.test.ts` | Bun | 〃 |
 | Demo day (demo profile, badge rules, Wind Rose explanation, URL routes, demo backup/restore) | `tests/demo-day.test.ts` | Bun | 〃 |
+| Signal freshness in the browser (old saved copies, a saved copy is never live, relative times in every language) | `tests/signal-freshness.test.ts` | Bun | 〃 |
 | API SQLite store (incl. reading an old Prisma-made file) | `artifacts/api-server/src/skillcast/lib/db.test.ts` | Node test runner | `pnpm run test:api` |
 | Fergana signals and assistant agent | `api-server/src/skillcast/lib/fergana-signals.test.ts`, `assistant.test.ts` | Bun | 〃 |
-| `pnpm dev` helpers | `scripts/dev-lib.test.mjs` | Node test runner | `pnpm run test:dev` |
+| Fergana source adapters (success, malformed, timeout, HTTP 503, one source failing, fallback, automatic and manual refresh, duplicate requests, scope, approved-source default) | `api-server/src/skillcast/lib/fergana-sources.test.ts` | Bun | 〃 |
+| `pnpm dev` helpers and Vercel build (API routes, `vercel.json`, same-origin API URL) | `scripts/dev-lib.test.mjs`, `scripts/build-vercel.test.mjs` | Node test runner | `pnpm run test:dev` |
 | Original SkillCast app | `artifacts/skillcast/tests/*` | Bun | `pnpm --filter @workspace/skillcast test` |
 | Browser end-to-end | `artifacts/skillcast-fergana/tests/e2e-demo-day.mjs` | Playwright + Chrome | `pnpm --filter @workspace/skillcast-fergana e2e` |
 | Older Chromium smoke test (Replit) | `tests/browser-learner-flow.mjs` | raw DevTools protocol | see file header; expects Replit's Chromium path |
@@ -52,20 +54,21 @@ API is not deployed.
 
 ## 6.3 Current verified results
 
-Run on 22 November 2026 against commit `eb5a16e` (Linux, Node 22.23, Bun 1.4.4, Chrome stable):
+Run on 24 November 2026 on the live-signals change (Linux, Node 22.23, Bun 1.4.4, Chrome stable):
 
 | Check | Result |
 | --- | --- |
 | `pnpm run typecheck` (all packages) | ✅ pass |
-| Frontend suites | ✅ **134 / 134** (voice 9, uz-cyrillic 6, catalog 16, learner-flow 28, i18n parity 8, experience 25, quality 23, demo-day 19) |
-| `pnpm run test:api` | ✅ **14 / 14** (SQLite 4; signals + assistant 10) |
-| `pnpm run test:dev` | ✅ **5 / 5** |
+| Frontend suites | ✅ **138 / 138** (voice 9, uz-cyrillic 6, catalog 16, learner-flow 28, i18n parity 8, experience 25, quality 23, demo-day 19, signal freshness 4) |
+| `pnpm run test:api` | ✅ **29 / 29** (SQLite 4; signals, source adapters and assistant 25) |
+| `pnpm run test:dev` | ✅ **8 / 8** |
 | Original SkillCast | ✅ **47 / 47** |
 | Production build (`skillcast-fergana`) | ✅ pass (chunk-size warning only) |
-| Browser e2e on dev server | ✅ **30 / 30** |
-| Browser e2e on production preview | ✅ **30 / 30** (`NOTE`: `/api/tts` unavailable in a static preview, as expected) |
+| Browser e2e on the Vercel build output (local emulator, read-only function files) | ✅ **30 / 30** |
+| Live sources through the Vercel build | ✅ SIAT, World Bank and Remotive `live`; values match the providers' own APIs; a manual refresh after 2 min moved SIAT and World Bank `fetchedAt` while Remotive kept its time (6 h limit); three fast clicks sent one request |
+| Simulated provider outage | ✅ saved data → `fallback` with the original `fetchedAt`; nothing saved → `error` with the labelled demo baseline |
 
-Total automated unit and integration tests: **200 passing**. Earlier audits (documented in the previous README) also
+Total automated unit and integration tests: **222 passing**. Earlier audits (documented in the previous README) also
 recorded 0 axe WCAG 2.1 A/AA violations on 11 screens; that audit script is not in the repository and was not re-run.
 
 ## 6.4 Known issues and limitations

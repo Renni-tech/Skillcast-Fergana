@@ -25,7 +25,7 @@ function setup(fail = false) {
     const body = url.includes('siat') ? (url.includes('/media/') ? SIAT_DATA : SIAT_META) : url.includes('worldbank') ? WB : REMOTIVE;
     return new Response(JSON.stringify(body), { status: 200 });
   }) as unknown as typeof fetch;
-  const service = createFerganaSignalsService({ path: path.join(dir, 'c.json'), fetcher, clock: () => now });
+  const service = createFerganaSignalsService({ path: path.join(dir, 'c.json'), fetcher, clock: () => now, sources: ['siat', 'worldbank', 'remotive'], retryDelayMs: 1 });
   return { service, calls, tick: (ms: number) => { now += ms; }, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
@@ -81,7 +81,7 @@ test('a cache that cannot be written does not fail the request', async () => {
     const body = url.includes('siat') ? (url.includes('/media/') ? SIAT_DATA : SIAT_META) : url.includes('worldbank') ? WB : REMOTIVE;
     return new Response(JSON.stringify(body), { status: 200 });
   }) as unknown as typeof fetch;
-  const service = createFerganaSignalsService({ path: path.join(blocker, 'cache', 'c.json'), fetcher });
+  const service = createFerganaSignalsService({ path: path.join(blocker, 'cache', 'c.json'), fetcher, sources: ['siat', 'worldbank', 'remotive'], retryDelayMs: 1 });
   const result = await service.get();
   expect(result.provenance.mode).toBe('periodic');
   expect(result.provenance.sources.map((s) => `${s.id}:${s.status}`).sort()).toEqual(['remotive:periodic', 'siat:periodic', 'worldbank:periodic']);
@@ -95,7 +95,7 @@ test('one failing source keeps the others live', async () => {
     const body = url.includes('worldbank') ? WB : REMOTIVE;
     return new Response(JSON.stringify(body), { status: 200 });
   }) as unknown as typeof fetch;
-  const service = createFerganaSignalsService({ path: path.join(dir, 'c.json'), fetcher });
+  const service = createFerganaSignalsService({ path: path.join(dir, 'c.json'), fetcher, sources: ['siat', 'worldbank', 'remotive'], retryDelayMs: 1 });
   const result = await service.get();
   const status = Object.fromEntries(result.provenance.sources.map((s) => [s.id, s.status]));
   expect(status).toEqual({ siat: 'unavailable', worldbank: 'periodic', remotive: 'periodic' });

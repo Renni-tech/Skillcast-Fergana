@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { makeT, SDG_COLORS as SDG_HEX } from '@/lib/i18n';
 import { useSkillCast } from '@/lib/store';
@@ -35,6 +35,9 @@ const Ctx = createContext<SignalsCtx>({
   lastRefresh: null,
 });
 
+/** How often an open page asks for fresh signals (each source has its own server-side interval). */
+export const SIGNALS_AUTO_REFRESH_MS = 10 * 60 * 1000;
+
 export function SignalsProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<SignalsPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,14 +45,19 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<LastRefresh | null>(null);
 
-  const load = async (method: 'GET' | 'POST') => {
-    if (method === 'POST') setRefreshing(true);
+  // One request at a time: a background GET is skipped while another request
+  // runs; a manual refresh pressed meanwhile runs right after it.
+  const inFlight = useRef<Promise<void> | null>(null);
+  const lastOkAt = useRef(0);
+
+  const run = async (method: 'GET' | 'POST') => {
     try {
       const res = await fetch('/api/fergana/signals', { method, cache: 'no-store', signal: AbortSignal.timeout(30000) });
       if (!res.ok) throw new Error(`signals ${res.status}`);
       const json = parseFerganaSignals(await res.json());
       setData(json);
       setError(null);
+      lastOkAt.current = Date.now();
       if (method === 'POST') setLastRefresh({ ok: true, at: new Date().toISOString(), results: json.provenance?.refresh?.results ?? [] });
       try { localStorage.setItem(SIGNALS_CACHE_KEY, JSON.stringify(json)); } catch { /* Source caching is optional; learner storage is unchanged. */ }
     } catch {
@@ -58,20 +66,46 @@ export function SignalsProvider({ children }: { children: ReactNode }) {
         const raw = localStorage.getItem(SIGNALS_CACHE_KEY);
         if (raw) saved = cachedFerganaSignals(parseFerganaSignals(JSON.parse(raw)));
       } catch { /* Corrupt source cache is discarded, never interpreted as live data. */ }
+      // The API could not be reached: whatever is shown is a saved copy, never "live".
       setData((previous) => previous ? cachedFerganaSignals(previous) : saved);
       setError('evidence.error');
       if (method === 'POST') setLastRefresh({ ok: false, at: new Date().toISOString() });
     } finally {
       setLoading(false);
-      setRefreshing(false);
+      if (method === 'POST') setRefreshing(false);
     }
   };
 
-  // Trade-off: eager load on mount means the signals request fires even on
-  // pages that never call useSignals(). The alternative — deferring to first
-  // access — adds latency on the first interaction.
+  const manual = useRef<Promise<void> | null>(null);
+  const load = (method: 'GET' | 'POST'): Promise<void> => {
+    if (method === 'GET') return inFlight.current ?? start('GET');
+    // Repeated clicks join the refresh already running or queued.
+    if (manual.current) return manual.current;
+    setRefreshing(true);
+    const p = (inFlight.current ? inFlight.current.then(() => start('POST')) : start('POST'))
+      .finally(() => { manual.current = null; });
+    manual.current = p;
+    return p;
+  };
+  const start = (method: 'GET' | 'POST'): Promise<void> => {
+    const p = run(method).finally(() => { inFlight.current = null; });
+    inFlight.current = p;
+    return p;
+  };
+
+  // Load on open, then refresh automatically while the page is visible. The
+  // server decides per source whether a new check is due (provider limits).
   useEffect(() => {
     void load('GET');
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void load('GET');
+    }, SIGNALS_AUTO_REFRESH_MS);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastOkAt.current > SIGNALS_AUTO_REFRESH_MS) void load('GET');
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const momentumMap: Record<string, number> = {};

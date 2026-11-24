@@ -6,11 +6,26 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { FerganaObservation } from './ferganaObservation';
+import type { FerganaSourceStateConfidence } from './ferganaSourceStateConfidence';
+import type { FerganaSourceStateKind } from './ferganaSourceStateKind';
+import type { FerganaSourceStateScopesItem } from './ferganaSourceStateScopesItem';
+import type { FerganaSourceStateState } from './ferganaSourceStateState';
 import type { FerganaSourceStateStatus } from './ferganaSourceStateStatus';
 
+/**
+ * Freshness of one external source. `state` is the user-facing status: live = the latest check succeeded; fallback = the latest check failed and an earlier successful result is shown; error = failed with nothing to show. `status` is the legacy name of the same thing (periodic/cached/unavailable).
+ */
 export interface FerganaSourceState {
   id: string;
   status: FerganaSourceStateStatus;
+  state: FerganaSourceStateState;
+  kind: FerganaSourceStateKind;
+  scopes: FerganaSourceStateScopesItem[];
+  recordCount: number;
+  confidence: FerganaSourceStateConfidence;
+  refreshMinutes: number;
+  /** @nullable */
+  error?: string | null;
   checkedAt: string;
   /** @nullable */
   fetchedAt: string | null;

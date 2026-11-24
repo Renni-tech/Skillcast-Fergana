@@ -157,10 +157,24 @@ components:
         sourceUrl: { type: string }
     FerganaSourceState:
       type: object
-      required: [id, status, checkedAt, fetchedAt, sourceUpdatedAt, nextCheckAt, observations]
+      description: >
+        Freshness of one external source. `state` is the user-facing status:
+        live = the latest check succeeded; fallback = the latest check failed and
+        an earlier successful result is shown; error = failed with nothing to show.
+        `status` is the legacy name of the same thing (periodic/cached/unavailable).
+      required: [id, status, state, kind, scopes, recordCount, confidence, refreshMinutes, checkedAt, fetchedAt, sourceUpdatedAt, nextCheckAt, observations]
       properties:
         id: { type: string }
         status: { type: string, enum: [periodic, cached, unavailable] }
+        state: { type: string, enum: [live, fallback, error] }
+        kind: { type: string, enum: [statistics, postings] }
+        scopes:
+          type: array
+          items: { type: string, enum: [region, national, global, remote] }
+        recordCount: { type: integer }
+        confidence: { type: string, enum: [high, medium, low] }
+        refreshMinutes: { type: integer }
+        error: { type: [string, "null"] }
         checkedAt: { type: string }
         fetchedAt: { type: [string, "null"] }
         sourceUpdatedAt: { type: [string, "null"] }

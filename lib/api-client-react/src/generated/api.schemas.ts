@@ -32,9 +32,56 @@ export const FerganaSourceStateStatus = {
   unavailable: 'unavailable',
 } as const;
 
+export type FerganaSourceStateState = typeof FerganaSourceStateState[keyof typeof FerganaSourceStateState];
+
+
+export const FerganaSourceStateState = {
+  live: 'live',
+  fallback: 'fallback',
+  error: 'error',
+} as const;
+
+export type FerganaSourceStateKind = typeof FerganaSourceStateKind[keyof typeof FerganaSourceStateKind];
+
+
+export const FerganaSourceStateKind = {
+  statistics: 'statistics',
+  postings: 'postings',
+} as const;
+
+export type FerganaSourceStateScopesItem = typeof FerganaSourceStateScopesItem[keyof typeof FerganaSourceStateScopesItem];
+
+
+export const FerganaSourceStateScopesItem = {
+  region: 'region',
+  national: 'national',
+  global: 'global',
+  remote: 'remote',
+} as const;
+
+export type FerganaSourceStateConfidence = typeof FerganaSourceStateConfidence[keyof typeof FerganaSourceStateConfidence];
+
+
+export const FerganaSourceStateConfidence = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+} as const;
+
+/**
+ * Freshness of one external source. `state` is the user-facing status: live = the latest check succeeded; fallback = the latest check failed and an earlier successful result is shown; error = failed with nothing to show. `status` is the legacy name of the same thing (periodic/cached/unavailable).
+ */
 export interface FerganaSourceState {
   id: string;
   status: FerganaSourceStateStatus;
+  state: FerganaSourceStateState;
+  kind: FerganaSourceStateKind;
+  scopes: FerganaSourceStateScopesItem[];
+  recordCount: number;
+  confidence: FerganaSourceStateConfidence;
+  refreshMinutes: number;
+  /** @nullable */
+  error?: string | null;
   checkedAt: string;
   /** @nullable */
   fetchedAt: string | null;

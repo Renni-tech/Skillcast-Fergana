@@ -34,19 +34,19 @@ export const SMI_WEIGHTS = { frequency: 0.5, trend: 0.3, horizon: 0.2 };
 // (verified 2026-10) — the endpoint is fetched without parameters and the
 // source chip honestly shows its contribution.
 const REMOTIVE_URL = 'https://remotive.com/api/remote-jobs';
-const ARBEITNOW_URL = 'https://www.arbeitnow.com/api/job-board-api';
+export const ARBEITNOW_URL = 'https://www.arbeitnow.com/api/job-board-api';
 
 // Verified public Greenhouse boards (checked 2026-10-23):
 // stripe, datadog, airbnb, cloudflare, figma, databricks, roblox,
 // pinterest, dropbox, coinbase — each returns HTTP 200 with a jobs array.
 // sentry returned 404 and was excluded.
-const GREENHOUSE_BOARDS = ['stripe', 'datadog', 'airbnb', 'cloudflare', 'figma', 'databricks', 'roblox', 'pinterest', 'dropbox', 'coinbase'];
+export const GREENHOUSE_BOARDS = ['stripe', 'datadog', 'airbnb', 'cloudflare', 'figma', 'databricks', 'roblox', 'pinterest', 'dropbox', 'coinbase'];
 
 // Verified Ashby job-board orgs (checked 2026-10-23):
 // notion, perplexity, mux, linear, ramp — each returns HTTP 200.
-const ASHBY_ORGS = ['notion', 'perplexity', 'mux', 'linear', 'ramp'];
+export const ASHBY_ORGS = ['notion', 'perplexity', 'mux', 'linear', 'ramp'];
 
-function stripHtml(s: string): string {
+export function stripHtml(s: string): string {
   return s.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ');
 }
 
@@ -338,6 +338,45 @@ export function computeMomentum(postings: Posting[]): SkillSnapshot[] {
     });
   }
   return results;
+}
+
+// ─── Compact form for multi-source pipelines ─────────────────────────────
+// A posting reduced to its date and the skills it mentions (same matcher as
+// computeMomentum). Lets sources that refresh at different intervals be stored
+// and recombined cheaply; momentumFromTagged gives the same numbers as
+// computeMomentum for the same postings (see momentum tests).
+export interface TaggedPosting { t: number; s: string[] }
+
+export function tagPostings(postings: Posting[]): TaggedPosting[] {
+  return postings.map((p) => {
+    const text = `${p.title}\n${p.description}`.toLowerCase();
+    return { t: p.date.getTime(), s: SKILLS.filter((skill) => countMatches(text, skill.aliases) > 0).map((skill) => skill.slug) };
+  });
+}
+
+export function momentumFromTagged(tagged: TaggedPosting[], now = Date.now()): SkillSnapshot[] {
+  const cutoff = now - 60 * 24 * 60 * 60 * 1000;
+  const filtered = tagged.filter((p) => p.t >= cutoff);
+  if (filtered.length === 0) throw new Error('No postings within the 60-day window');
+  const total = filtered.length;
+  const midBoundary = now - 30 * 24 * 60 * 60 * 1000;
+  return SKILLS.map((skill) => {
+    let count = 0; let recent = 0; let earlier = 0;
+    for (const p of filtered) {
+      if (!p.s.includes(skill.slug)) continue;
+      count++;
+      if (p.t >= midBoundary) recent++; else earlier++;
+    }
+    const frequency = (count / total) * 100;
+    const freqScore = Math.min(100, 100 * Math.sqrt(frequency / 100 / 0.06));
+    const ratio = (recent + 0.5) / (earlier + 0.5);
+    const trendScore = Math.max(0, Math.min(100, 50 + 45 * Math.log2(Math.max(0.25, Math.min(4, ratio)))));
+    const momentum = SMI_WEIGHTS.frequency * freqScore + SMI_WEIGHTS.trend * trendScore + SMI_WEIGHTS.horizon * skill.researchHorizon;
+    return {
+      skillSlug: skill.slug, postings: count, recentPostings: recent, earlierPostings: earlier,
+      frequency: Math.round(frequency * 100) / 100, trend: Math.round(trendScore), momentum: Math.round(momentum),
+    };
+  });
 }
 
 // Seeded fallback: used when live sources are unreachable (sandbox offline,

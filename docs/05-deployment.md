@@ -68,7 +68,7 @@ Serverless adjustments (all inactive outside Vercel, so local and Replit behavio
 | Issue on Vercel | Handling |
 | --- | --- |
 | Deployed code is read-only; only `/tmp` is writable | Fergana cache → `/tmp/skillcast/fergana-approved-signals.json`; SQLite for `/api/signals` → `/tmp/skillcast/`. A failed cache write is logged and no longer fails the request. Override with `FERGANA_SIGNALS_CACHE`. |
-| Each cold instance starts with an empty memory cache | `GET /api/fergana/signals` sends `Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400`, so Vercel's CDN serves it and the function (and the sources, which Remotive limits to a few checks a day) runs rarely. Elsewhere it stays `no-store`. |
+| Each cold instance starts with an empty memory cache | `GET /api/fergana/signals` sends `Cache-Control: public, max-age=0, s-maxage=300, stale-while-revalidate=60`, so the CDN answers most page loads and a new instance runs at most every few minutes. Each source then decides whether a check is due (statistics 15 min, Remotive 6 h). The response always carries each source's real `fetchedAt`, so a CDN copy never looks fresher than it is. Elsewhere it stays `no-store`. |
 | Logs | `NODE_ENV=production` is compiled in, so pino writes JSON (no pretty-print worker). |
 
 ### Project settings
@@ -80,7 +80,7 @@ Serverless adjustments (all inactive outside Vercel, so local and Replit behavio
 | Build / Install Command | from `vercel.json`; remove any dashboard override |
 | Output Directory | leave empty; the Build Output API directory is used |
 | Node.js Version | 22.x (the function runtime is `nodejs22.x`; `node:sqlite` needs 22.13+) |
-| Environment variables | none required; `PORT`/`BASE_PATH` default to `3000` and `/` in the build script |
+| Environment variables | none required; `PORT`/`BASE_PATH` default to `3000` and `/` in the build script. Optional: `FERGANA_EXTRA_SOURCES` (job boards not on the approved list). |
 
 Optional secrets (Project → Settings → Environment Variables, Production): `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID`,
 `OPENAI_API_KEY`, `GOOGLE_TTS_API_KEY`, `TTS_PROVIDER`, `CRON_SECRET`. Without them, AI and speech use their documented
@@ -90,7 +90,7 @@ fallbacks.
 
 - Source-check intervals are enforced per function instance; the CDN cache keeps instances rare, but for strict global
   limits move the cache to a shared store (for example Vercel Blob or KV).
-- `POST /api/fergana/signals` ("Refresh live sources") is not cached; a new instance may check sources sooner than a
+- `POST /api/fergana/signals` ("Refresh signals") is not cached; a new instance may check sources sooner than a
   long-running server would.
 - The in-memory per-IP limiter on `/api/tts` and `/api/assistant` is per instance.
 
