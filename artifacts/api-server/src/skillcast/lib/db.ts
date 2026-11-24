@@ -10,6 +10,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
+import { tmpdir } from "node:os";
 
 export const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS "SignalRun" (
@@ -101,7 +102,10 @@ const changelogRow = (r: Raw): ChangelogRow => ({
 });
 
 export function defaultDatabaseFile(): string {
-  const directory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../db");
+  // On Vercel the deployed bundle is read-only; /tmp is the only writable place.
+  const directory = process.env.VERCEL
+    ? path.join(tmpdir(), "skillcast")
+    : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../db");
   mkdirSync(directory, { recursive: true });
   return path.join(directory, "skillcast.db");
 }

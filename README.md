@@ -81,7 +81,7 @@ numbers.
 | AI | Qwen2.5-7B-Instruct on vLLM, RunPod serverless; speech via OpenAI TTS, Google TTS or Microsoft Edge neural voices |
 | Contract | OpenAPI spec → generated Zod schemas and React Query client (`lib/`) |
 | Tooling | pnpm workspaces, TypeScript project references, Bun and Node test runners, Playwright e2e |
-| Hosting | Replit configuration in the repo (frontend static + API); Vercel possible, see [deployment](docs/05-deployment.md) |
+| Hosting | Vercel (`vercel.json` + `scripts/build-vercel.mjs`: static site + the API as a function) and Replit; see [deployment](docs/05-deployment.md) |
 
 ## Project structure
 

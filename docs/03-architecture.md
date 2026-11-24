@@ -317,6 +317,8 @@ Accounts are the main prerequisite for the Telegram stage; see the identity desi
 | `GOOGLE_TTS_API_KEY` | API | unset | Google Cloud speech |
 | `DATABASE_URL` | `lib/db` | unset | Not needed; only the unused Postgres scaffold reads it |
 | `NODE_ENV` | both | — | Production disables Replit dev plugins |
+| `FERGANA_SIGNALS_CACHE` | API | `db/fergana-approved-signals.json` (`/tmp/skillcast/…` on Vercel) | Location of the rebuildable Fergana source cache |
+| `VERCEL` | API (set by Vercel) | unset | Switches caches to `/tmp` and enables CDN caching of `GET /api/fergana/signals` |
 
 `.env.example` documents the local variables; it does not yet list the TTS keys.
 

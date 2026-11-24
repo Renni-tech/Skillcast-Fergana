@@ -10,18 +10,23 @@ globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
-async function buildAll() {
-  const distDir = path.resolve(artifactDir, "dist");
-  await rm(distDir, { recursive: true, force: true });
+/**
+ * Bundles the API into `outdir`. Used for the long-running server (src/index.ts
+ * → dist/) and, by scripts/build-vercel.mjs, for the Vercel function
+ * (src/vercel.ts → .vercel/output/functions/...). Same options for both.
+ */
+export async function bundleApi({ entry = "src/index.ts", outdir = path.resolve(artifactDir, "dist"), define } = {}) {
+  await rm(outdir, { recursive: true, force: true });
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+    entryPoints: [path.resolve(artifactDir, entry)],
     platform: "node",
     bundle: true,
     format: "esm",
-    outdir: distDir,
+    outdir,
     outExtension: { ".js": ".mjs" },
     logLevel: "info",
+    ...(define ? { define } : {}),
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
     // Examples of unbundleable packages:
@@ -119,7 +124,14 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
   });
 }
 
-buildAll().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+async function buildAll() {
+  await bundleApi();
+}
+
+// Run only when executed directly (`node build.mjs`), not when imported.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  buildAll().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

@@ -18,10 +18,11 @@ artifacts/skillcast-fergana/.replit-artifact/artifact.toml   # Frontend service:
 artifacts/api-server/.replit-artifact/artifact.toml          # API service: path "/api", health /api/healthz
 artifacts/skillcast/.replit-artifact/artifact.toml           # Original app at "/skillcast/"
 artifacts/mockup-sandbox/.replit-artifact/artifact.toml      # Design canvas (not deployed as product)
-```
 
-There is **no `vercel.json` in the repository**. If the project is deployed on Vercel, that configuration lives in the
-Vercel dashboard; section 5.3 documents a working setup.
+vercel.json                                      # Vercel: install + build commands (Build Output API)
+scripts/build-vercel.mjs                         # Builds .vercel/output: static site + the API as a function
+artifacts/api-server/src/vercel.ts               # Function entry: the same Express app, exported as a handler
+```
 
 ## 5.2 Replit (configuration in the repository) ✅
 
@@ -36,49 +37,67 @@ Replit runs each artifact as a service behind one domain:
 The API runs `prepare-db.mjs` on start, so `db/` exists. Its caches are **not durable** across republishes; they rebuild
 themselves. Set secrets (`RUNPOD_*`, `CRON_SECRET`, TTS keys) in Replit Secrets.
 
-## 5.3 Vercel 🟡 (dashboard configuration, not in the repo)
+## 5.3 Vercel ✅ (configuration in the repository)
 
-### Frontend on Vercel
+The production site is `https://skillcast-fergana.vercel.app`. Until 24 November 2026 that project served only the
+static frontend, so every `/api/*` path returned Vercel's `404 NOT_FOUND` and the app fell back to its labelled
+baseline (no live SIAT, World Bank or Remotive data, no AI or neural speech). The repository now deploys the API too.
+
+### How it works
+
+`vercel.json` sets the install and build commands. `scripts/build-vercel.mjs` writes a
+[Build Output API v3](https://vercel.com/docs/build-output-api) directory:
+
+```
+.vercel/output/
+  static/                        ← artifacts/skillcast-fergana/dist/public (the SPA)
+  functions/api/healthz.func/    ← the Express API bundled by artifacts/api-server/build.mjs
+                                   (entry src/vercel.ts, runtime nodejs22.x, maxDuration 60 s)
+  functions/api/fergana/signals.func → symlink to healthz.func   (one per Express route,
+  functions/api/tts.func             → symlink to healthz.func    derived from src/routes/*.ts)
+  …
+  config.json                    ← files and functions first, then the SPA as a fallback; unknown /api paths 404
+```
+
+Each API path has its own function entry pointing at the same bundle, so Express receives exactly the URL it receives
+locally; no rewrites are involved. The frontend keeps calling same-origin `/api/...`, so the production CSP
+(`connect-src 'self'`) and CORS need no change.
+
+Serverless adjustments (all inactive outside Vercel, so local and Replit behaviour is unchanged):
+
+| Issue on Vercel | Handling |
+| --- | --- |
+| Deployed code is read-only; only `/tmp` is writable | Fergana cache → `/tmp/skillcast/fergana-approved-signals.json`; SQLite for `/api/signals` → `/tmp/skillcast/`. A failed cache write is logged and no longer fails the request. Override with `FERGANA_SIGNALS_CACHE`. |
+| Each cold instance starts with an empty memory cache | `GET /api/fergana/signals` sends `Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400`, so Vercel's CDN serves it and the function (and the sources, which Remotive limits to a few checks a day) runs rarely. Elsewhere it stays `no-store`. |
+| Logs | `NODE_ENV=production` is compiled in, so pino writes JSON (no pretty-print worker). |
+
+### Project settings
 
 | Setting | Value |
 | --- | --- |
-| Root directory | repository root (pnpm workspace) |
-| Install command | `pnpm install --frozen-lockfile` |
-| Build command | `pnpm --filter @workspace/skillcast-fergana run build` |
-| Output directory | `artifacts/skillcast-fergana/dist/public` |
-| Environment variables (build) | **`PORT=3000`** and **`BASE_PATH=/`**: `vite.config.ts` throws without them, even for a build |
-| Node.js version | 22.x or 24.x |
+| Root Directory | **empty** (repository root). `vercel.json` and the build script live there. |
+| Framework Preset | Other (`vercel.json` sets `"framework": null`) |
+| Build / Install Command | from `vercel.json`; remove any dashboard override |
+| Output Directory | leave empty; the Build Output API directory is used |
+| Node.js Version | 22.x (the function runtime is `nodejs22.x`; `node:sqlite` needs 22.13+) |
+| Environment variables | none required; `PORT`/`BASE_PATH` default to `3000` and `/` in the build script |
 
-Routing: the app uses hash URLs (`#/forecast/radar`), so no SPA rewrite is strictly needed for navigation. A catch-all
-rewrite to `index.html` is still harmless, **but it must not capture `/api/*`**, otherwise API calls receive the HTML
-page with status 200. The TTS client already rejects non-audio responses, and the other calls fall back on JSON parse
-errors, but a correct rewrite avoids the wasted requests.
+Optional secrets (Project → Settings → Environment Variables, Production): `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID`,
+`OPENAI_API_KEY`, `GOOGLE_TTS_API_KEY`, `TTS_PROVIDER`, `CRON_SECRET`. Without them, AI and speech use their documented
+fallbacks.
 
-### API: where to host it
+### Limitations on Vercel
 
-The API is a stateful, long-running Express server: in-memory rate limiting and refresh cooldowns, file caches in `db/`,
-`node:sqlite`, and outbound calls that can take up to 50 s (RunPod) or 20 s (Edge speech). That fits poorly with
-Vercel serverless functions. Recommended options:
+- Source-check intervals are enforced per function instance; the CDN cache keeps instances rare, but for strict global
+  limits move the cache to a shared store (for example Vercel Blob or KV).
+- `POST /api/fergana/signals` ("Refresh live sources") is not cached; a new instance may check sources sooner than a
+  long-running server would.
+- The in-memory per-IP limiter on `/api/tts` and `/api/assistant` is per instance.
 
-1. **Separate Node host** (Replit autoscale, Render, Railway, Fly.io, a VPS) running `pnpm --filter @workspace/api-server run start`,
-   and a Vercel rewrite that proxies `/api/*` to it, so the browser stays same-origin (the production CSP has
-   `connect-src 'self'`):
+### Alternative: separate API host
 
-   ```json
-   {
-     "rewrites": [
-       { "source": "/api/:path*", "destination": "https://YOUR-API-HOST/api/:path*" },
-       { "source": "/((?!api/).*)", "destination": "/index.html" }
-     ]
-   }
-   ```
-   This is an example for a future `vercel.json`; it is not in the repository.
-
-2. **Vercel serverless (not implemented)**: would need an adapter around `app.ts`, moving caches to an external store
-   (for example Vercel KV or Postgres), and accepting cold starts. Not recommended for the voice assistant.
-
-If the API is not deployed at all, the app still works: signals show the labelled baseline, AI features use
-deterministic answers, and the assistant falls back to the device voice or text.
+The API also still runs as a normal server (`pnpm --filter @workspace/api-server run start`) on Replit, Render, Railway
+or a VPS. In that case, deploy only the frontend to Vercel and proxy `/api/*` to that host with a rewrite.
 
 ## 5.4 Environments
 
@@ -139,7 +158,8 @@ deployed" from a real bug).
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | Build fails: `PORT environment variable is required` | Vite config needs `PORT` and `BASE_PATH` | Add both as build environment variables |
-| `/api/...` returns HTML | SPA rewrite captures `/api` or no API is deployed | Exclude `/api` from the catch-all; add the proxy rewrite |
+| `/api/...` returns `404 NOT_FOUND` (plain text) | The API function was not deployed: Root Directory is not the repo root, or a dashboard Build/Output override bypasses `vercel.json` | Clear the overrides, set Root Directory to the repository root, redeploy; the build log must show `[build-vercel] API paths: …` |
+| `/api/...` returns HTML | A rewrite captures `/api` | Remove it; `config.json` already excludes `/api` from the SPA fallback |
 | Assistant never speaks | `/api/tts` missing, blocked egress, or `TTS_PROVIDER=off` | Deploy the API; allow egress or set an OpenAI/Google key |
 | "Explain in more detail" fails in Uzbek | Known `/api/coach` language-enum bug | See [03-architecture.md](03-architecture.md#34-api-reference) |
 | Signals always "demo baseline" | API cannot reach the sources | Check outbound network; the UI is still usable |

@@ -31,7 +31,7 @@ Priorities: **P0** = before anything else, **P1** = next stage, **P2** = after t
 | 4 | Add an Institution entry point (path card or menu) or hide the view deliberately | A built feature is invisible | XS |
 | 5 | Align server skills with the 50 frontend skills | 10 skills never get live momentum | S |
 | 6 | Add TTS variables to `.env.example`; remove or document the unused `lib/db` | Developer clarity | XS |
-| 7 | Commit a `vercel.json` (or deployment notes) matching the real hosting | Reproducible deployments; see [05-deployment.md](05-deployment.md) | XS |
+| 7 | ~~Commit a `vercel.json` matching the real hosting~~ Done 24 Nov 2026: Vercel now deploys the API as a function | Live signals in production; see [05-deployment.md](05-deployment.md) | ✅ |
 | 8 | Native review of Uzbek and Russian copy | Default-language quality | S |
 | 9 | Code-split the 2.1 MB bundle (PDF, charts, assistant on demand) | Mobile and low-bandwidth users | M |
 

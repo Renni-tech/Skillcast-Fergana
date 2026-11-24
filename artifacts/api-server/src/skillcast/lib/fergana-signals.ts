@@ -1,5 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import type { FerganaEvidence, FerganaObservation, FerganaRefreshResult, FerganaSourceState, SkillSnapshot } from '@workspace/api-zod';
 import { computeMomentum, type Posting } from './momentum';
 import { SKILLS } from '../data/skills';
@@ -72,10 +73,21 @@ export function parseRemotive(value: unknown): Posting[] {
   return [...unique.values()];
 }
 
+/**
+ * Where the rebuildable source cache lives. `FERGANA_SIGNALS_CACHE` wins; on
+ * Vercel the deployed code is read-only and only /tmp is writable, so the cache
+ * goes there; everywhere else it stays in the API's db/ folder as before.
+ */
+export function defaultFerganaCachePath(env: NodeJS.ProcessEnv = process.env): string {
+  if (env.FERGANA_SIGNALS_CACHE) return env.FERGANA_SIGNALS_CACHE;
+  if (env.VERCEL) return join(tmpdir(), 'skillcast', 'fergana-approved-signals.json');
+  return resolve('db', 'fergana-approved-signals.json');
+}
+
 export function createFerganaSignalsService(options: {
   path?: string; fetcher?: typeof fetch; clock?: () => number;
 } = {}) {
-  const cachePath = options.path ?? resolve('db', 'fergana-approved-signals.json');
+  const cachePath = options.path ?? defaultFerganaCachePath();
   const fetcher = options.fetcher ?? fetch;
   const clock = options.clock ?? Date.now;
   let cache: Cache | undefined;
@@ -185,9 +197,15 @@ export function createFerganaSignalsService(options: {
         summary: 'evidence.history.summary', details: { movers, postings: state.count, mode: mode(), sources: structuredClone(Object.values(state.sources)) },
       });
       state.history = state.history.slice(0, 30);
-      await mkdir(dirname(cachePath), { recursive: true });
-      await writeFile(`${cachePath}.tmp`, JSON.stringify(state), 'utf8');
-      await rename(`${cachePath}.tmp`, cachePath);
+      // The data is already fetched and held in memory; failing to save this
+      // rebuildable cache (e.g. a read-only filesystem) must not fail the request.
+      try {
+        await mkdir(dirname(cachePath), { recursive: true });
+        await writeFile(`${cachePath}.tmp`, JSON.stringify(state), 'utf8');
+        await rename(`${cachePath}.tmp`, cachePath);
+      } catch (error) {
+        logger.warn({ err: error, cachePath }, 'Fergana signal cache could not be saved; serving from memory');
+      }
     }
     const order = (a: FerganaRefreshResult) => ids.indexOf(a.id as SourceId);
     return payload(!attempted, force ? { requestedAt, results: results.sort((a, b) => order(a) - order(b)) } : undefined);
